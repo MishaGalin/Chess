@@ -33,14 +33,14 @@ int main()
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
-	vector<vector<CircleShape>> cellCenters;
+	vector<vector<Vector2i>> cellCenters;
 	for (int i = 0; i < boardSize; i++) {
-		vector<CircleShape> temp;
+		vector<Vector2i> temp;
 		for (int j = 0; j < boardSize; j++) {
-			CircleShape tempCircle;
-			tempCircle.setFillColor(Color(0, 0, 0, 0));
-			tempCircle.setPosition(cellSide / 2 + cellSide * j, cellSide / 2 + cellSide * i);
-			temp.push_back(tempCircle);
+			Vector2i tempCenter;
+			tempCenter.x = cellSide / 2 + cellSide * j;
+			tempCenter.y = cellSide / 2 + cellSide * i;
+			temp.push_back(tempCenter);
 		}
 		cellCenters.push_back(temp);
 	}
@@ -103,7 +103,7 @@ int main()
 				double maxDistance = 10000.;
 				for (int i = 0; i < boardSize; i++) {
 					for (int j = 0; j < boardSize; j++) {
-						double dist = sqrt(pow(pawns_w[n]->sprite.getPosition().x - cellCenters[i][j].getPosition().x, 2) + pow(pawns_w[n]->sprite.getPosition().y - cellCenters[i][j].getPosition().y, 2));
+						double dist = sqrt(pow(pawns_w[n]->sprite.getPosition().x - cellCenters[i][j].x, 2) + pow(pawns_w[n]->sprite.getPosition().y - cellCenters[i][j].y, 2));
 						if (dist < maxDistance) {
 							maxDistance = dist;
 							cellX = i;
@@ -111,7 +111,7 @@ int main()
 						}
 					}
 				}
-				pawns_w[n]->sprite.setPosition(cellCenters[cellX][cellY].getPosition().x, cellCenters[cellX][cellY].getPosition().y);
+				pawns_w[n]->sprite.setPosition(cellCenters[cellX][cellY].x, cellCenters[cellX][cellY].y);
 			}
 		}
 

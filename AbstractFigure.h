@@ -2,8 +2,8 @@
 class AbstractFigure : sf::Drawable
 {
 public:
-	bool color; // 0 - white, 1 - black
-	int posX, posY;
+	bool color = 0; // 0 - white, 1 - black
+	int posX = 0, posY = 0;
 	sf::Texture textures;
 	sf::Sprite sprite;
 

@@ -1,2 +1,44 @@
 ﻿  Chess.cpp
-C:\Users\misha\source\repos\Chess\Chess.cpp(3,10): fatal error C1083: Не удается открыть файл включение: Connector.hpp: No such file or directory,
+C:\Users\misha\source\repos\Chess\Figures.h(12,67): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Figures.h(12,35): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Chess.cpp(82,77): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(82,65): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+          with
+          [
+              T=int
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(85,24): warning C4244: =: преобразование "T" в "int", возможна потеря данных
+          with
+          [
+              T=float
+          ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(86,24): warning C4244: =: преобразование "T" в "int", возможна потеря данных
+          with
+          [
+              T=float
+          ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(114,90): warning C4244: аргумент: преобразование "T" в "float", возможна потеря данных
+          with
+          [
+              T=int
+          ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(114,61): warning C4244: аргумент: преобразование "T" в "float", возможна потеря данных
+          with
+          [
+              T=int
+          ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(118,74): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Chess.cpp(118,57): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+  Chess.vcxproj -> C:\Users\misha\source\repos\Chess\x64\Debug\Chess.exe
