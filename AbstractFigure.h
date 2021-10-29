@@ -1,5 +1,5 @@
 #pragma once
-class AbstractFigure : sf::Drawable
+class AbstractFigure : public sf::Drawable
 {
 public:
 	bool color = 0; // 0 - white, 1 - black

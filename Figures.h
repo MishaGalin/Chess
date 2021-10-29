@@ -4,12 +4,15 @@ class Pawn : public AbstractFigure
 public:
 	bool firstMove = true;
 
-	Pawn(const int& posX, const int& posY, const bool& color, const int& cellSide) {
-		color ? textures.loadFromFile("images/pawn_b.png") : textures.loadFromFile("images/pawn_w.png");
-
-		sprite.setTexture(textures);
+	Pawn(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
 		sprite.setOrigin(18, 38);
 		sprite.setPosition(cellSide / 2 + cellSide * posX, cellSide / 2 + cellSide * posY);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+	{
+		target.draw(sprite);
 	}
 
 	//void Move(const int& newPosX, const int& newPosY, bool& turn) override
@@ -47,4 +50,74 @@ public:
 	//		}
 	//	}
 	//}
+};
+
+class Castle : public AbstractFigure {
+public:
+	Castle(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
+		sprite.setOrigin(26, 38);
+		sprite.setPosition(cellSide / 2 + cellSide * posX, cellSide / 2 + cellSide * posY);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+	{
+		target.draw(sprite);
+	}
+};
+
+class Knight : public AbstractFigure {
+public:
+	Knight(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
+		sprite.setOrigin(32, 40);
+		sprite.setPosition(cellSide / 2 + cellSide * posX, cellSide / 2 + cellSide * posY);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+	{
+		target.draw(sprite);
+	}
+};
+
+class Bishop : public AbstractFigure {
+public:
+	Bishop(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
+		sprite.setOrigin(34, 40);
+		sprite.setPosition(cellSide / 2 + cellSide * posX, cellSide / 2 + cellSide * posY);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+	{
+		target.draw(sprite);
+	}
+};
+
+class Queen : public AbstractFigure {
+public:
+	Queen(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
+		sprite.setOrigin(35, 40);
+		sprite.setPosition(cellSide / 2 + cellSide * posX, cellSide / 2 + cellSide * posY);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+	{
+		target.draw(sprite);
+	}
+};
+
+class King : public AbstractFigure {
+public:
+	King(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
+		sprite.setOrigin(35, 38);
+		sprite.setPosition(cellSide / 2 + cellSide * posX, cellSide / 2 + cellSide * posY);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+	{
+		target.draw(sprite);
+	}
 };

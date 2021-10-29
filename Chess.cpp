@@ -12,7 +12,7 @@ const unsigned char boardSize = 8;
 const unsigned short cellSide = 112; // length in pixels
 bool turn = 0; // 0 - ход белых, 1 - ход черных
 
-int boardArr[boardSize][boardSize] =
+short boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
   -6,-6,-6,-6,-6,-6,-6,-6,
    0, 0, 0, 0, 0, 0, 0, 0,
@@ -28,13 +28,55 @@ int main()
 	bool isMove = false;
 	int dx = 0, dy = 0;
 	int n = 0;
-	int b;
+
+	Texture texture_pawn_w; // Текстура белой пешки
+	texture_pawn_w.loadFromFile("images/pawn_w.png");
+
+	Texture texture_pawn_b; // Текстура черной пешки
+	texture_pawn_b.loadFromFile("images/pawn_b.png");
+
+	Texture texture_castle_w; // Текстура белой ладьи
+	texture_castle_w.loadFromFile("images/castle_w.png");
+
+	Texture texture_castle_b; // Текстура черной ладьи
+	texture_castle_b.loadFromFile("images/castle_b.png");
+
+	Texture texture_knight_w; // Текстура белого коня
+	texture_knight_w.loadFromFile("images/knight_w.png");
+
+	Texture texture_knight_b; // Текстура черного коня
+	texture_knight_b.loadFromFile("images/knight_b.png");
+
+	Texture texture_bishop_w; // Текстура белого слона
+	texture_bishop_w.loadFromFile("images/bishop_w.png");
+
+	Texture texture_bishop_b; // Текстура черного слона
+	texture_bishop_b.loadFromFile("images/bishop_b.png");
+
+	Texture texture_queen_w; // Текстура белой королевы
+	texture_queen_w.loadFromFile("images/queen_w.png");
+
+	Texture texture_queen_b; // Текстура черной королевы
+	texture_queen_b.loadFromFile("images/queen_b.png");
+
+	Texture texture_king_w; // Текстура белого короля
+	texture_king_w.loadFromFile("images/king_w.png");
+
+	Texture texture_king_b; // Текстура черного короля
+	texture_king_b.loadFromFile("images/king_b.png");
 
 	Texture boardTexture;
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
-	vector<vector<Vector2i>> cellCenters;
+	vector<vector<Vector2i>> cellCenters; // Сетка центров клеток
+
+	vector<AbstractFigure*> figures; // Массив всех фигур на доске
+
+	RenderWindow window(VideoMode(910, 910), "Chess");
+	window.setFramerateLimit(200);
+
+	// Рассчет центров клеток
 	for (int i = 0; i < boardSize; i++) {
 		vector<Vector2i> temp;
 		for (int j = 0; j < boardSize; j++) {
@@ -46,15 +88,57 @@ int main()
 		cellCenters.push_back(temp);
 	}
 
-	vector<Pawn*> pawns_w;
-	//vector<Pawn> pawns_b;
-
+	// Расстановка фигур
 	for (int i = 0; i < boardSize; i++) {
 		for (int j = 0; j < boardSize; j++) {
 			switch (boardArr[i][j])
 			{
+			case 1:
+			{figures.push_back(new Castle(j, i, texture_castle_w, cellSide)); }
+			break;
+
+			case -1:
+			{figures.push_back(new Castle(j, i, texture_castle_b, cellSide)); }
+			break;
+
+			case 2:
+			{figures.push_back(new Knight(j, i, texture_knight_w, cellSide)); }
+			break;
+
+			case -2:
+			{figures.push_back(new Knight(j, i, texture_knight_b, cellSide)); }
+			break;
+
+			case 3:
+			{figures.push_back(new Bishop(j, i, texture_bishop_w, cellSide)); }
+			break;
+
+			case -3:
+			{figures.push_back(new Bishop(j, i, texture_bishop_b, cellSide)); }
+			break;
+
+			case 4:
+			{figures.push_back(new Queen(j, i, texture_queen_w, cellSide)); }
+			break;
+
+			case -4:
+			{figures.push_back(new Queen(j, i, texture_queen_b, cellSide)); }
+			break;
+
+			case 5:
+			{figures.push_back(new King(j, i, texture_king_w, cellSide)); }
+			break;
+
+			case -5:
+			{figures.push_back(new King(j, i, texture_king_b, cellSide)); }
+			break;
+
+			case -6:
+			{figures.push_back(new Pawn(j, i, texture_pawn_b, cellSide)); }
+			break;
+
 			case 6:
-			{pawns_w.push_back(new Pawn(j, i, 0, cellSide)); }
+			{figures.push_back(new Pawn(j, i, texture_pawn_w, cellSide)); }
 			break;
 
 			default:
@@ -62,9 +146,6 @@ int main()
 			}
 		}
 	}
-
-	RenderWindow window(VideoMode(910, 910), "Chess");
-	window.setFramerateLimit(200);
 
 	while (window.isOpen())
 	{
@@ -79,12 +160,12 @@ int main()
 			// перетаскивание мышью
 			if (event.type == Event::MouseButtonPressed) {
 				if (event.key.code == Mouse::Left) {
-					for (int i = 0; i < pawns_w.size(); i++) {
-						if (pawns_w[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+					for (int i = 0; i < figures.size(); i++) {
+						if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 							isMove = true;
 							n = i;
-							dx = mousePos.x - pawns_w[i]->sprite.getPosition().x;
-							dy = mousePos.y - pawns_w[i]->sprite.getPosition().y;
+							dx = mousePos.x - figures[i]->sprite.getPosition().x;
+							dy = mousePos.y - figures[i]->sprite.getPosition().y;
 						}
 					}
 					//for (const auto& pawn : pawns_b) {
@@ -104,7 +185,7 @@ int main()
 				double maxDistance = 10000.;
 				for (int i = 0; i < boardSize; i++) {
 					for (int j = 0; j < boardSize; j++) {
-						double dist = sqrt(pow(pawns_w[n]->sprite.getPosition().x - cellCenters[i][j].x, 2) + pow(pawns_w[n]->sprite.getPosition().y - cellCenters[i][j].y, 2));
+						double dist = sqrt(pow(figures[n]->sprite.getPosition().x - cellCenters[i][j].x, 2) + pow(figures[n]->sprite.getPosition().y - cellCenters[i][j].y, 2));
 						if (dist < maxDistance) {
 							maxDistance = dist;
 							cellX = i;
@@ -112,16 +193,16 @@ int main()
 						}
 					}
 				}
-				pawns_w[n]->sprite.setPosition(cellCenters[cellX][cellY].x, cellCenters[cellX][cellY].y);
+				figures[n]->sprite.setPosition(cellCenters[cellX][cellY].x, cellCenters[cellX][cellY].y);
 			}
 		}
 
-		if (isMove) pawns_w[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
+		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
 
 		window.clear();
 		window.draw(board);
-		for (int i = 0; i < pawns_w.size(); i++) {
-			window.draw(pawns_w[i]->sprite);
+		for (int i = 0; i < figures.size(); i++) {
+			figures[i]->draw(window, sf::RenderStates::Default);
 		}
 		window.display();
 	}
