@@ -8,11 +8,11 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-const unsigned char boardSize = 8;
-const unsigned short cellSide = 112; // length in pixels
+const int boardSize = 8;
+const int cellSide = 112; // length in pixels
 bool turn = 0; // 0 - ход белых, 1 - ход черных
 
-short boardArr[boardSize][boardSize] =
+int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
   -6,-6,-6,-6,-6,-6,-6,-6,
    0, 0, 0, 0, 0, 0, 0, 0,
@@ -26,8 +26,7 @@ short boardArr[boardSize][boardSize] =
 int main()
 {
 	bool isMove = false;
-	int dx = 0, dy = 0;
-	int n = 0;
+	int dx = 0, dy = 0, n = 0;
 
 	Texture texture_pawn_w; // Текстура белой пешки
 	texture_pawn_w.loadFromFile("images/pawn_w.png");
@@ -65,7 +64,7 @@ int main()
 	Texture texture_king_b; // Текстура черного короля
 	texture_king_b.loadFromFile("images/king_b.png");
 
-	Texture boardTexture;
+	Texture boardTexture; // Текстура доски
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
@@ -76,9 +75,9 @@ int main()
 	RenderWindow window(VideoMode(910, 910), "Chess");
 
 	// Рассчет центров клеток
-	for (int i = 0; i < boardSize; i++) {
+	for (int i = 0; i < boardSize; ++i) {
 		vector<Cell> temp;
-		for (int j = 0; j < boardSize; j++) {
+		for (int j = 0; j < boardSize; ++j) {
 			Cell tempCell(j, i, boardArr[j][i], cellSide);
 			tempCell.x = i;
 			tempCell.y = j;
@@ -90,8 +89,8 @@ int main()
 	}
 
 	// Расстановка фигур
-	for (int i = 0; i < boardSize; i++) {
-		for (int j = 0; j < boardSize; j++) {
+	for (int i = 0; i < boardSize; ++i) {
+		for (int j = 0; j < boardSize; ++j) {
 			switch (boardArr[i][j])
 			{
 			case -1:
@@ -160,7 +159,7 @@ int main()
 
 			// перетаскивание мышью
 			if (event.type == Event::MouseButtonPressed and event.key.code == Mouse::Left) {
-				for (int i = 0; i < figures.size(); i++) {
+				for (int i = 0; i < figures.size(); ++i) {
 					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 						isMove = true;
 						n = i; // figures[n] - та фигура, которую мы двигаем мышью
@@ -173,11 +172,11 @@ int main()
 
 		if (event.type == Event::MouseButtonReleased and event.key.code == Mouse::Left) {
 			isMove = false;
-			unsigned short cellX = 0, cellY = 0;
+			int cellX = 0, cellY = 0;
 			double maxDistance = 10000.;
 
-			for (int i = 0; i < boardSize; i++) {
-				for (int j = 0; j < boardSize; j++) {
+			for (int i = 0; i < boardSize; ++i) {
+				for (int j = 0; j < boardSize; ++j) {
 					double dist = sqrt(pow(figures[n]->getPos().x - cells[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - cells[i][j].yInPixel, 2)); // Расстояние до клетки
 					if (dist < maxDistance) {
 						maxDistance = dist;
@@ -203,11 +202,11 @@ int main()
 
 		window.clear();
 		window.draw(board);
-		for (int i = 0; i < figures.size(); i++) {
+		for (int i = 0; i < figures.size(); ++i) {
 			figures[i]->draw(window, sf::RenderStates::Default);
 		}
+		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();
 	}
-
 	return 0;
 }

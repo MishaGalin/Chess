@@ -3,7 +3,7 @@ class AbstractFigure : public sf::Drawable
 {
 public:
 	bool color = 0; // 0 - white, 1 - black
-	short x = 0, y = 0, xInPixel = 0, yInPixel = 0;
+	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	sf::Texture textures;
 	sf::Sprite sprite;
 

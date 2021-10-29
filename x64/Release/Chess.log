@@ -1,4 +1,6 @@
 ﻿  Chess.cpp
+C:\Users\misha\source\repos\Chess\AbstractFigure.h(18,32): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\misha\source\repos\Chess\AbstractFigure.h(18,22): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
 C:\Users\misha\source\repos\Chess\AbstractFigure.h(27,67): warning C4244: аргумент: преобразование "const T" в "T", возможна потеря данных
           with
           [
@@ -19,7 +21,7 @@ C:\Users\misha\source\repos\Chess\AbstractFigure.h(27,43): warning C4244: арг
           ]
 C:\Users\misha\source\repos\Chess\AbstractFigure.h(31,25): warning C4244: аргумент: преобразование "const int" в "float", возможна потеря данных
 C:\Users\misha\source\repos\Chess\AbstractFigure.h(31,22): warning C4244: аргумент: преобразование "const int" в "float", возможна потеря данных
-C:\Users\misha\source\repos\Chess\Chess.cpp(164,76): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Chess.cpp(163,76): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
           with
           [
               T=int
@@ -28,7 +30,7 @@ C:\Users\misha\source\repos\Chess\Chess.cpp(164,76): warning C4244: аргуме
           [
               T=float
           ]
-C:\Users\misha\source\repos\Chess\Chess.cpp(164,64): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Chess.cpp(163,64): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
           with
           [
               T=int

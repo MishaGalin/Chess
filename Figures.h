@@ -4,7 +4,7 @@ class Pawn : public AbstractFigure
 public:
 	bool firstMove = true;
 
-	Pawn(const int& posX, const int& posY, const sf::Texture& texture, const unsigned short& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Pawn(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
 		sprite.setOrigin(18, 38);
 	}
 
@@ -47,45 +47,45 @@ public:
 
 class Castle : public AbstractFigure {
 public:
-	Castle(const int& posX, const int& posY, const sf::Texture& texture, const unsigned short& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Castle(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
 		sprite.setOrigin(26, 38);
 	}
 };
 
 class Knight : public AbstractFigure {
 public:
-	Knight(const int& posX, const int& posY, const sf::Texture& texture, const unsigned short& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Knight(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
 		sprite.setOrigin(32, 40);
 	}
 };
 
 class Bishop : public AbstractFigure {
 public:
-	Bishop(const int& posX, const int& posY, const sf::Texture& texture, const unsigned short& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Bishop(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
 		sprite.setOrigin(34, 40);
 	}
 };
 
 class Queen : public AbstractFigure {
 public:
-	Queen(const int& posX, const int& posY, const sf::Texture& texture, const unsigned short& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Queen(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
 		sprite.setOrigin(35, 40);
 	}
 };
 
 class King : public AbstractFigure {
 public:
-	King(const int& posX, const int& posY, const sf::Texture& texture, const unsigned short& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	King(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
 		sprite.setOrigin(35, 38);
 	}
 };
 
 class Cell {
 public:
-	short x = 0, y = 0, xInPixel = 0, yInPixel = 0;
+	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
 
-	Cell(const short& x, const short& y, const short& value, const unsigned short& cellSide) {
+	Cell(const int& x, const int& y, const int& value, const int& cellSide) {
 		this->x = x;
 		this->y = y;
 
