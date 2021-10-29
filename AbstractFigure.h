@@ -3,11 +3,22 @@ class AbstractFigure : public sf::Drawable
 {
 public:
 	bool color = 0; // 0 - white, 1 - black
-	int posX = 0, posY = 0;
+	short x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	sf::Texture textures;
 	sf::Sprite sprite;
 
-	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
+	AbstractFigure() {};
+
+	AbstractFigure(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+		sprite.setTexture(texture);
+		x = posX;
+		y = posY;
+		xInPixel = cellSide / 2 + cellSide * x;
+		yInPixel = cellSide / 2 + cellSide * y;
+		sprite.setPosition(xInPixel, yInPixel);
+	}
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
 		target.draw(sprite, states);
 	}
@@ -16,8 +27,8 @@ public:
 		return sf::Vector2i(sprite.getPosition().x, sprite.getPosition().y);
 	}
 
-	void setPos(const int& pos_x, const int& pos_y) {
-		sprite.setPosition(pos_x, pos_y);
+	void setPos(const int& x, const int& y) {
+		sprite.setPosition(x, y);
 	}
 
 	//virtual void Move(const int& newPosX, const int& newPosY, bool& turn) = 0;

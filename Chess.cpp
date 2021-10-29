@@ -69,23 +69,24 @@ int main()
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
-	vector<vector<Vector2i>> cellCenters; // Сетка центров клеток
+	vector<vector<Cell>> cells; // Сетка центров клеток
 
 	vector<AbstractFigure*> figures; // Массив всех фигур на доске
 
 	RenderWindow window(VideoMode(910, 910), "Chess");
-	window.setFramerateLimit(200);
 
 	// Рассчет центров клеток
 	for (int i = 0; i < boardSize; i++) {
-		vector<Vector2i> temp;
+		vector<Cell> temp;
 		for (int j = 0; j < boardSize; j++) {
-			Vector2i tempCenter;
-			tempCenter.x = cellSide / 2 + cellSide * j;
-			tempCenter.y = cellSide / 2 + cellSide * i;
-			temp.push_back(tempCenter);
+			Cell tempCell(j, i, boardArr[j][i], cellSide);
+			tempCell.x = i;
+			tempCell.y = j;
+			tempCell.xInPixel = cellSide / 2 + cellSide * i;
+			tempCell.yInPixel = cellSide / 2 + cellSide * j;
+			temp.push_back(tempCell);
 		}
-		cellCenters.push_back(temp);
+		cells.push_back(temp);
 	}
 
 	// Расстановка фигур
@@ -93,44 +94,44 @@ int main()
 		for (int j = 0; j < boardSize; j++) {
 			switch (boardArr[i][j])
 			{
-			case 1:
-			{figures.push_back(new Castle(j, i, texture_castle_w, cellSide)); }
-			break;
-
 			case -1:
 			{figures.push_back(new Castle(j, i, texture_castle_b, cellSide)); }
 			break;
 
-			case 2:
-			{figures.push_back(new Knight(j, i, texture_knight_w, cellSide)); }
+			case 1:
+			{figures.push_back(new Castle(j, i, texture_castle_w, cellSide)); }
 			break;
 
 			case -2:
 			{figures.push_back(new Knight(j, i, texture_knight_b, cellSide)); }
 			break;
 
-			case 3:
-			{figures.push_back(new Bishop(j, i, texture_bishop_w, cellSide)); }
+			case 2:
+			{figures.push_back(new Knight(j, i, texture_knight_w, cellSide)); }
 			break;
 
 			case -3:
 			{figures.push_back(new Bishop(j, i, texture_bishop_b, cellSide)); }
 			break;
 
-			case 4:
-			{figures.push_back(new Queen(j, i, texture_queen_w, cellSide)); }
+			case 3:
+			{figures.push_back(new Bishop(j, i, texture_bishop_w, cellSide)); }
 			break;
 
 			case -4:
 			{figures.push_back(new Queen(j, i, texture_queen_b, cellSide)); }
 			break;
 
-			case 5:
-			{figures.push_back(new King(j, i, texture_king_w, cellSide)); }
+			case 4:
+			{figures.push_back(new Queen(j, i, texture_queen_w, cellSide)); }
 			break;
 
 			case -5:
 			{figures.push_back(new King(j, i, texture_king_b, cellSide)); }
+			break;
+
+			case 5:
+			{figures.push_back(new King(j, i, texture_king_w, cellSide)); }
 			break;
 
 			case -6:
@@ -158,36 +159,43 @@ int main()
 				window.close();
 
 			// перетаскивание мышью
-			if (event.type == Event::MouseButtonPressed) {
-				if (event.key.code == Mouse::Left) {
-					for (int i = 0; i < figures.size(); i++) {
-						if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-							isMove = true;
-							n = i;
-							dx = mousePos.x - figures[i]->getPos().x;
-							dy = mousePos.y - figures[i]->getPos().y;
-						}
+			if (event.type == Event::MouseButtonPressed and event.key.code == Mouse::Left) {
+				for (int i = 0; i < figures.size(); i++) {
+					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+						isMove = true;
+						n = i; // figures[n] - та фигура, которую мы двигаем мышью
+						dx = mousePos.x - figures[n]->getPos().x;
+						dy = mousePos.y - figures[n]->getPos().y;
 					}
 				}
 			}
 		}
 
-		if (event.type == Event::MouseButtonReleased) {
-			if (event.key.code == Mouse::Left) {
-				isMove = false;
-				unsigned short cellX = 0, cellY = 0;
-				double maxDistance = 10000.;
-				for (int i = 0; i < boardSize; i++) {
-					for (int j = 0; j < boardSize; j++) {
-						double dist = sqrt(pow(figures[n]->getPos().x - cellCenters[i][j].x, 2) + pow(figures[n]->getPos().y - cellCenters[i][j].y, 2));
-						if (dist < maxDistance) {
-							maxDistance = dist;
-							cellX = i;
-							cellY = j;
-						}
+		if (event.type == Event::MouseButtonReleased and event.key.code == Mouse::Left) {
+			isMove = false;
+			unsigned short cellX = 0, cellY = 0;
+			double maxDistance = 10000.;
+
+			for (int i = 0; i < boardSize; i++) {
+				for (int j = 0; j < boardSize; j++) {
+					double dist = sqrt(pow(figures[n]->getPos().x - cells[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - cells[i][j].yInPixel, 2)); // Расстояние до клетки
+					if (dist < maxDistance) {
+						maxDistance = dist;
+						cellX = i;
+						cellY = j;
 					}
 				}
-				figures[n]->setPos(cellCenters[cellX][cellY].x, cellCenters[cellX][cellY].y);
+			}
+
+			if (cells[cellX][cellY].isEmpty) { // Проверка не занята ли клетка
+				cells[figures[n]->x][figures[n]->y].isEmpty = true;
+				cells[cellX][cellY].isEmpty = false;
+				figures[n]->setPos(cells[cellX][cellY].xInPixel, cells[cellX][cellY].yInPixel);
+				figures[n]->x = cellX;
+				figures[n]->y = cellY;
+			}
+			else {
+				figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel);
 			}
 		}
 
