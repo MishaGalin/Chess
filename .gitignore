@@ -388,3 +388,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 images/
+Debug/
+x64/Debug/

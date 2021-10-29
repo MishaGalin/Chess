@@ -42,7 +42,8 @@ C:\Users\misha\source\repos\Chess\Chess.cpp(114,61): warning C4244: аргуме
 C:\Users\misha\source\repos\Chess\Chess.cpp(118,74): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
 C:\Users\misha\source\repos\Chess\Chess.cpp(118,57): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
   Создание кода
-  Previous IPDB and IOBJ mismatch, fall back to full compilation.
-  All 239 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  3 of 239 functions ( 1.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   Chess.vcxproj -> C:\Users\misha\source\repos\Chess\x64\Release\Chess.exe
