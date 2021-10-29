@@ -28,6 +28,7 @@ int main()
 	bool isMove = false;
 	int dx = 0, dy = 0;
 	int n = 0;
+	int b;
 
 	Texture boardTexture;
 	boardTexture.loadFromFile("images/board1.png");
