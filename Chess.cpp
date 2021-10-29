@@ -164,16 +164,10 @@ int main()
 						if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 							isMove = true;
 							n = i;
-							dx = mousePos.x - figures[i]->sprite.getPosition().x;
-							dy = mousePos.y - figures[i]->sprite.getPosition().y;
+							dx = mousePos.x - figures[i]->getPos().x;
+							dy = mousePos.y - figures[i]->getPos().y;
 						}
 					}
-					//for (const auto& pawn : pawns_b) {
-					//	if (pawn.sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-					//		isMove = true;
-					//		dx = mousePos.x - pawn.sprite.getPosition().x;
-					//		dy = mousePos.y - pawn.sprite.getPosition().y;
-					//	}
 				}
 			}
 		}
@@ -185,7 +179,7 @@ int main()
 				double maxDistance = 10000.;
 				for (int i = 0; i < boardSize; i++) {
 					for (int j = 0; j < boardSize; j++) {
-						double dist = sqrt(pow(figures[n]->sprite.getPosition().x - cellCenters[i][j].x, 2) + pow(figures[n]->sprite.getPosition().y - cellCenters[i][j].y, 2));
+						double dist = sqrt(pow(figures[n]->getPos().x - cellCenters[i][j].x, 2) + pow(figures[n]->getPos().y - cellCenters[i][j].y, 2));
 						if (dist < maxDistance) {
 							maxDistance = dist;
 							cellX = i;
@@ -193,11 +187,11 @@ int main()
 						}
 					}
 				}
-				figures[n]->sprite.setPosition(cellCenters[cellX][cellY].x, cellCenters[cellX][cellY].y);
+				figures[n]->setPos(cellCenters[cellX][cellY].x, cellCenters[cellX][cellY].y);
 			}
 		}
 
-		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
+		if (isMove) figures[n]->setPos(mousePos.x - dx, mousePos.y - dy);
 
 		window.clear();
 		window.draw(board);
