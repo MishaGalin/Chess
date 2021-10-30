@@ -72,7 +72,14 @@ int main()
 
 	vector<AbstractFigure*> figures; // Массив всех фигур на доске
 
+	Image icon;
+	if (!icon.loadFromFile("icon.png"))
+	{
+		return 1;
+	}
+
 	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close);
+	window.setIcon(32, 32, icon.getPixelsPtr());
 
 	// Рассчет центров клеток
 	for (int i = 0; i < boardSize; ++i) {
@@ -212,5 +219,11 @@ int main()
 		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();
 	}
+
+	for (auto figure : figures)
+	{
+		delete figure;
+	}
+
 	return 0;
 }
