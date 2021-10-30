@@ -8,7 +8,7 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-const int boardSize = 8;
+const int boardSize = 8, windowSizeX = 910, windowSizeY = 910;
 const int cellSide = 112; // length in pixels
 bool turn = 0; // 0 - ход белых, 1 - ход черных
 
@@ -72,7 +72,7 @@ int main()
 
 	vector<AbstractFigure*> figures; // Массив всех фигур на доске
 
-	RenderWindow window(VideoMode(910, 910), "Chess");
+	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close);
 
 	// Рассчет центров клеток
 	for (int i = 0; i < boardSize; ++i) {
@@ -160,7 +160,8 @@ int main()
 			// перетаскивание мышью
 			if (event.type == Event::MouseButtonPressed and event.key.code == Mouse::Left) {
 				for (int i = 0; i < figures.size(); ++i) {
-					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y))
+					{
 						isMove = true;
 						n = i; // figures[n] - та фигура, которую мы двигаем мышью
 						dx = mousePos.x - figures[n]->getPos().x;
@@ -178,7 +179,8 @@ int main()
 			for (int i = 0; i < boardSize; ++i) {
 				for (int j = 0; j < boardSize; ++j) {
 					double dist = sqrt(pow(figures[n]->getPos().x - cells[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - cells[i][j].yInPixel, 2)); // Расстояние до клетки
-					if (dist < maxDistance) {
+					if (dist < maxDistance)
+					{
 						maxDistance = dist;
 						cellX = i;
 						cellY = j;
@@ -186,24 +188,26 @@ int main()
 				}
 			}
 
-			if (cells[cellX][cellY].isEmpty) { // Проверка не занята ли клетка
+			if (cells[cellX][cellY].isEmpty // Проверка не занята ли клетка
+				and figures[n]->getPos().x <= window.getSize().x and figures[n]->getPos().x >= 0 // проверка границ
+				and figures[n]->getPos().y <= window.getSize().y and figures[n]->getPos().y >= 0)
+			{
 				cells[figures[n]->x][figures[n]->y].isEmpty = true;
 				cells[cellX][cellY].isEmpty = false;
 				figures[n]->setPos(cells[cellX][cellY].xInPixel, cells[cellX][cellY].yInPixel);
 				figures[n]->x = cellX;
 				figures[n]->y = cellY;
 			}
-			else {
-				figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel);
-			}
+			else figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel);
 		}
 
 		if (isMove) figures[n]->setPos(mousePos.x - dx, mousePos.y - dy);
 
 		window.clear();
 		window.draw(board);
-		for (int i = 0; i < figures.size(); ++i) {
-			figures[i]->draw(window, sf::RenderStates::Default);
+		for (auto figure : figures)
+		{
+			figure->draw(window, sf::RenderStates::Default);
 		}
 		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();

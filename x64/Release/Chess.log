@@ -39,8 +39,10 @@ C:\Users\misha\source\repos\Chess\Chess.cpp(163,64): warning C4244: аргуме
           [
               T=float
           ]
+C:\Users\misha\source\repos\Chess\Chess.cpp(190,32): warning C4018: <=: несоответствие типов со знаком и без знака
+C:\Users\misha\source\repos\Chess\Chess.cpp(191,32): warning C4018: <=: несоответствие типов со знаком и без знака
   Создание кода
-  1 of 288 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  1 of 290 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
