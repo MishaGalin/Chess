@@ -4,91 +4,189 @@ class Pawn : public AbstractFigure
 public:
 	bool firstMove = true;
 
-	Pawn(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Pawn(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, color, texture, cellSide) {
 		sprite.setOrigin(18, 38);
 	}
 
-	//void Move(const int& newPosX, const int& newPosY, bool& turn) override
-	//{
-	//	if (turn == color and newPosX == posX) {
-	//		if (color == 0) { // if white
-	//			if (firstMove) {
-	//				if (posY - newPosY <= 2 and posY - newPosY >= 1) {
-	//					posY = newPosY;
-	//					firstMove = false;
-	//					turn = !turn;
-	//				}
-	//			}
-	//			else {
-	//				if (posY - newPosY == 1) {
-	//					posY = newPosY;
-	//					turn = !turn;
-	//				}
-	//			}
-	//		}
-	//		else { // if black
-	//			if (firstMove) {
-	//				if (newPosY - posY <= 2 and newPosY - posY >= 1) {
-	//					posY = newPosY;
-	//					firstMove = false;
-	//					turn = !turn;
-	//				}
-	//			}
-	//			else {
-	//				if (newPosY - posY == 1) {
-	//					posY = newPosY;
-	//					turn = !turn;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	{
+		if (*turn == color and oldCell.x == newCell.x and newCell.isEmpty) {
+			if (color == 0) { // if white
+				if (firstMove) {
+					if (oldCell.y - newCell.y == 2 or oldCell.y - newCell.y == 1) {
+						oldCell.isEmpty = true;
+						newCell.isEmpty = false;
+						firstMove = false;
+						x = newCell.x;
+						y = newCell.y;
+						setPos(newCell.xInPixel, newCell.yInPixel);
+						*turn = !*turn;
+						return;
+					}
+				}
+				else {
+					if (oldCell.y - newCell.y == 1) {
+						oldCell.isEmpty = true;
+						newCell.isEmpty = false;
+						x = newCell.x;
+						y = newCell.y;
+						setPos(newCell.xInPixel, newCell.yInPixel);
+						*turn = !*turn;
+						return;
+					}
+				}
+			}
+			else { // if black
+				if (firstMove) {
+					if (newCell.y - oldCell.y == 2 or newCell.y - oldCell.y == 1) {
+						oldCell.isEmpty = true;
+						newCell.isEmpty = false;
+						firstMove = false;
+						x = newCell.x;
+						y = newCell.y;
+						setPos(newCell.xInPixel, newCell.yInPixel);
+						*turn = !*turn;
+						return;
+					}
+				}
+				else {
+					if (newCell.y - oldCell.y == 1) {
+						oldCell.isEmpty = true;
+						newCell.isEmpty = false;
+						x = newCell.x;
+						y = newCell.y;
+						setPos(newCell.xInPixel, newCell.yInPixel);
+						*turn = !*turn;
+						return;
+					}
+				}
+			}
+		}
+		setPos(oldCell.xInPixel, oldCell.yInPixel);
+	}
 };
 
 class Castle : public AbstractFigure {
 public:
-	Castle(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Castle(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, color, texture, cellSide) {
 		sprite.setOrigin(26, 38);
+	}
+
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	{
+		if (*turn == color and newCell.x == x) {
+			if (color == 0) { // if white
+				if (y - newCell.y == 1) {
+					y = newCell.y;
+					*turn = !*turn;
+				}
+			}
+		}
+		else { // if black
+			if (newCell.y - y == 1) {
+				y = newCell.y;
+				*turn = !*turn;
+			}
+		}
 	}
 };
 
 class Knight : public AbstractFigure {
 public:
-	Knight(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Knight(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, color, texture, cellSide) {
 		sprite.setOrigin(32, 40);
+	}
+
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	{
+		if (*turn == color and newCell.x == x) {
+			if (color == 0) { // if white
+				if (y - newCell.y == 1) {
+					y = newCell.y;
+					*turn = !*turn;
+				}
+			}
+		}
+		else { // if black
+			if (newCell.y - y == 1) {
+				y = newCell.y;
+				*turn = !*turn;
+			}
+		}
 	}
 };
 
 class Bishop : public AbstractFigure {
 public:
-	Bishop(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Bishop(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, color, texture, cellSide) {
 		sprite.setOrigin(34, 40);
+	}
+
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	{
+		if (*turn == color and newCell.x == x) {
+			if (color == 0) { // if white
+				if (y - newCell.y == 1) {
+					y = newCell.y;
+					*turn = !*turn;
+				}
+			}
+		}
+		else { // if black
+			if (newCell.y - y == 1) {
+				y = newCell.y;
+				*turn = !*turn;
+			}
+		}
 	}
 };
 
 class Queen : public AbstractFigure {
 public:
-	Queen(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	Queen(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, color, texture, cellSide) {
 		sprite.setOrigin(35, 40);
+	}
+
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	{
+		if (*turn == color and newCell.x == x) {
+			if (color == 0) { // if white
+				if (y - newCell.y == 1) {
+					y = newCell.y;
+					*turn = !*turn;
+				}
+			}
+		}
+		else { // if black
+			if (newCell.y - y == 1) {
+				y = newCell.y;
+				*turn = !*turn;
+			}
+		}
 	}
 };
 
 class King : public AbstractFigure {
 public:
-	King(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, texture, cellSide) {
+	King(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) : AbstractFigure(posX, posY, color, texture, cellSide) {
 		sprite.setOrigin(35, 38);
 	}
-};
 
-class Cell {
-public:
-	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
-	bool isEmpty = true;
-
-	Cell(const int& x, const int& y, const int& value, const int& cellSide) {
-		this->x = x;
-		this->y = y;
-
-		value == 0 ? isEmpty = true : isEmpty = false;
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	{
+		if (*turn == color and newCell.x == x) {
+			if (color == 0) { // if white
+				if (y - newCell.y == 1) {
+					y = newCell.y;
+					*turn = !*turn;
+				}
+			}
+		}
+		else { // if black
+			if (newCell.y - y == 1) {
+				y = newCell.y;
+				*turn = !*turn;
+			}
+		}
 	}
 };

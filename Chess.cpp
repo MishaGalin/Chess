@@ -10,7 +10,7 @@ using namespace std;
 
 const int boardSize = 8, windowSizeX = 910, windowSizeY = 910;
 const int cellSide = 112; // length in pixels
-bool turn = 0; // 0 - ход белых, 1 - ход черных
+bool turn = false; // 0 - ход белых, 1 - ход черных
 
 int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
@@ -85,11 +85,7 @@ int main()
 	for (int i = 0; i < boardSize; ++i) {
 		vector<Cell> temp;
 		for (int j = 0; j < boardSize; ++j) {
-			Cell tempCell(j, i, boardArr[j][i], cellSide);
-			tempCell.x = i;
-			tempCell.y = j;
-			tempCell.xInPixel = cellSide / 2 + cellSide * i;
-			tempCell.yInPixel = cellSide / 2 + cellSide * j;
+			Cell tempCell(i, j, boardArr[j][i], cellSide);
 			temp.push_back(tempCell);
 		}
 		cells.push_back(temp);
@@ -101,51 +97,51 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{figures.push_back(new Castle(j, i, texture_castle_b, cellSide)); }
+			{figures.push_back(new Castle(j, i, true, texture_castle_b, cellSide)); }
 			break;
 
 			case 1:
-			{figures.push_back(new Castle(j, i, texture_castle_w, cellSide)); }
+			{figures.push_back(new Castle(j, i, false, texture_castle_w, cellSide)); }
 			break;
 
 			case -2:
-			{figures.push_back(new Knight(j, i, texture_knight_b, cellSide)); }
+			{figures.push_back(new Knight(j, i, true, texture_knight_b, cellSide)); }
 			break;
 
 			case 2:
-			{figures.push_back(new Knight(j, i, texture_knight_w, cellSide)); }
+			{figures.push_back(new Knight(j, i, false, texture_knight_w, cellSide)); }
 			break;
 
 			case -3:
-			{figures.push_back(new Bishop(j, i, texture_bishop_b, cellSide)); }
+			{figures.push_back(new Bishop(j, i, true, texture_bishop_b, cellSide)); }
 			break;
 
 			case 3:
-			{figures.push_back(new Bishop(j, i, texture_bishop_w, cellSide)); }
+			{figures.push_back(new Bishop(j, i, false, texture_bishop_w, cellSide)); }
 			break;
 
 			case -4:
-			{figures.push_back(new Queen(j, i, texture_queen_b, cellSide)); }
+			{figures.push_back(new Queen(j, i, true, texture_queen_b, cellSide)); }
 			break;
 
 			case 4:
-			{figures.push_back(new Queen(j, i, texture_queen_w, cellSide)); }
+			{figures.push_back(new Queen(j, i, false, texture_queen_w, cellSide)); }
 			break;
 
 			case -5:
-			{figures.push_back(new King(j, i, texture_king_b, cellSide)); }
+			{figures.push_back(new King(j, i, true, texture_king_b, cellSide)); }
 			break;
 
 			case 5:
-			{figures.push_back(new King(j, i, texture_king_w, cellSide)); }
+			{figures.push_back(new King(j, i, false, texture_king_w, cellSide)); }
 			break;
 
 			case -6:
-			{figures.push_back(new Pawn(j, i, texture_pawn_b, cellSide)); }
+			{figures.push_back(new Pawn(j, i, true, texture_pawn_b, cellSide)); }
 			break;
 
 			case 6:
-			{figures.push_back(new Pawn(j, i, texture_pawn_w, cellSide)); }
+			{figures.push_back(new Pawn(j, i, 0, texture_pawn_w, cellSide)); }
 			break;
 
 			default:
@@ -185,7 +181,7 @@ int main()
 
 			for (int i = 0; i < boardSize; ++i) {
 				for (int j = 0; j < boardSize; ++j) {
-					double dist = sqrt(pow(figures[n]->getPos().x - cells[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - cells[i][j].yInPixel, 2)); // Расстояние до клетки
+					double dist = sqrt(pow(figures[n]->sprite.getPosition().x - cells[i][j].xInPixel, 2) + pow(figures[n]->sprite.getPosition().y - cells[i][j].yInPixel, 2)); // Расстояние до клетки
 					if (dist < maxDistance)
 					{
 						maxDistance = dist;
@@ -195,20 +191,17 @@ int main()
 				}
 			}
 
-			if (cells[cellX][cellY].isEmpty // Проверка не занята ли клетка
-				and figures[n]->getPos().x <= window.getSize().x and figures[n]->getPos().x >= 0 // проверка границ
+			if (figures[n]->getPos().x <= window.getSize().x and figures[n]->getPos().x >= 0 // проверка границ
 				and figures[n]->getPos().y <= window.getSize().y and figures[n]->getPos().y >= 0)
 			{
-				cells[figures[n]->x][figures[n]->y].isEmpty = true;
-				cells[cellX][cellY].isEmpty = false;
-				figures[n]->setPos(cells[cellX][cellY].xInPixel, cells[cellX][cellY].yInPixel);
-				figures[n]->x = cellX;
-				figures[n]->y = cellY;
+				figures[n]->Move(cells[figures[n]->x][figures[n]->y], cells[cellX][cellY], cellSide, &turn);
 			}
-			else figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel);
+			else {
+				figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel);
+			}
 		}
 
-		if (isMove) figures[n]->setPos(mousePos.x - dx, mousePos.y - dy);
+		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
 
 		window.clear();
 		window.draw(board);

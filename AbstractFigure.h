@@ -1,4 +1,19 @@
 #pragma once
+class Cell {
+public:
+	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
+	bool isEmpty = true;
+
+	Cell(const int& x, const int& y, const int& value, const int& cellSide) {
+		this->x = x;
+		this->y = y;
+		this->xInPixel = cellSide / 2 + cellSide * x;
+		this->yInPixel = cellSide / 2 + cellSide * y;
+
+		value == 0 ? isEmpty = true : isEmpty = false;
+	}
+};
+
 class AbstractFigure : public sf::Drawable
 {
 public:
@@ -9,8 +24,9 @@ public:
 
 	AbstractFigure() {};
 
-	AbstractFigure(const int& posX, const int& posY, const sf::Texture& texture, const int& cellSide) {
+	AbstractFigure(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) {
 		sprite.setTexture(texture);
+		this->color = color;
 		x = posX;
 		y = posY;
 		xInPixel = cellSide / 2 + cellSide * x;
@@ -27,10 +43,12 @@ public:
 		return sf::Vector2i(sprite.getPosition().x, sprite.getPosition().y);
 	}
 
-	void setPos(const int& x, const int& y) {
-		sprite.setPosition(x, y);
+	void setPos(const int& xInPixel, const int& yInPixel) {
+		this->xInPixel = xInPixel;
+		this->yInPixel = xInPixel;
+		this->sprite.setPosition(xInPixel, yInPixel);
 	}
 
-	//virtual void Move(const int& newPosX, const int& newPosY, bool& turn) = 0;
+	virtual void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) = 0;
 	//virtual void Capture() = 0;
 };
