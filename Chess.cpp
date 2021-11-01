@@ -78,7 +78,7 @@ int main()
 		return 1;
 	}
 
-	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close);
+	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess: turn of white", sf::Style::Close);
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
 	// Рассчет центров клеток
@@ -141,7 +141,7 @@ int main()
 			break;
 
 			case 6:
-			{figures.push_back(new Pawn(j, i, 0, texture_pawn_w, cellSide)); }
+			{figures.push_back(new Pawn(j, i, false, texture_pawn_w, cellSide)); }
 			break;
 
 			default:
@@ -161,7 +161,7 @@ int main()
 				window.close();
 
 			// перетаскивание мышью
-			if (event.type == Event::MouseButtonPressed and event.key.code == Mouse::Left) {
+			if (event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left) {
 				for (int i = 0; i < figures.size(); ++i) {
 					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y))
 					{
@@ -174,7 +174,7 @@ int main()
 			}
 		}
 
-		if (event.type == Event::MouseButtonReleased and event.key.code == Mouse::Left) {
+		if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 			isMove = false;
 			int cellX = 0, cellY = 0;
 			double maxDistance = 10000.;
@@ -191,14 +191,12 @@ int main()
 				}
 			}
 
-			if (figures[n]->getPos().x <= window.getSize().x and figures[n]->getPos().x >= 0 // проверка границ
-				and figures[n]->getPos().y <= window.getSize().y and figures[n]->getPos().y >= 0)
+			if (figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
+				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0)
 			{
-				figures[n]->Move(cells[figures[n]->x][figures[n]->y], cells[cellX][cellY], cellSide, &turn);
+				figures[n]->Move(cells[figures[n]->x][figures[n]->y], cells[cellX][cellY], cellSide, turn, window);
 			}
-			else {
-				figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel);
-			}
+			else figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
 		}
 
 		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);

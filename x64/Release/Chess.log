@@ -40,12 +40,12 @@ C:\Users\misha\source\repos\Chess\Chess.cpp(166,64): warning C4244: аргуме
               T=float
           ]
 C:\Users\misha\source\repos\Chess\Chess.cpp(194,31): warning C4018: <=: несоответствие типов со знаком и без знака
-C:\Users\misha\source\repos\Chess\Chess.cpp(195,32): warning C4018: <=: несоответствие типов со знаком и без знака
-C:\Users\misha\source\repos\Chess\Chess.cpp(204,74): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-C:\Users\misha\source\repos\Chess\Chess.cpp(204,57): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Chess.cpp(195,31): warning C4018: <=: несоответствие типов со знаком и без знака
+C:\Users\misha\source\repos\Chess\Chess.cpp(202,74): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\misha\source\repos\Chess\Chess.cpp(202,57): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
   Создание кода
-  1 of 297 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  5 of 298 functions ( 1.7%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    3 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   Chess.vcxproj -> C:\Users\misha\source\repos\Chess\x64\Release\Chess.exe

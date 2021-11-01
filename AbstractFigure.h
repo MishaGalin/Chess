@@ -49,6 +49,16 @@ public:
 		this->sprite.setPosition(xInPixel, yInPixel);
 	}
 
-	virtual void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) = 0;
+	virtual void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) = 0;
+protected:
+	void Move_(Cell& oldCell, Cell& newCell, bool& turn, sf::RenderWindow& window) {
+		oldCell.isEmpty = true;
+		newCell.isEmpty = false;
+		x = newCell.x;
+		y = newCell.y;
+		setPos(newCell.xInPixel, newCell.yInPixel);
+		turn = !turn;
+		turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
+	};
 	//virtual void Capture() = 0;
 };

@@ -8,55 +8,33 @@ public:
 		sprite.setOrigin(18, 38);
 	}
 
-	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) override
 	{
-		if (*turn == color and oldCell.x == newCell.x and newCell.isEmpty) {
+		if (turn == color && oldCell.x == newCell.x && newCell.isEmpty) {
 			if (color == 0) { // if white
 				if (firstMove) {
-					if (oldCell.y - newCell.y == 2 or oldCell.y - newCell.y == 1) {
-						oldCell.isEmpty = true;
-						newCell.isEmpty = false;
-						firstMove = false;
-						x = newCell.x;
-						y = newCell.y;
-						setPos(newCell.xInPixel, newCell.yInPixel);
-						*turn = !*turn;
+					if (oldCell.y - newCell.y == 2 || oldCell.y - newCell.y == 1) {
+						Move_(oldCell, newCell, turn, window);
 						return;
 					}
 				}
 				else {
 					if (oldCell.y - newCell.y == 1) {
-						oldCell.isEmpty = true;
-						newCell.isEmpty = false;
-						x = newCell.x;
-						y = newCell.y;
-						setPos(newCell.xInPixel, newCell.yInPixel);
-						*turn = !*turn;
+						Move_(oldCell, newCell, turn, window);
 						return;
 					}
 				}
 			}
 			else { // if black
 				if (firstMove) {
-					if (newCell.y - oldCell.y == 2 or newCell.y - oldCell.y == 1) {
-						oldCell.isEmpty = true;
-						newCell.isEmpty = false;
-						firstMove = false;
-						x = newCell.x;
-						y = newCell.y;
-						setPos(newCell.xInPixel, newCell.yInPixel);
-						*turn = !*turn;
+					if (newCell.y - oldCell.y == 2 || newCell.y - oldCell.y == 1) {
+						Move_(oldCell, newCell, turn, window);
 						return;
 					}
 				}
 				else {
 					if (newCell.y - oldCell.y == 1) {
-						oldCell.isEmpty = true;
-						newCell.isEmpty = false;
-						x = newCell.x;
-						y = newCell.y;
-						setPos(newCell.xInPixel, newCell.yInPixel);
-						*turn = !*turn;
+						Move_(oldCell, newCell, turn, window);
 						return;
 					}
 				}
@@ -72,22 +50,23 @@ public:
 		sprite.setOrigin(26, 38);
 	}
 
-	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) override
 	{
-		if (*turn == color and newCell.x == x) {
+		if (turn == color && oldCell.x == newCell.x && newCell.isEmpty) {
 			if (color == 0) { // if white
-				if (y - newCell.y == 1) {
-					y = newCell.y;
-					*turn = !*turn;
+				if (oldCell.y - newCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
+				}
+			}
+			else { // if black
+				if (newCell.y - oldCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
 				}
 			}
 		}
-		else { // if black
-			if (newCell.y - y == 1) {
-				y = newCell.y;
-				*turn = !*turn;
-			}
-		}
+		setPos(oldCell.xInPixel, oldCell.yInPixel);
 	}
 };
 
@@ -97,22 +76,23 @@ public:
 		sprite.setOrigin(32, 40);
 	}
 
-	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) override
 	{
-		if (*turn == color and newCell.x == x) {
+		if (turn == color && oldCell.x == newCell.x && newCell.isEmpty) {
 			if (color == 0) { // if white
-				if (y - newCell.y == 1) {
-					y = newCell.y;
-					*turn = !*turn;
+				if (oldCell.y - newCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
+				}
+			}
+			else { // if black
+				if (newCell.y - oldCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
 				}
 			}
 		}
-		else { // if black
-			if (newCell.y - y == 1) {
-				y = newCell.y;
-				*turn = !*turn;
-			}
-		}
+		setPos(oldCell.xInPixel, oldCell.yInPixel);
 	}
 };
 
@@ -122,22 +102,24 @@ public:
 		sprite.setOrigin(34, 40);
 	}
 
-	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) override
 	{
-		if (*turn == color and newCell.x == x) {
+		if (turn == color && oldCell.x == newCell.x && newCell.isEmpty) {
 			if (color == 0) { // if white
-				if (y - newCell.y == 1) {
-					y = newCell.y;
-					*turn = !*turn;
+				if (oldCell.y - newCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
+				}
+			}
+
+			else { // if black
+				if (newCell.y - oldCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
 				}
 			}
 		}
-		else { // if black
-			if (newCell.y - y == 1) {
-				y = newCell.y;
-				*turn = !*turn;
-			}
-		}
+		setPos(oldCell.xInPixel, oldCell.yInPixel);
 	}
 };
 
@@ -147,22 +129,23 @@ public:
 		sprite.setOrigin(35, 40);
 	}
 
-	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) override
 	{
-		if (*turn == color and newCell.x == x) {
+		if (turn == color && oldCell.x == newCell.x && newCell.isEmpty) {
 			if (color == 0) { // if white
-				if (y - newCell.y == 1) {
-					y = newCell.y;
-					*turn = !*turn;
+				if (oldCell.y - newCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
+				}
+			}
+			else { // if black
+				if (newCell.y - oldCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
 				}
 			}
 		}
-		else { // if black
-			if (newCell.y - y == 1) {
-				y = newCell.y;
-				*turn = !*turn;
-			}
-		}
+		setPos(oldCell.xInPixel, oldCell.yInPixel);
 	}
 };
 
@@ -172,21 +155,22 @@ public:
 		sprite.setOrigin(35, 38);
 	}
 
-	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool* turn) override
+	void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) override
 	{
-		if (*turn == color and newCell.x == x) {
+		if (turn == color && oldCell.x == newCell.x && newCell.isEmpty) {
 			if (color == 0) { // if white
-				if (y - newCell.y == 1) {
-					y = newCell.y;
-					*turn = !*turn;
+				if (oldCell.y - newCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
+				}
+			}
+			else { // if black
+				if (newCell.y - oldCell.y == 1) {
+					Move_(oldCell, newCell, turn, window);
+					return;
 				}
 			}
 		}
-		else { // if black
-			if (newCell.y - y == 1) {
-				y = newCell.y;
-				*turn = !*turn;
-			}
-		}
+		setPos(oldCell.xInPixel, oldCell.yInPixel);
 	}
 };
