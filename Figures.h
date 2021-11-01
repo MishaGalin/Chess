@@ -8,39 +8,59 @@ public:
 		sprite.setOrigin(18, 38);
 	}
 
-	void Move(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) override
+	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (turn == color && oldSquare.x == newSquare.x && newSquare.isEmpty) {
+		if (turn == color && squares[x][y].x == squares[newX][newY].x && squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
 				if (firstMove) {
-					if (oldSquare.y - newSquare.y == 2 || oldSquare.y - newSquare.y == 1) {
-						Move_(oldSquare, newSquare, turn, window);
+					if ((squares[x][y].y - squares[newX][newY].y == 2 || squares[x][y].y - squares[newX][newY].y == 1) && squares[x][y - 1].isEmpty) {
+						firstMove = false;
+						Move_(squares[x][y], squares[newX][newY], turn, window);
 						return;
 					}
 				}
 				else {
-					if (oldSquare.y - newSquare.y == 1) {
-						Move_(oldSquare, newSquare, turn, window);
+					if (squares[x][y].y - squares[newX][newY].y == 1) {
+						Move_(squares[x][y], squares[newX][newY], turn, window);
 						return;
 					}
 				}
 			}
 			else { // if black
 				if (firstMove) {
-					if (newSquare.y - oldSquare.y == 2 || newSquare.y - oldSquare.y == 1) {
-						Move_(oldSquare, newSquare, turn, window);
+					if ((squares[newX][newY].y - squares[x][y].y == 2 || squares[newX][newY].y - squares[x][y].y == 1) && squares[x][y + 1].isEmpty) {
+						firstMove = false;
+						Move_(squares[x][y], squares[newX][newY], turn, window);
 						return;
 					}
 				}
 				else {
-					if (newSquare.y - oldSquare.y == 1) {
-						Move_(oldSquare, newSquare, turn, window);
+					if (squares[newX][newY].y - squares[x][y].y == 1) {
+						Move_(squares[x][y], squares[newX][newY], turn, window);
 						return;
 					}
 				}
 			}
 		}
-		setPos(oldSquare.xInPixel, oldSquare.yInPixel);
+		setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+	}
+
+	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
+	{
+		if (turn == color && !squares[newX][newY].isEmpty)
+		{
+			if (color == 0) { // if white
+				if (squares[x][y].y - squares[newX][newY].y == 1 && abs(squares[x][y].x - squares[newX][newY].x) == 1) {
+					return true;
+				}
+			}
+			else {
+				if (squares[newX][newY].y - squares[x][y].y == 1 && abs(squares[newX][newY].x - squares[x][y].x) == 1) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 };
 
@@ -50,24 +70,26 @@ public:
 		sprite.setOrigin(26, 38);
 	}
 
-	void Move(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) override
+	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (turn == color && oldSquare.x == newSquare.x && newSquare.isEmpty) {
+		if (turn == color && squares[x][y].x == squares[newX][newY].x && squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
-				if (oldSquare.y - newSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (squares[x][y].y - squares[newX][newY].y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 			else { // if black
-				if (newSquare.y - oldSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (squares[newX][newY].y - y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 		}
-		setPos(oldSquare.xInPixel, oldSquare.yInPixel);
+		setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
+
+	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override { return false; }
 };
 
 class Knight : public AbstractFigure {
@@ -76,24 +98,26 @@ public:
 		sprite.setOrigin(32, 40);
 	}
 
-	void Move(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) override
+	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (turn == color && oldSquare.x == newSquare.x && newSquare.isEmpty) {
+		if (turn == color && x == squares[newX][newY].x && squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
-				if (oldSquare.y - newSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (y - squares[newX][newY].y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 			else { // if black
-				if (newSquare.y - oldSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (squares[newX][newY].y - y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 		}
-		setPos(oldSquare.xInPixel, oldSquare.yInPixel);
+		setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
+
+	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override { return false; }
 };
 
 class Bishop : public AbstractFigure {
@@ -102,25 +126,26 @@ public:
 		sprite.setOrigin(34, 40);
 	}
 
-	void Move(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) override
-	{
-		if (turn == color && oldSquare.x == newSquare.x && newSquare.isEmpty) {
+	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+		if (turn == color && x == squares[newX][newY].x && squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
-				if (oldSquare.y - newSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (y - squares[newX][newY].y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 
 			else { // if black
-				if (newSquare.y - oldSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (squares[newX][newY].y - y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 		}
-		setPos(oldSquare.xInPixel, oldSquare.yInPixel);
+		setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
+
+	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override { return false; }
 };
 
 class Queen : public AbstractFigure {
@@ -129,24 +154,25 @@ public:
 		sprite.setOrigin(35, 40);
 	}
 
-	void Move(Square& oldCell, Square& newSquare, bool& turn, sf::RenderWindow& window) override
-	{
-		if (turn == color && oldCell.x == newSquare.x && newSquare.isEmpty) {
+	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+		if (turn == color && x == squares[newX][newY].x && squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
-				if (oldCell.y - newSquare.y == 1) {
-					Move_(oldCell, newSquare, turn, window);
+				if (y - squares[newX][newY].y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 			else { // if black
-				if (newSquare.y - oldCell.y == 1) {
-					Move_(oldCell, newSquare, turn, window);
+				if (squares[newX][newY].y - squares[x][y].y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 		}
-		setPos(oldCell.xInPixel, oldCell.yInPixel);
+		setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
+
+	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override { return false; }
 };
 
 class King : public AbstractFigure {
@@ -155,22 +181,24 @@ public:
 		sprite.setOrigin(35, 38);
 	}
 
-	void Move(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) override
+	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (turn == color && oldSquare.x == newSquare.x && newSquare.isEmpty) {
+		if (turn == color && squares[x][y].x == squares[newX][newY].x && squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
-				if (oldSquare.y - newSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (y - squares[newX][newY].y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 			else { // if black
-				if (newSquare.y - oldSquare.y == 1) {
-					Move_(oldSquare, newSquare, turn, window);
+				if (squares[newX][newY].y - y == 1) {
+					Move_(squares[x][y], squares[newX][newY], turn, window);
 					return;
 				}
 			}
 		}
-		setPos(oldSquare.xInPixel, oldSquare.yInPixel);
+		setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
+
+	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override { return false; }
 };

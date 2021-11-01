@@ -4,6 +4,8 @@ public:
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
 
+	Square() {}
+
 	Square(const int& x, const int& y, const int& value, const int& cellSide) {
 		this->x = x;
 		this->y = y;
@@ -14,11 +16,10 @@ public:
 	}
 };
 
-class AbstractFigure : public sf::Drawable
-{
+class AbstractFigure : public sf::Drawable {
 public:
 	bool color = 0; // 0 - white, 1 - black
-	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
+	int x = 0, y = 0;
 	sf::Texture textures;
 	sf::Sprite sprite;
 
@@ -27,9 +28,7 @@ public:
 		this->color = color;
 		this->x = square.x;
 		this->y = square.y;
-		this->xInPixel = square.xInPixel;
-		this->yInPixel = square.yInPixel;
-		this->sprite.setPosition(xInPixel, yInPixel);
+		this->sprite.setPosition(square.xInPixel, square.yInPixel);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -42,22 +41,24 @@ public:
 	}
 
 	void setPos(const int& xInPixel, const int& yInPixel) {
-		this->xInPixel = xInPixel;
-		this->yInPixel = xInPixel;
 		this->sprite.setPosition(xInPixel, yInPixel);
 	}
 
-	virtual void Move(Square& oldCell, Square& newCell, bool& turn, sf::RenderWindow& window) = 0;
+	//void self_delete(std::vector<std::vector<Square>>& squares) {
+	//	sprite.setColor(sf::Color(0, 0, 0, 0));
+	//	squares[x][y].isEmpty = true;
+	//}
 
-protected:
-	void Move_(Square& oldCell, Square& newCell, bool& turn, sf::RenderWindow& window) {
-		oldCell.isEmpty = true;
-		newCell.isEmpty = false;
-		x = newCell.x;
-		y = newCell.y;
-		setPos(newCell.xInPixel, newCell.yInPixel);
+	virtual void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
+	virtual bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
+
+	void Move_(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) {
+		oldSquare.isEmpty = true;
+		newSquare.isEmpty = false;
+		x = newSquare.x;
+		y = newSquare.y;
+		setPos(newSquare.xInPixel, newSquare.yInPixel);
 		turn = !turn;
 		turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	};
-	//virtual void Capture() = 0;
 };

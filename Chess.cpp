@@ -1,8 +1,8 @@
 ﻿#include <SFML/Graphics.hpp>
-#include <vector>
 #include <memory>
 #include "AbstractFigure.h"
 #include "Figures.h"
+#include <vector>
 
 using namespace sf; // SFML namespace
 using namespace std;
@@ -21,6 +21,15 @@ int boardArr[boardSize][boardSize] =
    6, 6, 6, 6, 6, 6, 6, 6,
    1, 2, 3, 4, 5, 3, 2, 1
 };
+
+void del(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*> figures) {
+	for (auto& figure : figures) {
+		if (figure->x == square.x && figure->y == square.y) {
+			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
+			squares[figure->x][figure->y].isEmpty = true;
+		}
+	}
+}
 
 int main()
 {
@@ -67,9 +76,9 @@ int main()
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
-	vector<vector<Square>> squares; // Сетка центров клеток
+	vector<vector<Square>> squares;
 
-	vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
+	vector<AbstractFigure*> figures; // Массив всех фигур на доске
 
 	Image icon;
 	if (!icon.loadFromFile("icon.png")) return 1;
@@ -77,7 +86,6 @@ int main()
 	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess: turn of white", sf::Style::Close);
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
-	// Рассчет центров клеток
 	for (int i = 0; i < boardSize; ++i) {
 		vector<Square> temp;
 		for (int j = 0; j < boardSize; ++j) {
@@ -93,51 +101,51 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], true, texture_castle_b))); }
+			{figures.push_back(new Castle(squares[j][i], true, texture_castle_b)); }
 			break;
 
 			case 1:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], false, texture_castle_w))); }
+			{figures.push_back(new Castle(squares[j][i], false, texture_castle_w)); }
 			break;
 
 			case -2:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], true, texture_knight_b))); }
+			{figures.push_back(new Knight(squares[j][i], true, texture_knight_b)); }
 			break;
 
 			case 2:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], false, texture_knight_w))); }
+			{figures.push_back(new Knight(squares[j][i], false, texture_knight_w)); }
 			break;
 
 			case -3:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], true, texture_bishop_b))); }
+			{figures.push_back(new Bishop(squares[j][i], true, texture_bishop_b)); }
 			break;
 
 			case 3:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], false, texture_bishop_w))); }
+			{figures.push_back(new Bishop(squares[j][i], false, texture_bishop_w)); }
 			break;
 
 			case -4:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], true, texture_queen_b))); }
+			{figures.push_back(new Queen(squares[j][i], true, texture_queen_b)); }
 			break;
 
 			case 4:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], false, texture_queen_w))); }
+			{figures.push_back(new Queen(squares[j][i], false, texture_queen_w)); }
 			break;
 
 			case -5:
-			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], true, texture_king_b))); }
+			{figures.push_back(new King(squares[j][i], true, texture_king_b)); }
 			break;
 
 			case 5:
-			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], false, texture_king_w))); }
+			{figures.push_back(new King(squares[j][i], false, texture_king_w)); }
 			break;
 
 			case -6:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], true, texture_pawn_b))); }
+			{figures.push_back(new Pawn(squares[j][i], true, texture_pawn_b)); }
 			break;
 
 			case 6:
-			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], false, texture_pawn_w))); }
+			{figures.push_back(new Pawn(squares[j][i], false, texture_pawn_w)); }
 			break;
 
 			default:
@@ -190,7 +198,11 @@ int main()
 			if (figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
 				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0)
 			{
-				figures[n]->Move(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
+				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {
+					del(squares, squares[squareX][squareY], figures);
+					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
+				}
+				else figures[n]->Move(squareX, squareY, turn, window, squares);
 			}
 			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
 		}
