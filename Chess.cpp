@@ -1,7 +1,6 @@
 ﻿#include <SFML/Graphics.hpp>
-#include <iostream>
 #include <vector>
-#include <cmath>
+#include <memory>
 #include "AbstractFigure.h"
 #include "Figures.h"
 
@@ -9,8 +8,8 @@ using namespace sf; // SFML namespace
 using namespace std;
 
 const int boardSize = 8, windowSizeX = 910, windowSizeY = 910;
-const int cellSide = 112; // length in pixels
-bool turn = false; // 0 - ход белых, 1 - ход черных
+const int squareSide = 112; // length in pixels
+bool turn = false; // 0 / false - ход белых, 1 / true - ход черных
 
 int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
@@ -68,27 +67,24 @@ int main()
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
-	vector<vector<Cell>> cells; // Сетка центров клеток
+	vector<vector<Square>> squares; // Сетка центров клеток
 
-	vector<AbstractFigure*> figures; // Массив всех фигур на доске
+	vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
 
 	Image icon;
-	if (!icon.loadFromFile("icon.png"))
-	{
-		return 1;
-	}
+	if (!icon.loadFromFile("icon.png")) return 1;
 
 	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess: turn of white", sf::Style::Close);
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
 	// Рассчет центров клеток
 	for (int i = 0; i < boardSize; ++i) {
-		vector<Cell> temp;
+		vector<Square> temp;
 		for (int j = 0; j < boardSize; ++j) {
-			Cell tempCell(i, j, boardArr[j][i], cellSide);
-			temp.push_back(tempCell);
+			Square tempSquare(i, j, boardArr[j][i], squareSide);
+			temp.push_back(tempSquare);
 		}
-		cells.push_back(temp);
+		squares.push_back(temp);
 	}
 
 	// Расстановка фигур
@@ -97,51 +93,51 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{figures.push_back(new Castle(j, i, true, texture_castle_b, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], true, texture_castle_b))); }
 			break;
 
 			case 1:
-			{figures.push_back(new Castle(j, i, false, texture_castle_w, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], false, texture_castle_w))); }
 			break;
 
 			case -2:
-			{figures.push_back(new Knight(j, i, true, texture_knight_b, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], true, texture_knight_b))); }
 			break;
 
 			case 2:
-			{figures.push_back(new Knight(j, i, false, texture_knight_w, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], false, texture_knight_w))); }
 			break;
 
 			case -3:
-			{figures.push_back(new Bishop(j, i, true, texture_bishop_b, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], true, texture_bishop_b))); }
 			break;
 
 			case 3:
-			{figures.push_back(new Bishop(j, i, false, texture_bishop_w, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], false, texture_bishop_w))); }
 			break;
 
 			case -4:
-			{figures.push_back(new Queen(j, i, true, texture_queen_b, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], true, texture_queen_b))); }
 			break;
 
 			case 4:
-			{figures.push_back(new Queen(j, i, false, texture_queen_w, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], false, texture_queen_w))); }
 			break;
 
 			case -5:
-			{figures.push_back(new King(j, i, true, texture_king_b, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], true, texture_king_b))); }
 			break;
 
 			case 5:
-			{figures.push_back(new King(j, i, false, texture_king_w, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], false, texture_king_w))); }
 			break;
 
 			case -6:
-			{figures.push_back(new Pawn(j, i, true, texture_pawn_b, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], true, texture_pawn_b))); }
 			break;
 
 			case 6:
-			{figures.push_back(new Pawn(j, i, false, texture_pawn_w, cellSide)); }
+			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], false, texture_pawn_w))); }
 			break;
 
 			default:
@@ -176,17 +172,17 @@ int main()
 
 		if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 			isMove = false;
-			int cellX = 0, cellY = 0;
+			int squareX = 0, squareY = 0;
 			double maxDistance = 10000.;
 
 			for (int i = 0; i < boardSize; ++i) {
 				for (int j = 0; j < boardSize; ++j) {
-					double dist = sqrt(pow(figures[n]->sprite.getPosition().x - cells[i][j].xInPixel, 2) + pow(figures[n]->sprite.getPosition().y - cells[i][j].yInPixel, 2)); // Расстояние до клетки
+					double dist = sqrt(pow(figures[n]->sprite.getPosition().x - squares[i][j].xInPixel, 2) + pow(figures[n]->sprite.getPosition().y - squares[i][j].yInPixel, 2)); // Расстояние до клетки
 					if (dist < maxDistance)
 					{
 						maxDistance = dist;
-						cellX = i;
-						cellY = j;
+						squareX = i;
+						squareY = j;
 					}
 				}
 			}
@@ -194,26 +190,21 @@ int main()
 			if (figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
 				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0)
 			{
-				figures[n]->Move(cells[figures[n]->x][figures[n]->y], cells[cellX][cellY], cellSide, turn, window);
+				figures[n]->Move(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
 			}
-			else figures[n]->setPos(cells[figures[n]->x][figures[n]->y].xInPixel, cells[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
+			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
 		}
 
 		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
 
 		window.clear();
 		window.draw(board);
-		for (auto figure : figures)
+		for (auto& figure : figures)
 		{
 			figure->draw(window, sf::RenderStates::Default);
 		}
 		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();
-	}
-
-	for (auto figure : figures)
-	{
-		delete figure;
 	}
 
 	return 0;

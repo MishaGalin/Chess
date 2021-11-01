@@ -1,16 +1,16 @@
 #pragma once
-class Cell {
+class Square {
 public:
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
 
-	Cell(const int& x, const int& y, const int& value, const int& cellSide) {
+	Square(const int& x, const int& y, const int& value, const int& cellSide) {
 		this->x = x;
 		this->y = y;
 		this->xInPixel = cellSide / 2 + cellSide * x;
 		this->yInPixel = cellSide / 2 + cellSide * y;
 
-		value == 0 ? isEmpty = true : isEmpty = false;
+		value ? isEmpty = false : isEmpty = true;
 	}
 };
 
@@ -22,16 +22,14 @@ public:
 	sf::Texture textures;
 	sf::Sprite sprite;
 
-	AbstractFigure() {};
-
-	AbstractFigure(const int& posX, const int& posY, const bool& color, const sf::Texture& texture, const int& cellSide) {
-		sprite.setTexture(texture);
+	AbstractFigure(const Square& square, const bool& color, const sf::Texture& texture) {
+		this->sprite.setTexture(texture);
 		this->color = color;
-		x = posX;
-		y = posY;
-		xInPixel = cellSide / 2 + cellSide * x;
-		yInPixel = cellSide / 2 + cellSide * y;
-		sprite.setPosition(xInPixel, yInPixel);
+		this->x = square.x;
+		this->y = square.y;
+		this->xInPixel = square.xInPixel;
+		this->yInPixel = square.yInPixel;
+		this->sprite.setPosition(xInPixel, yInPixel);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -49,9 +47,10 @@ public:
 		this->sprite.setPosition(xInPixel, yInPixel);
 	}
 
-	virtual void Move(Cell& oldCell, Cell& newCell, const int& cellSide, bool& turn, sf::RenderWindow& window) = 0;
+	virtual void Move(Square& oldCell, Square& newCell, bool& turn, sf::RenderWindow& window) = 0;
+
 protected:
-	void Move_(Cell& oldCell, Cell& newCell, bool& turn, sf::RenderWindow& window) {
+	void Move_(Square& oldCell, Square& newCell, bool& turn, sf::RenderWindow& window) {
 		oldCell.isEmpty = true;
 		newCell.isEmpty = false;
 		x = newCell.x;
