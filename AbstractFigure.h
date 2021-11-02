@@ -18,7 +18,8 @@ public:
 
 class AbstractFigure : public sf::Drawable {
 public:
-	bool color = 0; // 0 - white, 1 - black
+	bool color = false; // 0 - white, 1 - black
+	bool isDeleted = false;
 	int x = 0, y = 0;
 	sf::Texture textures;
 	sf::Sprite sprite;

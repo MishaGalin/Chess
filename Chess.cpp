@@ -1,5 +1,4 @@
 ﻿#include <SFML/Graphics.hpp>
-#include <memory>
 #include "AbstractFigure.h"
 #include "Figures.h"
 #include <vector>
@@ -27,6 +26,8 @@ void del(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*
 		if (figure->x == square.x && figure->y == square.y) {
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
 			squares[figure->x][figure->y].isEmpty = true;
+			figure->setPos(-windowSizeX, -windowSizeY);
+			figure->isDeleted = true;
 		}
 	}
 }
@@ -213,7 +214,7 @@ int main()
 		window.draw(board);
 		for (auto& figure : figures)
 		{
-			figure->draw(window, sf::RenderStates::Default);
+			if (!figure->isDeleted) figure->draw(window, sf::RenderStates::Default);
 		}
 		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();
