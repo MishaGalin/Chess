@@ -21,16 +21,25 @@ int boardArr[boardSize][boardSize] =
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
-void del(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*> figures) {
+//bool findFigure(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures) {
+//	for (auto& figure : figures) {
+//		if (figure->x == square.x && figure->y == square.y) return figure;
+//	}
+//	return false;
+//};
+
+bool del(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures) {
 	for (auto& figure : figures) {
-		if (figure->x == square.x && figure->y == square.y) {
+		if (figure->x == square.x && figure->y == square.y && figure->color != turn) {
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
 			squares[figure->x][figure->y].isEmpty = true;
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->isDeleted = true;
+			return true;
 		}
 	}
-}
+	return false;
+};
 
 int main()
 {
@@ -84,7 +93,9 @@ int main()
 	Image icon;
 	if (!icon.loadFromFile("icon.png")) return 1;
 
-	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess: turn of white", sf::Style::Close);
+	sf::ContextSettings settings;
+	settings.antialiasingLevel = 8;
+	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess: turn of white", sf::Style::Close, settings);
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
 	for (int i = 0; i < boardSize; ++i) {
@@ -157,6 +168,9 @@ int main()
 
 	while (window.isOpen())
 	{
+		window.clear();
+		window.draw(board);
+
 		Vector2i mousePos = Mouse::getPosition(window);
 
 		Event event;
@@ -197,24 +211,30 @@ int main()
 			}
 
 			if (figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
-				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0)
+				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0
+				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода
 			{
 				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {
-					del(squares, squares[squareX][squareY], figures);
-					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
+					if (del(squares, squares[squareX][squareY], figures))
+						figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
 				}
-				else figures[n]->Move(squareX, squareY, turn, window, squares);
+				else
+					figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);
+				if (squares[squareX][squareY].isEmpty) figures[n]->Move(squareX, squareY, turn, window, squares);
 			}
 			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
 		}
 
 		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
 
-		window.clear();
-		window.draw(board);
 		for (auto& figure : figures)
 		{
 			if (!figure->isDeleted) figure->draw(window, sf::RenderStates::Default);
+		}
+		for (int i = 0; i < boardSize; ++i) {
+			for (int j = 0; j < boardSize; ++j) {
+				if (figures[n]->ConditionMove(i, j, turn, squares) && figures[n]->color == turn && squares[i][j].isEmpty) window.draw(squares[i][j].center);
+			}
 		}
 		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();

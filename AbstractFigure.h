@@ -3,6 +3,7 @@ class Square {
 public:
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
+	sf::CircleShape center;
 
 	Square() {}
 
@@ -11,6 +12,10 @@ public:
 		this->y = y;
 		this->xInPixel = cellSide / 2 + cellSide * x;
 		this->yInPixel = cellSide / 2 + cellSide * y;
+		center.setPosition(xInPixel, yInPixel);
+		center.setRadius(14);
+		center.setOrigin(7, 7);
+		center.setFillColor(sf::Color(80, 255, 70, 255));
 
 		value ? isEmpty = false : isEmpty = true;
 	}
@@ -52,6 +57,7 @@ public:
 
 	virtual void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
 	virtual bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
+	virtual bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) = 0;
 
 	void Move_(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) {
 		oldSquare.isEmpty = true;
