@@ -3,19 +3,17 @@ class Square {
 public:
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
-	sf::CircleShape center;
+	sf::RectangleShape drawableRect;
 
-	Square() {}
-
-	Square(const int& x, const int& y, const int& value, const int& cellSide) {
+	Square(const int& x, const int& y, const int& value, const int& squareSide) {
 		this->x = x;
 		this->y = y;
-		this->xInPixel = cellSide / 2 + cellSide * x;
-		this->yInPixel = cellSide / 2 + cellSide * y;
-		center.setPosition(xInPixel, yInPixel);
-		center.setRadius(14);
-		center.setOrigin(7, 7);
-		center.setFillColor(sf::Color(80, 255, 70, 255));
+		this->xInPixel = squareSide / 2 + squareSide * x;
+		this->yInPixel = squareSide / 2 + squareSide * y;
+		drawableRect.setPosition(xInPixel, yInPixel);
+		drawableRect.setSize(sf::Vector2f(squareSide, squareSide));
+		drawableRect.setOrigin(squareSide / 2 - 7, squareSide / 2 - 7);
+		drawableRect.setFillColor(sf::Color(80, 255, 70, 100));
 
 		value ? isEmpty = false : isEmpty = true;
 	}
@@ -49,11 +47,6 @@ public:
 	void setPos(const int& xInPixel, const int& yInPixel) {
 		this->sprite.setPosition(xInPixel, yInPixel);
 	}
-
-	//void self_delete(std::vector<std::vector<Square>>& squares) {
-	//	sprite.setColor(sf::Color(0, 0, 0, 0));
-	//	squares[x][y].isEmpty = true;
-	//}
 
 	virtual void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
 	virtual bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
