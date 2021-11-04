@@ -24,6 +24,7 @@ public:
 	bool color = false; // 0 - white, 1 - black
 	bool isDeleted = false;
 	int x = 0, y = 0;
+	std::string name;
 	sf::Texture textures;
 	sf::Sprite sprite;
 

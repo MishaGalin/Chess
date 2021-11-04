@@ -6,6 +6,7 @@ public:
 
 	Pawn(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(18, 38);
+		name = "Pawn";
 	}
 
 	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
@@ -70,6 +71,7 @@ class Castle : public AbstractFigure {
 public:
 	Castle(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(26, 38);
+		name = "Castle";
 	}
 
 	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
@@ -183,6 +185,7 @@ class Knight : public AbstractFigure {
 public:
 	Knight(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(32, 40);
+		name = "Knight";
 	}
 
 	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
@@ -206,6 +209,7 @@ class Bishop : public AbstractFigure {
 public:
 	Bishop(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(34, 40);
+		name = "Bishop";
 	}
 
 	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
@@ -318,6 +322,7 @@ class Queen : public AbstractFigure {
 public:
 	Queen(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(35, 40);
+		name = "Queen";
 	}
 
 	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
@@ -512,6 +517,7 @@ class King : public AbstractFigure {
 public:
 	King(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(35, 38);
+		name = "King";
 	}
 
 	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {

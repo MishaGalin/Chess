@@ -9,6 +9,7 @@ using namespace std;
 const int boardSize = 8, windowSizeX = 910, windowSizeY = 910;
 const int squareSide = 112; // length in pixels
 bool turn = false; // 0 / false - ход белых, 1 / true - ход черных
+bool gameIsStopped = false;
 
 int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
@@ -21,9 +22,15 @@ int boardArr[boardSize][boardSize] =
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
-bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures) {
+void Stop(AbstractFigure*& figure, sf::RenderWindow& window) {
+	turn ? window.setTitle("Chess: BLACK WIN") : window.setTitle("Chess: WHITE WIN");
+	gameIsStopped = true;
+};
+
+bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
 		if (figure->x == square.x && figure->y == square.y && figure->color != turn) {
+			if (figure->name == "King") Stop(figure, window);
 			figure->isDeleted = true;
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
@@ -87,7 +94,7 @@ int main()
 	if (!icon.loadFromFile("icon.png")) return 1;
 
 	sf::ContextSettings settings;
-	settings.antialiasingLevel = 8;
+	settings.antialiasingLevel = 2;
 
 	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close, settings);
 	turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
@@ -202,15 +209,20 @@ int main()
 				}
 			}
 
-			if (figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ												 //
+			if (!gameIsStopped && figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ							 //
 				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0																 //
 				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода																	 //
 			{																																				 //
 				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {																			 //
-					if (Delete(squares, squares[squareX][squareY], figures))																				 //
+					if (Delete(squares, squares[squareX][squareY], figures, window)) {																		 //
+						if (gameIsStopped) {																												 //
+							figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);								 //
+							continue;																														 //  вот это все лучше не трогать
+						}																																	 //
 						figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);									 //
+					}																																		 //
 					else																																	 //
-						figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);                  //  вот это все лучше не трогать
+						figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);                  //
 				}																																			 //
 				else																																		 //
 					figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);						 //
@@ -230,7 +242,7 @@ int main()
 
 		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 			for (int j = 0; j < boardSize; ++j) {
-				if (figures[n]->ConditionMove(i, j, turn, squares) && figures[n]->color == turn && squares[i][j].isEmpty) window.draw(squares[i][j].drawableRect);
+				if (figures[n]->ConditionMove(i, j, turn, squares) && figures[n]->color == turn && squares[i][j].isEmpty && !gameIsStopped) window.draw(squares[i][j].drawableRect);
 			}
 		}
 
