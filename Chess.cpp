@@ -14,27 +14,22 @@ bool gameIsStopped = false;
 int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
   -6,-6,-6,-6,-6,-6,-6,-6,
+   0, 0, 0, 0, 0, 0, 6, 0,
    0, 0, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 1,4, 3, 0, 0,
+   0, 0, 0, 0, -5, 0, -6, 0,
    6, 6, 6, 6, 6, 6, 6, 6,
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
-void Stop(AbstractFigure*& figure, sf::RenderWindow& window) {
-	turn ? window.setTitle("Chess: BLACK WIN") : window.setTitle("Chess: WHITE WIN");
-	gameIsStopped = true;
-};
-
 bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
-		if (figure->x == square.x && figure->y == square.y && figure->color != turn) {
-			if (figure->name == "King") Stop(figure, window);
+		if (figure->color != turn && figure->x == square.x && figure->y == square.y) {
 			figure->isDeleted = true;
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
 			squares[figure->x][figure->y].isEmpty = true;
+			if (figure->name == "King") gameIsStopped = true;
 			return true;
 		}
 	}
@@ -115,51 +110,63 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{figures.push_back(new Castle(squares[j][i], true, texture_castle_b)); }
+			{figures.push_back(new Castle(squares[j][i], true, texture_castle_b));
+			squares[j][i].color = true; }
 			break;
 
 			case 1:
-			{figures.push_back(new Castle(squares[j][i], false, texture_castle_w)); }
+			{figures.push_back(new Castle(squares[j][i], false, texture_castle_w));
+			squares[j][i].color = false; }
 			break;
 
 			case -2:
-			{figures.push_back(new Knight(squares[j][i], true, texture_knight_b)); }
+			{figures.push_back(new Knight(squares[j][i], true, texture_knight_b));
+			squares[j][i].color = true; }
 			break;
 
 			case 2:
-			{figures.push_back(new Knight(squares[j][i], false, texture_knight_w)); }
+			{figures.push_back(new Knight(squares[j][i], false, texture_knight_w));
+			squares[j][i].color = false; }
 			break;
 
 			case -3:
-			{figures.push_back(new Bishop(squares[j][i], true, texture_bishop_b)); }
+			{figures.push_back(new Bishop(squares[j][i], true, texture_bishop_b));
+			squares[j][i].color = true;  }
 			break;
 
 			case 3:
-			{figures.push_back(new Bishop(squares[j][i], false, texture_bishop_w)); }
+			{figures.push_back(new Bishop(squares[j][i], false, texture_bishop_w));
+			squares[j][i].color = false; }
 			break;
 
 			case -4:
-			{figures.push_back(new Queen(squares[j][i], true, texture_queen_b)); }
+			{figures.push_back(new Queen(squares[j][i], true, texture_queen_b));
+			squares[j][i].color = true; }
 			break;
 
 			case 4:
-			{figures.push_back(new Queen(squares[j][i], false, texture_queen_w)); }
+			{figures.push_back(new Queen(squares[j][i], false, texture_queen_w));
+			squares[j][i].color = false; }
 			break;
 
 			case -5:
-			{figures.push_back(new King(squares[j][i], true, texture_king_b)); }
+			{figures.push_back(new King(squares[j][i], true, texture_king_b));
+			squares[j][i].color = true; }
 			break;
 
 			case 5:
-			{figures.push_back(new King(squares[j][i], false, texture_king_w)); }
+			{figures.push_back(new King(squares[j][i], false, texture_king_w));
+			squares[j][i].color = false; }
 			break;
 
 			case -6:
-			{figures.push_back(new Pawn(squares[j][i], true, texture_pawn_b)); }
+			{figures.push_back(new Pawn(squares[j][i], true, texture_pawn_b));
+			squares[j][i].color = true; }
 			break;
 
 			case 6:
-			{figures.push_back(new Pawn(squares[j][i], false, texture_pawn_w)); }
+			{figures.push_back(new Pawn(squares[j][i], false, texture_pawn_w));
+			squares[j][i].color = false; }
 			break;
 
 			default:
@@ -209,27 +216,24 @@ int main()
 				}
 			}
 
-			if (!gameIsStopped && figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ							 //
-				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0																 //
-				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода																	 //
-			{																																				 //
-				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {																			 //
-					if (Delete(squares, squares[squareX][squareY], figures, window)) {																		 //
-						if (gameIsStopped) {																												 //
-							figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);								 //
-							continue;																														 //  вот это все лучше не трогать
-						}																																	 //
-						figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);									 //
-					}																																		 //
-					else																																	 //
-						figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);                  //
-				}																																			 //
-				else																																		 //
-					figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);						 //
-				if (squares[squareX][squareY].isEmpty) figures[n]->Move(squareX, squareY, turn, window, squares);											 //
-			}																																				 //
-			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно		 //
-		}																																					 //
+			if (!gameIsStopped && figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
+				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0
+				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода
+			{
+				if (figures[n]->Capture(squareX, squareY, turn, window, squares) && squares[squareX][squareY].color != turn) {
+					if (Delete(squares, squares[squareX][squareY], figures, window)) {
+						figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
+						if (gameIsStopped) {
+							turn ? window.setTitle("Chess: WHITE WIN") : window.setTitle("Chess: BLACK WIN");
+							continue;
+						}
+					}
+					else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);
+				}
+				else figures[n]->Move(squareX, squareY, turn, window, squares);
+			}
+			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
+		}
 
 		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
 
@@ -242,7 +246,14 @@ int main()
 
 		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 			for (int j = 0; j < boardSize; ++j) {
-				if (figures[n]->ConditionMove(i, j, turn, squares) && figures[n]->color == turn && squares[i][j].isEmpty && !gameIsStopped) window.draw(squares[i][j].drawableRect);
+				if (figures[n]->Capture(i, j, turn, window, squares) && squares[i][j].color != turn && figures[n]->color == turn && !gameIsStopped) { // красный квадрат, если можно срубить
+					squares[i][j].drawableRect.setFillColor(sf::Color(255, 40, 70, 100));
+					window.draw(squares[i][j].drawableRect);
+				}
+				if (figures[n]->ConditionMove(i, j, turn, squares) && figures[n]->color == turn && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
+					squares[i][j].drawableRect.setFillColor(sf::Color(80, 255, 70, 100));
+					window.draw(squares[i][j].drawableRect);
+				}
 			}
 		}
 

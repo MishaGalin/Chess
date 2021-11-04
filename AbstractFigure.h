@@ -3,6 +3,7 @@ class Square {
 public:
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
+	bool color;
 	sf::RectangleShape drawableRect;
 
 	Square(const int& x, const int& y, const int& value, const int& squareSide) {
@@ -13,7 +14,6 @@ public:
 		drawableRect.setPosition(xInPixel, yInPixel);
 		drawableRect.setSize(sf::Vector2f(squareSide, squareSide));
 		drawableRect.setOrigin(squareSide / 2 - 7, squareSide / 2 - 7);
-		drawableRect.setFillColor(sf::Color(80, 255, 70, 100));
 
 		value ? isEmpty = false : isEmpty = true;
 	}
@@ -21,7 +21,7 @@ public:
 
 class AbstractFigure : public sf::Drawable {
 public:
-	bool color = false; // 0 - white, 1 - black
+	bool color; // 0 - white, 1 - black
 	bool isDeleted = false;
 	int x = 0, y = 0;
 	std::string name;
@@ -56,6 +56,7 @@ public:
 	void Move_(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) {
 		oldSquare.isEmpty = true;
 		newSquare.isEmpty = false;
+		newSquare.color = this->color;
 		x = newSquare.x;
 		y = newSquare.y;
 		setPos(newSquare.xInPixel, newSquare.yInPixel);
