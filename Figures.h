@@ -2,14 +2,13 @@
 class Pawn : public AbstractFigure
 {
 public:
-	bool firstMove = true;
 
 	Pawn(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(18, 38);
 		name = "Pawn";
 	}
 
-	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty) {
 			if (x == newX) {
 				if (color == false) { // if white
@@ -43,7 +42,7 @@ public:
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (ConditionMove(newX, newY, turn, squares)) {
+		if (ConditionOfMove(newX, newY, turn, squares)) {
 			Move_(squares[x][y], squares[newX][newY], turn, window);
 			if (firstMove) firstMove = false;
 		}
@@ -55,13 +54,11 @@ public:
 		if (!squares[newX][newY].isEmpty) {
 			if (color == 0) { // if white
 				if (y - newY == 1 && abs(x - newX) == 1) {
-					if (firstMove) firstMove = false;
 					return true;
 				}
 			}
 			else {
 				if (newY - y == 1 && abs(newX - x) == 1) {
-					if (firstMove) firstMove = false;
 					return true;
 				}
 			}
@@ -77,7 +74,7 @@ public:
 		name = "Castle";
 	}
 
-	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty) {
 			int dir1Y = y,
 				dir2X = x,
@@ -120,7 +117,7 @@ public:
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (ConditionMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
@@ -177,14 +174,14 @@ public:
 		name = "Knight";
 	}
 
-	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2) return true;
 		else return false;
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (ConditionMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
@@ -201,7 +198,7 @@ public:
 		name = "Bishop";
 	}
 
-	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y)) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
@@ -254,7 +251,7 @@ public:
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (ConditionMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
@@ -314,7 +311,7 @@ public:
 		name = "Queen";
 	}
 
-	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
@@ -416,7 +413,7 @@ public:
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (ConditionMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
@@ -514,14 +511,14 @@ public:
 		name = "King";
 	}
 
-	bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1) return true;
 		return false;
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (ConditionMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 

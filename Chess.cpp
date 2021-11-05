@@ -14,10 +14,10 @@ bool gameIsStopped = false;
 int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
   -6,-6,-6,-6,-6,-6,-6,-6,
-   0, 0, 0, 0, 0, 0, 6, 0,
    0, 0, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 1,4, 3, 0, 0,
-   0, 0, 0, 0, -5, 0, -6, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
    6, 6, 6, 6, 6, 6, 6, 6,
    1, 2, 3, 4, 5, 3, 2, 1
 };
@@ -28,8 +28,8 @@ bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigu
 			figure->isDeleted = true;
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
-			squares[figure->x][figure->y].isEmpty = true;
 			if (figure->name == "King") gameIsStopped = true;
+			squares[figure->x][figure->y].isEmpty = true;
 			return true;
 		}
 	}
@@ -220,9 +220,10 @@ int main()
 				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0
 				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода
 			{
-				if (figures[n]->Capture(squareX, squareY, turn, window, squares) && squares[squareX][squareY].color != turn) {
+				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {
 					if (Delete(squares, squares[squareX][squareY], figures, window)) {
 						figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
+						if (figures[n]->name == "Pawn" && figures[n]->firstMove) figures[n]->firstMove = false;
 						if (gameIsStopped) {
 							turn ? window.setTitle("Chess: WHITE WIN") : window.setTitle("Chess: BLACK WIN");
 							continue;
@@ -246,12 +247,12 @@ int main()
 
 		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 			for (int j = 0; j < boardSize; ++j) {
-				if (figures[n]->Capture(i, j, turn, window, squares) && squares[i][j].color != turn && figures[n]->color == turn && !gameIsStopped) { // красный квадрат, если можно срубить
-					squares[i][j].drawableRect.setFillColor(sf::Color(255, 40, 70, 100));
+				if (figures[n]->ConditionOfMove(i, j, turn, squares) && figures[n]->color == turn && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
+					squares[i][j].drawableRect.setFillColor(sf::Color(50, 255, 50, 80));
 					window.draw(squares[i][j].drawableRect);
 				}
-				if (figures[n]->ConditionMove(i, j, turn, squares) && figures[n]->color == turn && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
-					squares[i][j].drawableRect.setFillColor(sf::Color(80, 255, 70, 100));
+				else if (figures[n]->Capture(i, j, turn, window, squares) && squares[i][j].color != turn && figures[n]->color == turn && !gameIsStopped) { // красный квадрат, если можно срубить
+					squares[i][j].drawableRect.setFillColor(sf::Color(255, 50, 50, 80));
 					window.draw(squares[i][j].drawableRect);
 				}
 			}

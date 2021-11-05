@@ -11,6 +11,7 @@ public:
 		this->y = y;
 		this->xInPixel = squareSide / 2 + squareSide * x;
 		this->yInPixel = squareSide / 2 + squareSide * y;
+		this->color = false;
 		drawableRect.setPosition(xInPixel, yInPixel);
 		drawableRect.setSize(sf::Vector2f(squareSide, squareSide));
 		drawableRect.setOrigin(squareSide / 2 - 7, squareSide / 2 - 7);
@@ -23,6 +24,7 @@ class AbstractFigure : public sf::Drawable {
 public:
 	bool color; // 0 - white, 1 - black
 	bool isDeleted = false;
+	bool firstMove = true; // учитывается только у пешек
 	int x = 0, y = 0;
 	std::string name;
 	sf::Texture textures;
@@ -51,12 +53,13 @@ public:
 
 	virtual void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
 	virtual bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
-	virtual bool ConditionMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) = 0;
+	virtual bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) = 0;
 
 	void Move_(Square& oldSquare, Square& newSquare, bool& turn, sf::RenderWindow& window) {
 		oldSquare.isEmpty = true;
 		newSquare.isEmpty = false;
 		newSquare.color = this->color;
+		oldSquare.color = !this->color;
 		x = newSquare.x;
 		y = newSquare.y;
 		setPos(newSquare.xInPixel, newSquare.yInPixel);
