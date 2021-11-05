@@ -59,7 +59,7 @@ public:
 		oldSquare.isEmpty = true;
 		newSquare.isEmpty = false;
 		newSquare.color = this->color;
-		oldSquare.color = !this->color;
+		oldSquare.color = !(this->color);
 		x = newSquare.x;
 		y = newSquare.y;
 		setPos(newSquare.xInPixel, newSquare.yInPixel);

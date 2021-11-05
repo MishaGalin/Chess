@@ -24,12 +24,14 @@ int boardArr[boardSize][boardSize] =
 
 bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
-		if (figure->color != turn && figure->x == square.x && figure->y == square.y) {
+		if (!figure->isDeleted && figure->color != turn && figure->x == square.x && figure->y == square.y) {
 			figure->isDeleted = true;
+			squares[figure->x][figure->y].isEmpty = true;
+			figure->x = -10;
+			figure->y = -10;
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
 			if (figure->name == "King") gameIsStopped = true;
-			squares[figure->x][figure->y].isEmpty = true;
 			return true;
 		}
 	}

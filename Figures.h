@@ -51,18 +51,7 @@ public:
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (!squares[newX][newY].isEmpty) {
-			if (color == 0) { // if white
-				if (y - newY == 1 && abs(x - newX) == 1) {
-					return true;
-				}
-			}
-			else {
-				if (newY - y == 1 && abs(newX - x) == 1) {
-					return true;
-				}
-			}
-		}
+		if (!squares[newX][newY].isEmpty && pow((-1), int(color)) * (y - newY) == 1 && abs(pow((-1), int(color)) * (x - newX)) == 1) return true;
 		return false;
 	}
 };
@@ -523,7 +512,7 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1) return true;
+		if (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && newX != x && newY != y) return true;
 		return false;
 	}
 };
