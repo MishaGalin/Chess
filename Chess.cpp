@@ -8,7 +8,7 @@ using namespace sf; // SFML namespace
 using namespace std;
 
 const int boardSize = 8, windowSizeX = 910, windowSizeY = 910;
-const int squareSide = 112; // length in pixels
+const int squareSide = 112; // длина в пикселях
 bool turn = false; // 0 / false - ход белых, 1 / true - ход черных
 bool gameIsStopped = false;
 
