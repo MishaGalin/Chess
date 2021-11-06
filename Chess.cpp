@@ -42,7 +42,6 @@ void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<A
 
 int main()
 {
-	int a;
 	bool isMove = false;
 	int dx = 0, dy = 0, n = 0;
 
