@@ -22,6 +22,9 @@ int boardArr[boardSize][boardSize] =
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
+void Castling() {
+};
+
 bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
 		if (!figure->isDeleted && figure->color != turn && figure->x == square.x && figure->y == square.y) {
@@ -242,24 +245,24 @@ int main()
 
 		window.clear();
 		window.draw(board);
-		for (auto& figure : figures)
-		{
-			if (!figure->isDeleted) figure->draw(window, sf::RenderStates::Default);
-		}
 
 		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 			for (int j = 0; j < boardSize; ++j) {
 				if (figures[n]->ConditionOfMove(i, j, turn, squares) && figures[n]->color == turn && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
-					squares[i][j].drawableRect.setFillColor(sf::Color(50, 255, 50, 80));
+					squares[i][j].drawableRect.setFillColor(sf::Color(0, 255, 0, 80));
 					window.draw(squares[i][j].drawableRect);
 				}
 				else if (figures[n]->Capture(i, j, turn, window, squares) && squares[i][j].color != turn && figures[n]->color == turn && !gameIsStopped) { // красный квадрат, если можно срубить
-					squares[i][j].drawableRect.setFillColor(sf::Color(255, 50, 50, 80));
+					squares[i][j].drawableRect.setFillColor(sf::Color(255, 0, 0, 80));
 					window.draw(squares[i][j].drawableRect);
 				}
 			}
 		}
 
+		for (auto& figure : figures)
+		{
+			if (!figure->isDeleted) figure->draw(window, sf::RenderStates::Default);
+		}
 		figures[n]->draw(window, sf::RenderStates::Default);
 		window.display();
 	}

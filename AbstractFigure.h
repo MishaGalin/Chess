@@ -13,8 +13,10 @@ public:
 		this->yInPixel = squareSide / 2 + squareSide * y;
 		this->color = false;
 		drawableRect.setPosition(xInPixel, yInPixel);
-		drawableRect.setSize(sf::Vector2f(squareSide, squareSide));
-		drawableRect.setOrigin(squareSide / 2 - 7, squareSide / 2 - 7);
+		drawableRect.setSize(sf::Vector2f(squareSide - 4, squareSide - 4));
+		drawableRect.setOrigin(squareSide / 2 - 9, squareSide / 2 - 9);
+		drawableRect.setOutlineColor(sf::Color(255, 255, 255));
+		drawableRect.setOutlineThickness(2);
 
 		value ? isEmpty = false : isEmpty = true;
 	}
