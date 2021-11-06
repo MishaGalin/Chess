@@ -9,35 +9,8 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty) {
-			if (x == newX) {
-				if (color == false) { // if white
-					if (firstMove) {
-						if ((y - newY == 2 && squares[x][y - 1].isEmpty) || y - newY == 1) {
-							return true;
-						}
-					}
-					else {
-						if (y - newY == 1) {
-							return true;
-						}
-					}
-				}
-				else if (color == true) { // if black
-					if (firstMove) {
-						if ((newY - y == 2 && squares[x][y + 1].isEmpty) || newY - y == 1) {
-							return true;
-						}
-					}
-					else {
-						if (newY - y == 1) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
+		return (squares[newX][newY].isEmpty && x == newX
+			&& ((pow(-1, color) * (y - newY) == 2 && squares[x][y - (pow(-1, color) * 1)].isEmpty && firstMove) || pow(-1, color) * (y - newY) == 1));
 	};
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
@@ -51,8 +24,7 @@ public:
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		if (!squares[newX][newY].isEmpty && pow((-1), int(color)) * (y - newY) == 1 && abs(pow((-1), int(color)) * (x - newX)) == 1) return true;
-		return false;
+		return (!squares[newX][newY].isEmpty && pow(-1, color) * (y - newY) == 1 && abs(pow(-1, color) * (x - newX)) == 1);
 	}
 };
 
@@ -72,34 +44,29 @@ public:
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
 			if (newX == x && newY < y) dir1 = true;
-			if (newX < x && newY == y) dir2 = true;
-			if (newX == x && newY > y) dir3 = true;
-			if (newX > x && newY == y) dir4 = true;
+			else if (newX < x && newY == y) dir2 = true;
+			else if (newX == x && newY > y) dir3 = true;
+			else if (newX > x && newY == y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
 				if (dir1 && y - i >= 0 && y - i <= 7) {
-					if (squares[x][y - i].isEmpty) dir1Y = y - i;
-					else break;
+					if (squares[x][y - i].isEmpty) dir1Y = y - i; else break;
 				}
 				else if (dir2 && x - i >= 0 && x - i <= 7) {
-					if (squares[x - i][y].isEmpty) dir2X = x - i;
-					else break;
+					if (squares[x - i][y].isEmpty) dir2X = x - i; else break;
 				}
 				else if (dir3 && y + i >= 0 && y + i <= 7) {
-					if (squares[x][y + i].isEmpty) dir3Y = y + i;
-					else break;
+					if (squares[x][y + i].isEmpty) dir3Y = y + i; else break;
 				}
 				else if (dir4 && x + i >= 0 && x + i <= 7) {
-					if (squares[x + i][y].isEmpty) dir4X = x + i;
-					else break;
+					if (squares[x + i][y].isEmpty) dir4X = x + i; else break;
 				}
 			}
-			if ((dir1 && newY >= dir1Y) ||
+			return ((dir1 && newY >= dir1Y) ||
 				(dir2 && newX >= dir2X) ||
 				(dir3 && newY <= dir3Y) ||
-				(dir4 && newX <= dir4X)) return true;
-			else return false;
+				(dir4 && newX <= dir4X));
 		}
 		return false;
 	}
@@ -119,38 +86,33 @@ public:
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
 			if (newX == x && newY < y) dir1 = true;
-			if (newX < x && newY == y) dir2 = true;
-			if (newX == x && newY > y) dir3 = true;
-			if (newX > x && newY == y) dir4 = true;
+			else if (newX < x && newY == y) dir2 = true;
+			else if (newX == x && newY > y) dir3 = true;
+			else if (newX > x && newY == y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
 				if (dir1 && y - i >= 0 && y - i <= 7) {
 					dir1Y = y - i;
-					if (squares[x][dir1Y].isEmpty) continue;
-					else break;
+					if (squares[x][dir1Y].isEmpty) continue; else break;
 				}
 				else if (dir2 && x - i >= 0 && x - i <= 7) {
 					dir2X = x - i;
-					if (squares[dir2X][y].isEmpty) continue;
-					else break;
+					if (squares[dir2X][y].isEmpty) continue; else break;
 				}
 				else if (dir3 && y + i >= 0 && y + i <= 7) {
 					dir3Y = y + i;
-					if (squares[x][dir3Y].isEmpty) continue;
-					else break;
+					if (squares[x][dir3Y].isEmpty) continue; else break;
 				}
 				else if (dir4 && x + i >= 0 && x + i <= 7) {
 					dir4X = x + i;
-					if (squares[dir4X][y].isEmpty) continue;
-					else break;
+					if (squares[dir4X][y].isEmpty) continue; else break;
 				}
-				else break;
 			}
-			if ((dir1 && newY == dir1Y) ||
+			return ((dir1 && newY == dir1Y) ||
 				(dir2 && newX == dir2X) ||
 				(dir3 && newY == dir3Y) ||
-				(dir4 && newX == dir4X)) return true;
+				(dir4 && newX == dir4X));
 		}
 		return false;
 	}
@@ -164,8 +126,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2) return true;
-		else return false;
+		return (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2);
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
@@ -175,8 +136,7 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2) return true;
-		return false;
+		return (!squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2);
 	}
 };
 
@@ -196,9 +156,9 @@ public:
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
 			if (newX > x && newY < y) dir1 = true;
-			if (newX < x && newY < y) dir2 = true;
-			if (newX < x && newY > y) dir3 = true;
-			if (newX > x && newY > y) dir4 = true;
+			else if (newX < x && newY < y) dir2 = true;
+			else if (newX < x && newY > y) dir3 = true;
+			else if (newX > x && newY > y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
@@ -231,10 +191,11 @@ public:
 					else break;
 				}
 			}
-			if ((dir1 && newX <= dir1X && newY >= dir1Y) ||
+
+			return ((dir1 && newX <= dir1X && newY >= dir1Y) ||
 				(dir2 && newX >= dir2X && newY >= dir2Y) ||
 				(dir3 && newX >= dir3X && newY <= dir3Y) ||
-				(dir4 && newX <= dir4X && newY <= dir4Y)) return true;
+				(dir4 && newX <= dir4X && newY <= dir4Y));
 		}
 		return false;
 	}
@@ -313,17 +274,18 @@ public:
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false,
 				dir5 = false, dir6 = false, dir7 = false, dir8 = false;
 
-			if (abs(newX - x) == abs(newY - y)) {
+			if (abs(newX - x) == abs(newY - y)) { // диагонали
 				if (newX > x && newY < y)  dir2 = true;
-				if (newX < x && newY < y)  dir4 = true;
-				if (newX < x && newY > y)  dir6 = true;
-				if (newX > x && newY > y)  dir8 = true;
+				else if (newX < x && newY < y)  dir4 = true;
+				else if (newX < x && newY > y)  dir6 = true;
+				else if (newX > x && newY > y)  dir8 = true;
 			}
-
-			if (newX > x && newY == y) dir1 = true;
-			if (newX == x && newY < y) dir3 = true;
-			if (newX < x && newY == y) dir5 = true;
-			if (newX == x && newY > y) dir7 = true;
+			else { // горизонтали и вертикали
+				if (newX > x && newY == y) dir1 = true;
+				else if (newX == x && newY < y) dir3 = true;
+				else if (newX < x && newY == y) dir5 = true;
+				else if (newX == x && newY > y) dir7 = true;
+			}
 
 			for (int i = 1; i < 8; ++i)
 			{
@@ -389,14 +351,14 @@ public:
 				}
 			}
 
-			if ((dir1 && newX <= dir1X) ||
+			return ((dir1 && newX <= dir1X) ||
 				(dir2 && newX <= dir2X && newY >= dir2Y) ||
 				(dir3 && newY >= dir3Y) ||
 				(dir4 && newX >= dir4X && newY >= dir4Y) ||
 				(dir5 && newX >= dir5X) ||
 				(dir6 && newX >= dir6X && newY <= dir6Y) ||
 				(dir7 && newY <= dir7Y) ||
-				(dir8 && newX <= dir8X && newY <= dir8Y)) return true;
+				(dir8 && newX <= dir8X && newY <= dir8Y));
 		}
 		return false;
 	}
@@ -421,73 +383,66 @@ public:
 
 			if (abs(newX - x) == abs(newY - y)) { // диагонали
 				if (newX > x && newY < y)  dir2 = true;
-				if (newX < x && newY < y)  dir4 = true;
-				if (newX < x && newY > y)  dir6 = true;
-				if (newX > x && newY > y)  dir8 = true;
+				else if (newX < x && newY < y)  dir4 = true;
+				else if (newX < x && newY > y)  dir6 = true;
+				else if (newX > x && newY > y)  dir8 = true;
 			}
-
-			if (newX > x && newY == y) dir1 = true;
-			if (newX == x && newY < y) dir3 = true;
-			if (newX < x && newY == y) dir5 = true;
-			if (newX == x && newY > y) dir7 = true;
+			else { // горизонтали и вертикали
+				if (newX > x && newY == y) dir1 = true;
+				else if (newX == x && newY < y) dir3 = true;
+				else if (newX < x && newY == y) dir5 = true;
+				else if (newX == x && newY > y) dir7 = true;
+			}
 
 			for (int i = 1; i < 8; ++i)
 			{
 				if (dir1 && x + i >= 0 && x + i <= 7) {
 					dir1X = x + i;
-					if (squares[x + i][y].isEmpty) continue;
-					else break;
+					if (squares[x + i][y].isEmpty) continue; else break;
 				}
 				else if (dir2 && x + i >= 0 && x + i <= 7 && y - i >= 0 && y - i <= 7) {
 					dir2X = x + i;
 					dir2Y = y - i;
-					if (squares[x + i][y - i].isEmpty) continue;
-					else break;
+					if (squares[x + i][y - i].isEmpty) continue; else break;
 				}
 				else if (dir3 && y - i >= 0 && y - i <= 7) {
 					dir3Y = y - i;
-					if (squares[x][y - i].isEmpty) continue;
-					else break;
+					if (squares[x][y - i].isEmpty) continue; else break;
 				}
 				else if (dir4 && x - i >= 0 && x - i <= 7 && y - i >= 0 && y - i <= 7) {
 					dir4X = x - i;
 					dir4Y = y - i;
-					if (squares[x - i][y - i].isEmpty) continue;
-					else break;
+					if (squares[x - i][y - i].isEmpty) continue; else break;
 				}
 				else if (dir5 && x - i >= 0 && x - i <= 7) {
 					dir5X = x - i;
-					if (squares[x - i][y].isEmpty) continue;
-					else break;
+					if (squares[x - i][y].isEmpty) continue; else break;
 				}
 				else if (dir6 && x - i >= 0 && x - i <= 7 && y + i >= 0 && y + i <= 7) {
 					dir6X = x - i;
 					dir6Y = y + i;
-					if (squares[x - i][y + i].isEmpty) continue;
-					else break;
+					if (squares[x - i][y + i].isEmpty) continue; else break;
 				}
 				else if (dir7 && y + i >= 0 && y + i <= 7) {
 					dir7Y = y + i;
-					if (squares[x][y + i].isEmpty) continue;
-					else break;
+					if (squares[x][y + i].isEmpty) continue; else break;
 				}
 				else if (dir8 && x + i >= 0 && x + i <= 7 && y + i >= 0 && y + i <= 7) {
 					dir8X = x + i;
 					dir8Y = y + i;
-					if (squares[x + i][y + i].isEmpty) continue;
-					else break;
+					if (squares[x + i][y + i].isEmpty) continue; else break;
 				}
 				else break;
 			}
 
-			if ((dir1 && newX == dir1X) ||
+			return ((dir1 && newX == dir1X) ||
 				(dir2 && newX == dir2X && newY == dir2Y) ||
 				(dir3 && newY == dir3Y) ||
 				(dir4 && newX == dir4X && newY == dir4Y) ||
 				(dir5 && newX == dir5X) ||
 				(dir6 && newX == dir6X && newY == dir6Y) ||
 				(dir7 && newY == dir7Y) ||
-				(dir8 && newX == dir8X && newY == dir8Y)) return true;
+				(dir8 && newX == dir8X && newY == dir8Y));
 		}
 		return false;
 	}
@@ -501,8 +456,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1) return true;
-		return false;
+		return (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1);
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
@@ -512,7 +466,6 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && newX != x && newY != y) return true;
-		return false;
+		return (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && newX != x && newY != y);
 	}
 };

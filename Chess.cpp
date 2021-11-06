@@ -26,20 +26,18 @@ int boardArr[boardSize][boardSize] =
 void Castling() {
 };
 
-bool Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, sf::RenderWindow& window) {
+void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
 		if (!figure->isDeleted && figure->color != turn && figure->x == square.x && figure->y == square.y) {
 			figure->isDeleted = true;
 			squares[figure->x][figure->y].isEmpty = true;
-			figure->x = -10;
-			figure->y = -10;
+			figure->x = -boardSize;
+			figure->y = -boardSize;
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
 			if (figure->name == "King") gameIsStopped = true;
-			return true;
 		}
 	}
-	return false;
 };
 
 int main()
@@ -227,15 +225,13 @@ int main()
 				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода
 			{
 				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {
-					if (Delete(squares, squares[squareX][squareY], figures, window)) {
-						figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
-						if (figures[n]->name == "Pawn" && figures[n]->firstMove) figures[n]->firstMove = false;
-						if (gameIsStopped) {
-							turn ? window.setTitle("Chess: WHITE WIN") : window.setTitle("Chess: BLACK WIN");
-							continue;
-						}
+					Delete(squares, squares[squareX][squareY], figures, window);
+					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
+					if (figures[n]->name == "Pawn" && figures[n]->firstMove) figures[n]->firstMove = false;
+					if (gameIsStopped) {
+						turn ? window.setTitle("Chess: WHITE WIN") : window.setTitle("Chess: BLACK WIN");
+						continue;
 					}
-					else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel);
 				}
 				else figures[n]->Move(squareX, squareY, turn, window, squares);
 			}
