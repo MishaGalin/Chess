@@ -9,16 +9,15 @@ public:
 	Square(const int& x, const int& y, const int& value, const int& squareSide) {
 		this->x = x;
 		this->y = y;
-		this->xInPixel = squareSide / 2 + squareSide * x;
-		this->yInPixel = squareSide / 2 + squareSide * y;
+		this->xInPixel = squareSide / 2 + squareSide * this->x;
+		this->yInPixel = squareSide / 2 + squareSide * this->y;
 		this->color = false;
-		drawableRect.setPosition(xInPixel, yInPixel);
-		drawableRect.setSize(sf::Vector2f(squareSide - 4, squareSide - 4));
-		drawableRect.setOrigin(squareSide / 2 - 9, squareSide / 2 - 9);
-		drawableRect.setOutlineColor(sf::Color(255, 255, 255));
-		drawableRect.setOutlineThickness(2);
-
-		value ? isEmpty = false : isEmpty = true;
+		this->drawableRect.setPosition(xInPixel, yInPixel);
+		this->drawableRect.setSize(sf::Vector2f(squareSide - 4, squareSide - 4));
+		this->drawableRect.setOrigin(squareSide / 2 - 9, squareSide / 2 - 9);
+		this->drawableRect.setOutlineColor(sf::Color(255, 255, 255));
+		this->drawableRect.setOutlineThickness(2);
+		value ? this->isEmpty = false : this->isEmpty = true;
 	}
 };
 
@@ -34,10 +33,10 @@ public:
 
 	AbstractFigure(const Square& square, const bool& color, const sf::Texture& texture) {
 		this->sprite.setTexture(texture);
+		this->sprite.setPosition(square.xInPixel, square.yInPixel);
 		this->color = color;
 		this->x = square.x;
 		this->y = square.y;
-		this->sprite.setPosition(square.xInPixel, square.yInPixel);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -62,9 +61,9 @@ public:
 		newSquare.isEmpty = false;
 		newSquare.color = this->color;
 		oldSquare.color = !(this->color);
-		x = newSquare.x;
-		y = newSquare.y;
-		setPos(newSquare.xInPixel, newSquare.yInPixel);
+		this->x = newSquare.x;
+		this->y = newSquare.y;
+		this->setPos(newSquare.xInPixel, newSquare.yInPixel);
 		turn = !turn;
 		turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	};

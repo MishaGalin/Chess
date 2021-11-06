@@ -2,6 +2,7 @@
 #include "AbstractFigure.h"
 #include "Figures.h"
 #include <vector>
+#include <memory>
 
 using namespace sf; // SFML namespace
 using namespace std;
@@ -25,7 +26,7 @@ int boardArr[boardSize][boardSize] =
 void Castling() {
 };
 
-bool Delete(vector<vector<Square>>& squares, Square& square, vector<AbstractFigure*>& figures, sf::RenderWindow& window) {
+bool Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
 		if (!figure->isDeleted && figure->color != turn && figure->x == square.x && figure->y == square.y) {
 			figure->isDeleted = true;
@@ -88,7 +89,7 @@ int main()
 
 	vector<vector<Square>> squares;
 
-	vector<AbstractFigure*> figures; // Массив всех фигур на доске
+	vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
 
 	Image icon;
 	if (!icon.loadFromFile("icon.png")) return 1;
@@ -115,62 +116,62 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{figures.push_back(new Castle(squares[j][i], true, texture_castle_b));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], true, texture_castle_b)));
 			squares[j][i].color = true; }
 			break;
 
 			case 1:
-			{figures.push_back(new Castle(squares[j][i], false, texture_castle_w));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], false, texture_castle_w)));
 			squares[j][i].color = false; }
 			break;
 
 			case -2:
-			{figures.push_back(new Knight(squares[j][i], true, texture_knight_b));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], true, texture_knight_b)));
 			squares[j][i].color = true; }
 			break;
 
 			case 2:
-			{figures.push_back(new Knight(squares[j][i], false, texture_knight_w));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], false, texture_knight_w)));
 			squares[j][i].color = false; }
 			break;
 
 			case -3:
-			{figures.push_back(new Bishop(squares[j][i], true, texture_bishop_b));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], true, texture_bishop_b)));
 			squares[j][i].color = true;  }
 			break;
 
 			case 3:
-			{figures.push_back(new Bishop(squares[j][i], false, texture_bishop_w));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], false, texture_bishop_w)));
 			squares[j][i].color = false; }
 			break;
 
 			case -4:
-			{figures.push_back(new Queen(squares[j][i], true, texture_queen_b));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], true, texture_queen_b)));
 			squares[j][i].color = true; }
 			break;
 
 			case 4:
-			{figures.push_back(new Queen(squares[j][i], false, texture_queen_w));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], false, texture_queen_w)));
 			squares[j][i].color = false; }
 			break;
 
 			case -5:
-			{figures.push_back(new King(squares[j][i], true, texture_king_b));
+			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], true, texture_king_b)));
 			squares[j][i].color = true; }
 			break;
 
 			case 5:
-			{figures.push_back(new King(squares[j][i], false, texture_king_w));
+			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], false, texture_king_w)));
 			squares[j][i].color = false; }
 			break;
 
 			case -6:
-			{figures.push_back(new Pawn(squares[j][i], true, texture_pawn_b));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], true, texture_pawn_b)));
 			squares[j][i].color = true; }
 			break;
 
 			case 6:
-			{figures.push_back(new Pawn(squares[j][i], false, texture_pawn_w));
+			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], false, texture_pawn_w)));
 			squares[j][i].color = false; }
 			break;
 
@@ -249,11 +250,11 @@ int main()
 		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 			for (int j = 0; j < boardSize; ++j) {
 				if (figures[n]->ConditionOfMove(i, j, turn, squares) && figures[n]->color == turn && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
-					squares[i][j].drawableRect.setFillColor(sf::Color(0, 255, 0, 80));
+					squares[i][j].drawableRect.setFillColor(sf::Color(0, 255, 0, 70));
 					window.draw(squares[i][j].drawableRect);
 				}
 				else if (figures[n]->Capture(i, j, turn, window, squares) && squares[i][j].color != turn && figures[n]->color == turn && !gameIsStopped) { // красный квадрат, если можно срубить
-					squares[i][j].drawableRect.setFillColor(sf::Color(255, 0, 0, 80));
+					squares[i][j].drawableRect.setFillColor(sf::Color(255, 0, 0, 70));
 					window.draw(squares[i][j].drawableRect);
 				}
 			}
@@ -263,7 +264,8 @@ int main()
 		{
 			if (!figure->isDeleted) figure->draw(window, sf::RenderStates::Default);
 		}
-		figures[n]->draw(window, sf::RenderStates::Default);
+
+		figures[n]->draw(window, sf::RenderStates::Default); // перемещаемая фигура рисуется в последнюю очередь, для того что бы она была поверх всех остальных
 		window.display();
 	}
 
