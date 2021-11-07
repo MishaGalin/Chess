@@ -388,8 +388,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 Debug/
-<<<<<<< HEAD
 x64/
-=======
-x64/
->>>>>>> caf5e0065a8c7f7f620e58ff95e80d22f7931a53
+

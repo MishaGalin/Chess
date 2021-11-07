@@ -3,7 +3,7 @@ class Square {
 public:
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	bool isEmpty = true;
-	bool color;
+	bool color; // для определения цвета фигуры, которая стоит на этой клетке
 	sf::RectangleShape drawableRect;
 
 	Square(const int& x, const int& y, const int& value, const int& squareSide) {
@@ -39,18 +39,11 @@ public:
 		this->y = square.y;
 	}
 
-	void draw(sf::RenderTarget& target, sf::RenderStates states) const
-	{
-		target.draw(sprite, states);
-	}
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const { target.draw(sprite, states); }
 
-	sf::Vector2i getPos() {
-		return sf::Vector2i(sprite.getPosition().x, sprite.getPosition().y);
-	}
+	sf::Vector2i getPos() { return sf::Vector2i(sprite.getPosition().x, sprite.getPosition().y); }
 
-	void setPos(const int& xInPixel, const int& yInPixel) {
-		this->sprite.setPosition(xInPixel, yInPixel);
-	}
+	void setPos(const int& xInPixel, const int& yInPixel) { this->sprite.setPosition(xInPixel, yInPixel); }
 
 	virtual void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;
 	virtual bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) = 0;

@@ -9,7 +9,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && x == newX
+		return (squares[newX][newY].isEmpty && x == newX && color == turn
 			&& ((pow(-1, color) * (y - newY) == 2 && squares[x][y - (pow(-1, color) * 1)].isEmpty && firstMove) || pow(-1, color) * (y - newY) == 1));
 	};
 
@@ -24,7 +24,7 @@ public:
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
 	{
-		return (!squares[newX][newY].isEmpty && pow(-1, color) * (y - newY) == 1 && abs(pow(-1, color) * (x - newX)) == 1);
+		return (!squares[newX][newY].isEmpty && pow(-1, color) * (y - newY) == 1 && abs(x - newX) == 1 && squares[newX][newY].color != turn && color == turn);
 	}
 };
 
@@ -36,7 +36,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty) {
+		if (squares[newX][newY].isEmpty && color == turn) {
 			int dir1Y = y,
 				dir2X = x,
 				dir3Y = y,
@@ -78,7 +78,7 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty) {
+		if (!squares[newX][newY].isEmpty && squares[newX][newY].color != turn && color == turn) {
 			int dir1Y = y,
 				dir2X = x,
 				dir3Y = y,
@@ -126,7 +126,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2);
+		return (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2 && color == turn);
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
@@ -136,7 +136,7 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		return (!squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2);
+		return (!squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2 && squares[newX][newY].color != turn && color == turn);
 	}
 };
 
@@ -148,7 +148,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y)) {
+		if (squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y) && color == turn) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
 				dir3X = x, dir3Y = y,
@@ -206,7 +206,7 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y)) {
+		if (!squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y) && squares[newX][newY].color != turn && color == turn) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
 				dir3X = x, dir3Y = y,
@@ -262,7 +262,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty) {
+		if (squares[newX][newY].isEmpty && color == turn) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
 				dir3Y = y,						   // 3 - вверх
@@ -369,7 +369,7 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty) {
+		if (!squares[newX][newY].isEmpty && squares[newX][newY].color != turn && color == turn) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
 				dir3Y = y,						   // 3 - вверх
@@ -456,7 +456,7 @@ public:
 	}
 
 	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1);
+		return (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1) && color == turn;
 	}
 
 	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
@@ -466,6 +466,6 @@ public:
 	}
 
 	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		return (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && newX != x && newY != y);
+		return (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && newX != x && newY != y && squares[newX][newY].color != turn && color == turn);
 	}
 };

@@ -28,7 +28,7 @@ void Castling() {
 
 void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, sf::RenderWindow& window) {
 	for (auto& figure : figures) {
-		if (!figure->isDeleted && figure->color != turn && figure->x == square.x && figure->y == square.y) {
+		if (figure->x == square.x && figure->y == square.y) {
 			figure->isDeleted = true;
 			squares[figure->x][figure->y].isEmpty = true;
 			figure->x = -boardSize;
@@ -42,7 +42,6 @@ void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<A
 
 int main()
 {
-	int a;
 	bool isMove = false;
 	int dx = 0, dy = 0, n = 0;
 
@@ -91,12 +90,9 @@ int main()
 	vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
 
 	Image icon;
-	if (!icon.loadFromFile("icon.png")) return 1;
+	icon.loadFromFile("icon.png");
 
-	sf::ContextSettings settings;
-	settings.antialiasingLevel = 2;
-
-	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close, settings);
+	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close);
 	turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
@@ -185,16 +181,14 @@ int main()
 		Vector2i mousePos = Mouse::getPosition(window);
 
 		Event event;
-		while (window.pollEvent(event))
-		{
+		while (window.pollEvent(event)) {
 			if (event.type == Event::Closed)
 				window.close();
 
 			// перетаскивание мышью
 			if (event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left) {
 				for (int i = 0; i < figures.size(); ++i) {
-					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y))
-					{
+					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 						isMove = true;
 						n = i; // figures[n] - та фигура, которую мы двигаем мышью
 						dx = mousePos.x - figures[n]->getPos().x;
@@ -211,9 +205,8 @@ int main()
 
 			for (int i = 0; i < boardSize; ++i) {
 				for (int j = 0; j < boardSize; ++j) {
-					double dist = sqrt(pow(figures[n]->sprite.getPosition().x - squares[i][j].xInPixel, 2) + pow(figures[n]->sprite.getPosition().y - squares[i][j].yInPixel, 2)); // Расстояние до клетки
-					if (dist < maxDistance)
-					{
+					double dist = sqrt(pow(figures[n]->getPos().x - squares[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - squares[i][j].yInPixel, 2)); // Расстояние до клетки
+					if (dist < maxDistance) {
 						maxDistance = dist;
 						squareX = i;
 						squareY = j;
@@ -222,9 +215,7 @@ int main()
 			}
 
 			if (!gameIsStopped && figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
-				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0
-				&& figures[n]->color == turn) // проверка соответствия цвета фигуры и хода
-			{
+				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0) {
 				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {
 					Delete(squares, squares[squareX][squareY], figures, window);
 					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
@@ -239,18 +230,18 @@ int main()
 			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
 		}
 
-		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy);
+		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy); // меняем позицию только спрайта, т.к. перемещение еще не подтверждено
 
 		window.clear();
 		window.draw(board);
 
 		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 			for (int j = 0; j < boardSize; ++j) {
-				if (figures[n]->ConditionOfMove(i, j, turn, squares) && figures[n]->color == turn && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
+				if (figures[n]->ConditionOfMove(i, j, turn, squares) && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
 					squares[i][j].drawableRect.setFillColor(sf::Color(0, 255, 0, 70));
 					window.draw(squares[i][j].drawableRect);
 				}
-				else if (figures[n]->Capture(i, j, turn, window, squares) && squares[i][j].color != turn && figures[n]->color == turn && !gameIsStopped) { // красный квадрат, если можно срубить
+				else if (figures[n]->Capture(i, j, turn, window, squares) && !gameIsStopped) { // красный квадрат, если можно срубить
 					squares[i][j].drawableRect.setFillColor(sf::Color(255, 0, 0, 70));
 					window.draw(squares[i][j].drawableRect);
 				}
