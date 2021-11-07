@@ -1,19 +1,22 @@
 #pragma once
+using namespace sf; // SFML namespace
+using namespace std;
+
 class Pawn : public AbstractFigure
 {
 public:
 
-	Pawn(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
+	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(18, 38);
 		name = "Pawn";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
 		return (squares[newX][newY].isEmpty && x == newX && color == turn
 			&& ((pow(-1, color) * (y - newY) == 2 && squares[x][y - (pow(-1, color) * 1)].isEmpty && firstMove) || pow(-1, color) * (y - newY) == 1));
 	};
 
-	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
+	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
 	{
 		if (ConditionOfMove(newX, newY, turn, squares)) {
 			Move_(squares[x][y], squares[newX][newY], turn, window);
@@ -22,7 +25,7 @@ public:
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
+	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
 	{
 		return (!squares[newX][newY].isEmpty && pow(-1, color) * (y - newY) == 1 && abs(x - newX) == 1 && squares[newX][newY].color != turn && color == turn);
 	}
@@ -30,12 +33,12 @@ public:
 
 class Castle : public AbstractFigure {
 public:
-	Castle(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
+	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(26, 38);
 		name = "Castle";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty && color == turn) {
 			int dir1Y = y,
 				dir2X = x,
@@ -71,13 +74,13 @@ public:
 		return false;
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
+	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
 	{
 		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
 		if (!squares[newX][newY].isEmpty && squares[newX][newY].color != turn && color == turn) {
 			int dir1Y = y,
 				dir2X = x,
@@ -120,34 +123,34 @@ public:
 
 class Knight : public AbstractFigure {
 public:
-	Knight(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
+	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(32, 40);
 		name = "Knight";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
 		return (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2 && color == turn);
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
+	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
 	{
 		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
 		return (!squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2 && squares[newX][newY].color != turn && color == turn);
 	}
 };
 
 class Bishop : public AbstractFigure {
 public:
-	Bishop(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
+	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(34, 40);
 		name = "Bishop";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y) && color == turn) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
@@ -200,12 +203,12 @@ public:
 		return false;
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
 		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
 		if (!squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y) && squares[newX][newY].color != turn && color == turn) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
@@ -256,12 +259,12 @@ public:
 
 class Queen : public AbstractFigure {
 public:
-	Queen(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
+	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(35, 40);
 		name = "Queen";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
 		if (squares[newX][newY].isEmpty && color == turn) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
@@ -363,12 +366,12 @@ public:
 		return false;
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
 		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
+	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
 		if (!squares[newX][newY].isEmpty && squares[newX][newY].color != turn && color == turn) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
@@ -450,22 +453,22 @@ public:
 
 class King : public AbstractFigure {
 public:
-	King(const Square& square, const bool& color, const sf::Texture& texture) : AbstractFigure(square, color, texture) {
+	King(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(35, 38);
 		name = "King";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, std::vector<std::vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1) && color == turn;
+	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
+		return (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && color == turn);
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override
+	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
 	{
 		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, sf::RenderWindow& window, std::vector<std::vector<Square>>& squares) override {
-		return (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && newX != x && newY != y && squares[newX][newY].color != turn && color == turn);
+	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
+		return (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && (newX != x || newY != y) && squares[newX][newY].color != turn && color == turn);
 	}
 };

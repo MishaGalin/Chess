@@ -23,22 +23,7 @@ int boardArr[boardSize][boardSize] =
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
-void Castling() {
-};
-
-void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, sf::RenderWindow& window) {
-	for (auto& figure : figures) {
-		if (figure->x == square.x && figure->y == square.y) {
-			figure->isDeleted = true;
-			squares[figure->x][figure->y].isEmpty = true;
-			figure->x = -boardSize;
-			figure->y = -boardSize;
-			figure->setPos(-windowSizeX, -windowSizeY);
-			figure->sprite.setColor(sf::Color(0, 0, 0, 0));
-			if (figure->name == "King") gameIsStopped = true;
-		}
-	}
-};
+void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, RenderWindow& window);
 
 int main()
 {
@@ -92,7 +77,7 @@ int main()
 	Image icon;
 	icon.loadFromFile("icon.png");
 
-	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", sf::Style::Close);
+	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", Style::Close);
 	turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
@@ -235,27 +220,46 @@ int main()
 		window.clear();
 		window.draw(board);
 
-		for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
-			for (int j = 0; j < boardSize; ++j) {
-				if (figures[n]->ConditionOfMove(i, j, turn, squares) && !gameIsStopped) { // зеленый квадрат, если в эту клетку можно пойти
-					squares[i][j].drawableRect.setFillColor(sf::Color(0, 255, 0, 70));
-					window.draw(squares[i][j].drawableRect);
-				}
-				else if (figures[n]->Capture(i, j, turn, window, squares) && !gameIsStopped) { // красный квадрат, если можно срубить
-					squares[i][j].drawableRect.setFillColor(sf::Color(255, 0, 0, 70));
-					window.draw(squares[i][j].drawableRect);
+		if (!gameIsStopped) {
+			for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
+				for (int j = 0; j < boardSize; ++j) {
+					if (figures[n]->ConditionOfMove(i, j, turn, squares)) { // зеленый квадрат, если в эту клетку можно пойти
+						squares[i][j].drawableRect.setFillColor(Color(0, 255, 0, 70));
+						window.draw(squares[i][j].drawableRect);
+					}
+					else if (figures[n]->Capture(i, j, turn, window, squares)) { // красный квадрат, если можно срубить
+						squares[i][j].drawableRect.setFillColor(Color(255, 0, 0, 70));
+						window.draw(squares[i][j].drawableRect);
+					}
 				}
 			}
 		}
 
 		for (auto& figure : figures)
 		{
-			if (!figure->isDeleted) figure->draw(window, sf::RenderStates::Default);
+			if (!figure->isDeleted) figure->draw(window, RenderStates::Default);
 		}
 
-		figures[n]->draw(window, sf::RenderStates::Default); // перемещаемая фигура рисуется в последнюю очередь, для того что бы она была поверх всех остальных
+		figures[n]->draw(window, RenderStates::Default); // перемещаемая фигура рисуется в последнюю очередь, чтобы она была поверх всех остальных
 		window.display();
 	}
 
 	return 0;
 }
+
+void Castling() {
+};
+
+void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, RenderWindow& window) {
+	for (auto& figure : figures) {
+		if (figure->x == square.x && figure->y == square.y) {
+			figure->isDeleted = true;
+			squares[figure->x][figure->y].isEmpty = true;
+			figure->x = -boardSize;
+			figure->y = -boardSize;
+			figure->setPos(-windowSizeX, -windowSizeY);
+			figure->sprite.setColor(Color(0, 0, 0, 0));
+			if (figure->name == "King") gameIsStopped = true;
+		}
+	}
+};
