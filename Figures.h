@@ -5,463 +5,515 @@ using namespace std;
 extern vector<vector<Square>> squares;
 extern bool turn;
 
+void Delete(Square& square);
+
 class Pawn : public AbstractFigure {
 public:
 	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
-		sprite.setOrigin(18, 38);
+		sprite.setOrigin(25, 42);
 		name = "Pawn";
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.isEmpty && x == square.x && color == turn
-			&& ((pow(-1, color) * (y - square.y) == 2 && squares[x][y - (pow(-1, color) * 1)].isEmpty && firstMove) || pow(-1, color) * (y - square.y) == 1));
+		return (square.getIsEmpty() && getX() == square.getX() && getColor() == turn
+			&& ((pow(-1, getColor()) * (getY() - square.getY()) == 2 && squares[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() && getFirstMove())
+				|| pow(-1, getColor()) * (getY() - square.getY()) == 1));
 	};
 
 	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[x][y], square);
-		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.isEmpty && pow(-1, color) * (y - square.y) == 1 && abs(x - square.x) == 1 && square.color != turn && color == turn);
+		return (!square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != turn && getColor() == turn);
+	}
+
+	void Capture(Square& square) override {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(squares[getX()][getY()], square);
+		}
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };
 
 class Castle : public AbstractFigure {
 public:
 	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
-		sprite.setOrigin(26, 38);
+		sprite.setOrigin(33, 43);
 		name = "Castle";
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.isEmpty && color == turn) {
-			int dir1Y = y,
-				dir2X = x,
-				dir3Y = y,
-				dir4X = x;
+		if (square.getIsEmpty() && getColor() == turn) {
+			int dir1Y = getY(),
+				dir2X = getX(),
+				dir3Y = getY(),
+				dir4X = getX();
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (square.x == x && square.y < y) dir1 = true;
-			else if (square.x < x && square.y == y) dir2 = true;
-			else if (square.x == x && square.y > y) dir3 = true;
-			else if (square.x > x && square.y == y) dir4 = true;
+			if (square.getX() == getX() && square.getY() < getY()) dir1 = true;
+			else if (square.getX() < getX() && square.getY() == getY()) dir2 = true;
+			else if (square.getX() == getX() && square.getY() > getY()) dir3 = true;
+			else if (square.getX() > getX() && square.getY() == getY()) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
-				if (dir1 && y - i >= 0 && y - i <= 7) {
-					if (squares[x][y - i].isEmpty) dir1Y = y - i; else break;
+				if (dir1 && getY() - i >= 0 && getY() - i <= 7) {
+					if (squares[getX()][getY() - i].getIsEmpty()) dir1Y = getY() - i; else break;
 				}
-				else if (dir2 && x - i >= 0 && x - i <= 7) {
-					if (squares[x - i][y].isEmpty) dir2X = x - i; else break;
+				else if (dir2 && getX() - i >= 0 && getX() - i <= 7) {
+					if (squares[getX() - i][getY()].getIsEmpty()) dir2X = getX() - i; else break;
 				}
-				else if (dir3 && y + i >= 0 && y + i <= 7) {
-					if (squares[x][y + i].isEmpty) dir3Y = y + i; else break;
+				else if (dir3 && getY() + i >= 0 && getY() + i <= 7) {
+					if (squares[getX()][getY() + i].getIsEmpty()) dir3Y = getY() + i; else break;
 				}
-				else if (dir4 && x + i >= 0 && x + i <= 7) {
-					if (squares[x + i][y].isEmpty) dir4X = x + i; else break;
+				else if (dir4 && getX() + i >= 0 && getX() + i <= 7) {
+					if (squares[getX() + i][getY()].getIsEmpty()) dir4X = getX() + i; else break;
 				}
 			}
-			return ((dir1 && square.y >= dir1Y) ||
-				(dir2 && square.x >= dir2X) ||
-				(dir3 && square.y <= dir3Y) ||
-				(dir4 && square.x <= dir4X));
+			return ((dir1 && square.getY() >= dir1Y) ||
+				(dir2 && square.getX() >= dir2X) ||
+				(dir3 && square.getY() <= dir3Y) ||
+				(dir4 && square.getX() <= dir4X));
 		}
 		return false;
 	}
 
 	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[x][y], square);
-		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.isEmpty && square.color != turn && color == turn) {
-			int dir1Y = y,
-				dir2X = x,
-				dir3Y = y,
-				dir4X = x;
+		if (!square.getIsEmpty() && square.getColor() != turn && getColor() == turn) {
+			int dir1Y = getY(),
+				dir2X = getX(),
+				dir3Y = getY(),
+				dir4X = getX();
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (square.x == x && square.y < y) dir1 = true;
-			else if (square.x < x && square.y == y) dir2 = true;
-			else if (square.x == x && square.y > y) dir3 = true;
-			else if (square.x > x && square.y == y) dir4 = true;
+			if (square.getX() == getX() && square.getY() < getY()) dir1 = true;
+			else if (square.getX() < getX() && square.getY() == getY()) dir2 = true;
+			else if (square.getX() == getX() && square.getY() > getY()) dir3 = true;
+			else if (square.getX() > getX() && square.getY() == getY()) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
-				if (dir1 && y - i >= 0 && y - i <= 7) {
-					dir1Y = y - i;
-					if (squares[x][dir1Y].isEmpty) continue; else break;
+				if (dir1 && getY() - i >= 0 && getY() - i <= 7) {
+					dir1Y = getY() - i;
+					if (squares[getX()][dir1Y].getIsEmpty()) continue; else break;
 				}
-				else if (dir2 && x - i >= 0 && x - i <= 7) {
-					dir2X = x - i;
-					if (squares[dir2X][y].isEmpty) continue; else break;
+				else if (dir2 && getX() - i >= 0 && getX() - i <= 7) {
+					dir2X = getX() - i;
+					if (squares[dir2X][getY()].getIsEmpty()) continue; else break;
 				}
-				else if (dir3 && y + i >= 0 && y + i <= 7) {
-					dir3Y = y + i;
-					if (squares[x][dir3Y].isEmpty) continue; else break;
+				else if (dir3 && getY() + i >= 0 && getY() + i <= 7) {
+					dir3Y = getY() + i;
+					if (squares[getX()][dir3Y].getIsEmpty()) continue; else break;
 				}
-				else if (dir4 && x + i >= 0 && x + i <= 7) {
-					dir4X = x + i;
-					if (squares[dir4X][y].isEmpty) continue; else break;
+				else if (dir4 && getX() + i >= 0 && getX() + i <= 7) {
+					dir4X = getX() + i;
+					if (squares[dir4X][getY()].getIsEmpty()) continue; else break;
 				}
 			}
-			return ((dir1 && square.y == dir1Y) ||
-				(dir2 && square.x == dir2X) ||
-				(dir3 && square.y == dir3Y) ||
-				(dir4 && square.x == dir4X));
+			return ((dir1 && square.getY() == dir1Y) ||
+				(dir2 && square.getX() == dir2X) ||
+				(dir3 && square.getY() == dir3Y) ||
+				(dir4 && square.getX() == dir4X));
 		}
 		return false;
+	}
+
+	void Capture(Square& square) override {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(squares[getX()][getY()], square);
+		}
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };
 
 class Knight : public AbstractFigure {
 public:
 	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
-		sprite.setOrigin(32, 40);
+		sprite.setOrigin(37, 45);
 		name = "Knight";
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.isEmpty && abs((x - square.x) * (y - square.y)) == 2 && color == turn);
+		return (square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == turn);
 	}
 
 	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[x][y], square);
-		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.isEmpty && abs((x - square.x) * (y - square.y)) == 2 && square.color != turn && color == turn);
+		return (!square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != turn && getColor() == turn);
+	}
+
+	void Capture(Square& square) override {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(squares[getX()][getY()], square);
+		}
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };
 
 class Bishop : public AbstractFigure {
 public:
 	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
-		sprite.setOrigin(34, 40);
+		sprite.setOrigin(42, 44);
 		name = "Bishop";
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.isEmpty && abs(square.x - x) == abs(square.y - y) && color == turn) {
-			int dir1X = x, dir1Y = y,
-				dir2X = x, dir2Y = y,
-				dir3X = x, dir3Y = y,
-				dir4X = x, dir4Y = y;
+		if (square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == turn) {
+			int dir1X = getX(), dir1Y = getY(),
+				dir2X = getX(), dir2Y = getY(),
+				dir3X = getX(), dir3Y = getY(),
+				dir4X = getX(), dir4Y = getY();
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (square.x > x && square.y < y) dir1 = true;
-			else if (square.x < x && square.y < y) dir2 = true;
-			else if (square.x < x && square.y > y) dir3 = true;
-			else if (square.x > x && square.y > y) dir4 = true;
+			if (square.getX() > getX() && square.getY() < getY()) dir1 = true;
+			else if (square.getX() < getX() && square.getY() < getY()) dir2 = true;
+			else if (square.getX() < getX() && square.getY() > getY()) dir3 = true;
+			else if (square.getX() > getX() && square.getY() > getY()) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
-				if (dir1 && x + i >= 0 && x + i <= 7 && y - i >= 0 && y - i <= 7) {
-					if (squares[x + i][y - i].isEmpty) {
-						dir1X = x + i;
-						dir1Y = y - i;
+				if (dir1 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					if (squares[getX() + i][getY() - i].getIsEmpty()) {
+						dir1X = getX() + i;
+						dir1Y = getY() - i;
 					}
 					else break;
 				}
-				else if (dir2 && x - i >= 0 && x - i <= 7 && y - i >= 0 && y - i <= 7) {
-					if (squares[x - i][y - i].isEmpty) {
-						dir2X = x - i;
-						dir2Y = y - i;
+				else if (dir2 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					if (squares[getX() - i][getY() - i].getIsEmpty()) {
+						dir2X = getX() - i;
+						dir2Y = getY() - i;
 					}
 					else break;
 				}
-				else if (dir3 && x - i >= 0 && x - i <= 7 && y + i >= 0 && y + i <= 7) {
-					if (squares[x - i][y + i].isEmpty) {
-						dir3X = x - i;
-						dir3Y = y + i;
+				else if (dir3 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					if (squares[getX() - i][getY() + i].getIsEmpty()) {
+						dir3X = getX() - i;
+						dir3Y = getY() + i;
 					}
 					else break;
 				}
-				else if (dir4 && x + i >= 0 && x + i <= 7 && y + i >= 0 && y + i <= 7) {
-					if (squares[x + i][y + i].isEmpty) {
-						dir4X = x + i;
-						dir4Y = y + i;
+				else if (dir4 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					if (squares[getX() + i][getY() + i].getIsEmpty()) {
+						dir4X = getX() + i;
+						dir4Y = getY() + i;
 					}
 					else break;
 				}
 			}
 
-			return ((dir1 && square.x <= dir1X && square.y >= dir1Y) ||
-				(dir2 && square.x >= dir2X && square.y >= dir2Y) ||
-				(dir3 && square.x >= dir3X && square.y <= dir3Y) ||
-				(dir4 && square.x <= dir4X && square.y <= dir4Y));
+			return ((dir1 && square.getX() <= dir1X && square.getY() >= dir1Y) ||
+				(dir2 && square.getX() >= dir2X && square.getY() >= dir2Y) ||
+				(dir3 && square.getX() >= dir3X && square.getY() <= dir3Y) ||
+				(dir4 && square.getX() <= dir4X && square.getY() <= dir4Y));
 		}
 		return false;
 	}
 
 	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[x][y], square);
-		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.isEmpty && abs(square.x - x) == abs(square.y - y) && square.color != turn && color == turn) {
-			int dir1X = x, dir1Y = y,
-				dir2X = x, dir2Y = y,
-				dir3X = x, dir3Y = y,
-				dir4X = x, dir4Y = y;
+		if (!square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != turn && getColor() == turn) {
+			int dir1X = getX(), dir1Y = getY(),
+				dir2X = getX(), dir2Y = getY(),
+				dir3X = getX(), dir3Y = getY(),
+				dir4X = getX(), dir4Y = getY();
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (square.x > x && square.y < y) dir1 = true;
-			else if (square.x < x && square.y < y) dir2 = true;
-			else if (square.x < x && square.y > y) dir3 = true;
-			else if (square.x > x && square.y > y) dir4 = true;
+			if (square.getX() > getX() && square.getY() < getY()) dir1 = true;
+			else if (square.getX() < getX() && square.getY() < getY()) dir2 = true;
+			else if (square.getX() < getX() && square.getY() > getY()) dir3 = true;
+			else if (square.getX() > getX() && square.getY() > getY()) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
-				if (dir1 && x + i >= 0 && x + i <= 7 && y - i >= 0 && y - i <= 7) {
-					dir1X = x + i;
-					dir1Y = y - i;
-					if (squares[x + i][y - i].isEmpty) continue;
+				if (dir1 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					dir1X = getX() + i;
+					dir1Y = getY() - i;
+					if (squares[getX() + i][getY() - i].getIsEmpty()) continue;
 					else break;
 				}
-				else if (dir2 && x - i >= 0 && x - i <= 7 && y - i >= 0 && y - i <= 7) {
-					dir2X = x - i;
-					dir2Y = y - i;
-					if (squares[x - i][y - i].isEmpty) continue;
+				else if (dir2 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					dir2X = getX() - i;
+					dir2Y = getY() - i;
+					if (squares[getX() - i][getY() - i].getIsEmpty()) continue;
 					else break;
 				}
-				else if (dir3 && x - i >= 0 && x - i <= 7 && y + i >= 0 && y + i <= 7) {
-					dir3X = x - i;
-					dir3Y = y + i;
-					if (squares[x - i][y + i].isEmpty) continue;
+				else if (dir3 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					dir3X = getX() - i;
+					dir3Y = getY() + i;
+					if (squares[getX() - i][getY() + i].getIsEmpty()) continue;
 					else break;
 				}
-				else if (dir4 && x + i >= 0 && x + i <= 7 && y + i >= 0 && y + i <= 7) {
-					dir4X = x + i;
-					dir4Y = y + i;
-					if (squares[x + i][y + i].isEmpty) continue;
+				else if (dir4 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					dir4X = getX() + i;
+					dir4Y = getY() + i;
+					if (squares[getX() + i][getY() + i].getIsEmpty()) continue;
 					else break;
 				}
 			}
-			return ((dir1 && square.x == dir1X && square.y == dir1Y) ||
-				(dir2 && square.x == dir2X && square.y == dir2Y) ||
-				(dir3 && square.x == dir3X && square.y == dir3Y) ||
-				(dir4 && square.x == dir4X && square.y == dir4Y));
+			return ((dir1 && square.getX() == dir1X && square.getY() == dir1Y) ||
+				(dir2 && square.getX() == dir2X && square.getY() == dir2Y) ||
+				(dir3 && square.getX() == dir3X && square.getY() == dir3Y) ||
+				(dir4 && square.getX() == dir4X && square.getY() == dir4Y));
 		}
 		return false;
+	}
+
+	void Capture(Square& square)override {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(squares[getX()][getY()], square);
+		}
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };
 
 class Queen : public AbstractFigure {
 public:
 	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
-		sprite.setOrigin(35, 40);
+		sprite.setOrigin(42, 45);
 		name = "Queen";
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.isEmpty && color == turn) {
-			int dir1X = x, 						   // 1 - вправо
-				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
-				dir3Y = y,						   // 3 - вверх
-				dir4X = x, dir4Y = y,			   // и т.д. против часовой стрелки
-				dir5X = x,						   //
-				dir6X = x, dir6Y = y,			   //
-				dir7Y = y,						   //
-				dir8X = x, dir8Y = y;			   //
+		if (square.getIsEmpty() && getColor() == turn) {
+			int dir1X = getX(), 						   // 1 - вправо
+				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
+				dir3Y = getY(),						   // 3 - вверх
+				dir4X = getX(), dir4Y = getY(),			   // и т.д. против часовой стрелки
+				dir5X = getX(),						   //
+				dir6X = getX(), dir6Y = getY(),			   //
+				dir7Y = getY(),						   //
+				dir8X = getX(), dir8Y = getY();			   //
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false,
 				dir5 = false, dir6 = false, dir7 = false, dir8 = false;
 
-			if (abs(square.x - x) == abs(square.y - y)) { // диагонали
-				if (square.x > x && square.y < y)  dir2 = true;
-				else if (square.x < x && square.y < y)  dir4 = true;
-				else if (square.x < x && square.y > y)  dir6 = true;
-				else if (square.x > x && square.y > y)  dir8 = true;
+			if (abs(square.getX() - getX()) == abs(square.getY() - getY())) { // диагонали
+				if (square.getX() > getX() && square.getY() < getY())  dir2 = true;
+				else if (square.getX() < getX() && square.getY() < getY())  dir4 = true;
+				else if (square.getX() < getX() && square.getY() > getY())  dir6 = true;
+				else if (square.getX() > getX() && square.getY() > getY())  dir8 = true;
 			}
 			else { // горизонтали и вертикали
-				if (square.x > x && square.y == y) dir1 = true;
-				else if (square.x == x && square.y < y) dir3 = true;
-				else if (square.x < x && square.y == y) dir5 = true;
-				else if (square.x == x && square.y > y) dir7 = true;
+				if (square.getX() > getX() && square.getY() == getY()) dir1 = true;
+				else if (square.getX() == getX() && square.getY() < getY()) dir3 = true;
+				else if (square.getX() < getX() && square.getY() == getY()) dir5 = true;
+				else if (square.getX() == getX() && square.getY() > getY()) dir7 = true;
 			}
 
 			for (int i = 1; i < 8; ++i)
 			{
-				if (dir1 && x + i >= 0 && x + i <= 7) {
-					if (squares[x + i][y].isEmpty) {
-						dir1X = x + i;
+				if (dir1 && getX() + i >= 0 && getX() + i <= 7) {
+					if (squares[getX() + i][getY()].getIsEmpty()) {
+						dir1X = getX() + i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir2 && x + i >= 0 && x + i <= 7 && y - i >= 0 && y - i <= 7) {
-					if (squares[x + i][y - i].isEmpty) {
-						dir2X = x + i;
-						dir2Y = y - i;
+				else if (dir2 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					if (squares[getX() + i][getY() - i].getIsEmpty()) {
+						dir2X = getX() + i;
+						dir2Y = getY() - i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir3 && y - i >= 0 && y - i <= 7) {
-					if (squares[x][y - i].isEmpty) {
-						dir3Y = y - i;
+				else if (dir3 && getY() - i >= 0 && getY() - i <= 7) {
+					if (squares[getX()][getY() - i].getIsEmpty()) {
+						dir3Y = getY() - i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir4 && x - i >= 0 && x - i <= 7 && y - i >= 0 && y - i <= 7) {
-					if (squares[x - i][y - i].isEmpty) {
-						dir4X = x - i;
-						dir4Y = y - i;
+				else if (dir4 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					if (squares[getX() - i][getY() - i].getIsEmpty()) {
+						dir4X = getX() - i;
+						dir4Y = getY() - i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir5 && x - i >= 0 && x - i <= 7) {
-					if (squares[x - i][y].isEmpty) {
-						dir5X = x - i;
+				else if (dir5 && getX() - i >= 0 && getX() - i <= 7) {
+					if (squares[getX() - i][getY()].getIsEmpty()) {
+						dir5X = getX() - i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir6 && x - i >= 0 && x - i <= 7 && y + i >= 0 && y + i <= 7) {
-					if (squares[x - i][y + i].isEmpty) {
-						dir6X = x - i;
-						dir6Y = y + i;
+				else if (dir6 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					if (squares[getX() - i][getY() + i].getIsEmpty()) {
+						dir6X = getX() - i;
+						dir6Y = getY() + i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir7 && y + i >= 0 && y + i <= 7) {
-					if (squares[x][y + i].isEmpty) {
-						dir7Y = y + i;
+				else if (dir7 && getY() + i >= 0 && getY() + i <= 7) {
+					if (squares[getX()][getY() + i].getIsEmpty()) {
+						dir7Y = getY() + i;
 						continue;
 					}
 					else break;
 				}
-				else if (dir8 && x + i >= 0 && x + i <= 7 && y + i >= 0 && y + i <= 7) {
-					if (squares[x + i][y + i].isEmpty) {
-						dir8X = x + i;
-						dir8Y = y + i;
+				else if (dir8 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					if (squares[getX() + i][getY() + i].getIsEmpty()) {
+						dir8X = getX() + i;
+						dir8Y = getY() + i;
 						continue;
 					}
 					else break;
 				}
 			}
 
-			return ((dir1 && square.x <= dir1X) ||
-				(dir2 && square.x <= dir2X && square.y >= dir2Y) ||
-				(dir3 && square.y >= dir3Y) ||
-				(dir4 && square.x >= dir4X && square.y >= dir4Y) ||
-				(dir5 && square.x >= dir5X) ||
-				(dir6 && square.x >= dir6X && square.y <= dir6Y) ||
-				(dir7 && square.y <= dir7Y) ||
-				(dir8 && square.x <= dir8X && square.y <= dir8Y));
+			return ((dir1 && square.getX() <= dir1X) ||
+				(dir2 && square.getX() <= dir2X && square.getY() >= dir2Y) ||
+				(dir3 && square.getY() >= dir3Y) ||
+				(dir4 && square.getX() >= dir4X && square.getY() >= dir4Y) ||
+				(dir5 && square.getX() >= dir5X) ||
+				(dir6 && square.getX() >= dir6X && square.getY() <= dir6Y) ||
+				(dir7 && square.getY() <= dir7Y) ||
+				(dir8 && square.getX() <= dir8X && square.getY() <= dir8Y));
 		}
 		return false;
 	}
 
 	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[x][y], square);
-		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.isEmpty && square.color != turn && color == turn) {
-			int dir1X = x, 						   // 1 - вправо
-				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
-				dir3Y = y,						   // 3 - вверх
-				dir4X = x, dir4Y = y,			   // и т.д. против часовой стрелки
-				dir5X = x,						   //
-				dir6X = x, dir6Y = y,			   //
-				dir7Y = y,						   //
-				dir8X = x, dir8Y = y;			   //
+		if (!square.getIsEmpty() && square.getColor() != turn && getColor() == turn) {
+			int dir1X = getX(), 						   // 1 - вправо
+				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
+				dir3Y = getY(),						   // 3 - вверх
+				dir4X = getX(), dir4Y = getY(),			   // и т.д. против часовой стрелки
+				dir5X = getX(),						   //
+				dir6X = getX(), dir6Y = getY(),			   //
+				dir7Y = getY(),						   //
+				dir8X = getX(), dir8Y = getY();			   //
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false,
 				dir5 = false, dir6 = false, dir7 = false, dir8 = false;
 
-			if (abs(square.x - x) == abs(square.y - y)) { // диагонали
-				if (square.x > x && square.y < y)  dir2 = true;
-				else if (square.x < x && square.y < y)  dir4 = true;
-				else if (square.x < x && square.y > y)  dir6 = true;
-				else if (square.x > x && square.y > y)  dir8 = true;
+			if (abs(square.getX() - getX()) == abs(square.getY() - getY())) { // диагонали
+				if (square.getX() > getX() && square.getY() < getY())  dir2 = true;
+				else if (square.getX() < getX() && square.getY() < getY())  dir4 = true;
+				else if (square.getX() < getX() && square.getY() > getY())  dir6 = true;
+				else if (square.getX() > getX() && square.getY() > getY())  dir8 = true;
 			}
 			else { // горизонтали и вертикали
-				if (square.x > x && square.y == y) dir1 = true;
-				else if (square.x == x && square.y < y) dir3 = true;
-				else if (square.x < x && square.y == y) dir5 = true;
-				else if (square.x == x && square.y > y) dir7 = true;
+				if (square.getX() > getX() && square.getY() == getY()) dir1 = true;
+				else if (square.getX() == getX() && square.getY() < getY()) dir3 = true;
+				else if (square.getX() < getX() && square.getY() == getY()) dir5 = true;
+				else if (square.getX() == getX() && square.getY() > getY()) dir7 = true;
 			}
 
 			for (int i = 1; i < 8; ++i)
 			{
-				if (dir1 && x + i >= 0 && x + i <= 7) {
-					dir1X = x + i;
-					if (squares[x + i][y].isEmpty) continue; else break;
+				if (dir1 && getX() + i >= 0 && getX() + i <= 7) {
+					dir1X = getX() + i;
+					if (squares[getX() + i][getY()].getIsEmpty()) continue; else break;
 				}
-				else if (dir2 && x + i >= 0 && x + i <= 7 && y - i >= 0 && y - i <= 7) {
-					dir2X = x + i;
-					dir2Y = y - i;
-					if (squares[x + i][y - i].isEmpty) continue; else break;
+				else if (dir2 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					dir2X = getX() + i;
+					dir2Y = getY() - i;
+					if (squares[getX() + i][getY() - i].getIsEmpty()) continue; else break;
 				}
-				else if (dir3 && y - i >= 0 && y - i <= 7) {
-					dir3Y = y - i;
-					if (squares[x][y - i].isEmpty) continue; else break;
+				else if (dir3 && getY() - i >= 0 && getY() - i <= 7) {
+					dir3Y = getY() - i;
+					if (squares[getX()][getY() - i].getIsEmpty()) continue; else break;
 				}
-				else if (dir4 && x - i >= 0 && x - i <= 7 && y - i >= 0 && y - i <= 7) {
-					dir4X = x - i;
-					dir4Y = y - i;
-					if (squares[x - i][y - i].isEmpty) continue; else break;
+				else if (dir4 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
+					dir4X = getX() - i;
+					dir4Y = getY() - i;
+					if (squares[getX() - i][getY() - i].getIsEmpty()) continue; else break;
 				}
-				else if (dir5 && x - i >= 0 && x - i <= 7) {
-					dir5X = x - i;
-					if (squares[x - i][y].isEmpty) continue; else break;
+				else if (dir5 && getX() - i >= 0 && getX() - i <= 7) {
+					dir5X = getX() - i;
+					if (squares[getX() - i][getY()].getIsEmpty()) continue; else break;
 				}
-				else if (dir6 && x - i >= 0 && x - i <= 7 && y + i >= 0 && y + i <= 7) {
-					dir6X = x - i;
-					dir6Y = y + i;
-					if (squares[x - i][y + i].isEmpty) continue; else break;
+				else if (dir6 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					dir6X = getX() - i;
+					dir6Y = getY() + i;
+					if (squares[getX() - i][getY() + i].getIsEmpty()) continue; else break;
 				}
-				else if (dir7 && y + i >= 0 && y + i <= 7) {
-					dir7Y = y + i;
-					if (squares[x][y + i].isEmpty) continue; else break;
+				else if (dir7 && getY() + i >= 0 && getY() + i <= 7) {
+					dir7Y = getY() + i;
+					if (squares[getX()][getY() + i].getIsEmpty()) continue; else break;
 				}
-				else if (dir8 && x + i >= 0 && x + i <= 7 && y + i >= 0 && y + i <= 7) {
-					dir8X = x + i;
-					dir8Y = y + i;
-					if (squares[x + i][y + i].isEmpty) continue; else break;
+				else if (dir8 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
+					dir8X = getX() + i;
+					dir8Y = getY() + i;
+					if (squares[getX() + i][getY() + i].getIsEmpty()) continue; else break;
 				}
 				else break;
 			}
 
-			return ((dir1 && square.x == dir1X) ||
-				(dir2 && square.x == dir2X && square.y == dir2Y) ||
-				(dir3 && square.y == dir3Y) ||
-				(dir4 && square.x == dir4X && square.y == dir4Y) ||
-				(dir5 && square.x == dir5X) ||
-				(dir6 && square.x == dir6X && square.y == dir6Y) ||
-				(dir7 && square.y == dir7Y) ||
-				(dir8 && square.x == dir8X && square.y == dir8Y));
+			return ((dir1 && square.getX() == dir1X) ||
+				(dir2 && square.getX() == dir2X && square.getY() == dir2Y) ||
+				(dir3 && square.getY() == dir3Y) ||
+				(dir4 && square.getX() == dir4X && square.getY() == dir4Y) ||
+				(dir5 && square.getX() == dir5X) ||
+				(dir6 && square.getX() == dir6X && square.getY() == dir6Y) ||
+				(dir7 && square.getY() == dir7Y) ||
+				(dir8 && square.getX() == dir8X && square.getY() == dir8Y));
 		}
 		return false;
+	}
+
+	void Capture(Square& square)override {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(squares[getX()][getY()], square);
+		}
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };
 
 class King : public AbstractFigure {
 public:
 	King(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
-		sprite.setOrigin(35, 38);
+		sprite.setOrigin(42, 44);
 		name = "King";
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.isEmpty && abs(square.x - x) <= 1 && abs(square.y - y) <= 1 && color == turn);
+		return (square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == turn);
 	}
 
 	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[x][y], square);
-		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
+		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.isEmpty && abs(square.x - x) <= 1 && abs(square.y - y) <= 1 && (square.x != x || square.y != y) && square.color != turn && color == turn);
+		return (!square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
+			&& (square.getX() != getX() || square.getY() != getY()) && square.getColor() != turn && getColor() == turn);
+	}
+
+	void Capture(Square& square)override {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(squares[getX()][getY()], square);
+		}
+		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };

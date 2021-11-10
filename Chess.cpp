@@ -96,62 +96,62 @@ int main()
 			{
 			case -1:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], true, texture_castle_b)));
-			squares[j][i].color = true; }
+			squares[j][i].setColor(true); }
 			break;
 
 			case 1:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Castle(squares[j][i], false, texture_castle_w)));
-			squares[j][i].color = false; }
+			squares[j][i].setColor(false); }
 			break;
 
 			case -2:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], true, texture_knight_b)));
-			squares[j][i].color = true; }
+			squares[j][i].setColor(true); }
 			break;
 
 			case 2:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Knight(squares[j][i], false, texture_knight_w)));
-			squares[j][i].color = false; }
+			squares[j][i].setColor(false); }
 			break;
 
 			case -3:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], true, texture_bishop_b)));
-			squares[j][i].color = true;  }
+			squares[j][i].setColor(true);  }
 			break;
 
 			case 3:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Bishop(squares[j][i], false, texture_bishop_w)));
-			squares[j][i].color = false; }
+			squares[j][i].setColor(false); }
 			break;
 
 			case -4:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], true, texture_queen_b)));
-			squares[j][i].color = true; }
+			squares[j][i].setColor(true); }
 			break;
 
 			case 4:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Queen(squares[j][i], false, texture_queen_w)));
-			squares[j][i].color = false; }
+			squares[j][i].setColor(false); }
 			break;
 
 			case -5:
 			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], true, texture_king_b)));
-			squares[j][i].color = true; }
+			squares[j][i].setColor(true); }
 			break;
 
 			case 5:
 			{figures.push_back(unique_ptr<AbstractFigure>(new King(squares[j][i], false, texture_king_w)));
-			squares[j][i].color = false; }
+			squares[j][i].setColor(false); }
 			break;
 
 			case -6:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], true, texture_pawn_b)));
-			squares[j][i].color = true; }
+			squares[j][i].setColor(true); }
 			break;
 
 			case 6:
 			{figures.push_back(unique_ptr<AbstractFigure>(new Pawn(squares[j][i], false, texture_pawn_w)));
-			squares[j][i].color = false; }
+			squares[j][i].setColor(false); }
 			break;
 
 			default:
@@ -175,8 +175,8 @@ int main()
 					if (figures[i]->sprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 						isMove = true;
 						n = i; // figures[n] - та фигура, которую мы двигаем мышью
-						dx = mousePos.x - figures[n]->getPos().x;
-						dy = mousePos.y - figures[n]->getPos().y;
+						dx = mousePos.x - figures[n]->sprite.getPosition().x;
+						dy = mousePos.y - figures[n]->sprite.getPosition().y;
 					}
 				}
 			}
@@ -189,7 +189,7 @@ int main()
 
 			for (int i = 0; i < boardSize; ++i) {
 				for (int j = 0; j < boardSize; ++j) {
-					double dist = sqrt(pow(figures[n]->getPos().x - squares[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - squares[i][j].yInPixel, 2)); // Расстояние до клетки
+					double dist = sqrt(pow(figures[n]->sprite.getPosition().x - squares[i][j].getXInPixel(), 2) + pow(figures[n]->sprite.getPosition().y - squares[i][j].getYInPixel(), 2)); // Расстояние до клетки
 					if (dist < maxDistance) {
 						maxDistance = dist;
 						nearestX = i;
@@ -198,15 +198,13 @@ int main()
 				}
 			}
 
-			if (!gameIsStopped && figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
-				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0) {
-				if (figures[n]->ConditionOfCapture(squares[nearestX][nearestY])) {
-					Delete(squares[nearestX][nearestY]);
-					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[nearestX][nearestY]);
-				}
-				else figures[n]->Move(squares[nearestX][nearestY]);
+			if (!gameIsStopped && figures[n]->sprite.getPosition().x <= window.getSize().x && figures[n]->sprite.getPosition().x >= 0 // проверка границ
+				&& figures[n]->sprite.getPosition().y <= window.getSize().y && figures[n]->sprite.getPosition().y >= 0)
+			{
+				figures[n]->Capture(squares[nearestX][nearestY]);
+				figures[n]->Move(squares[nearestX][nearestY]);
 			}
-			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
+			else figures[n]->sprite.setPosition(squares[figures[n]->getX()][figures[n]->getY()].getXInPixel(), squares[figures[n]->getX()][figures[n]->getY()].getYInPixel()); // возврат обратно
 		}
 
 		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy); // меняем позицию только спрайта, т.к. перемещение еще не подтверждено
@@ -231,7 +229,7 @@ int main()
 
 		for (auto& figure : figures)
 		{
-			if (!figure->isDeleted) figure->draw(window);
+			if (!figure->getIsDeleted()) figure->draw(window);
 		}
 
 		figures[n]->draw(window); // перемещаемая фигура рисуется в последнюю очередь (еще раз), для того чтобы она была поверх всех остальных
@@ -245,14 +243,14 @@ void Castling() {};
 
 void Delete(Square& square) {
 	for (auto& figure : figures) {
-		if (figure->x == square.x && figure->y == square.y) {
-			figure->isDeleted = true;
-			squares[figure->x][figure->y].isEmpty = true;
-			figure->x = -boardSize;
-			figure->y = -boardSize;
-			figure->setPos(-windowSizeX, -windowSizeY);
+		if (figure->getX() == square.getX() && figure->getY() == square.getY()) {
+			figure->setIsDeleted(true);
+			squares[figure->getX()][figure->getY()].setIsEmpty(true);
+			figure->setX(-boardSize);
+			figure->setY(-boardSize);
+			figure->sprite.setPosition(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(Color(0, 0, 0, 0));
-			if (figure->name == "King") gameIsStopped = true;
+			if (figure->getName() == "King") gameIsStopped = true;
 			return;
 		}
 	}
