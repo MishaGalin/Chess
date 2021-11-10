@@ -12,6 +12,10 @@ const int squareSide = 112; // длина в пикселях
 bool turn = false; // 0 / false - ход белых, 1 / true - ход черных
 bool gameIsStopped = false;
 
+RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", Style::Close);
+vector<vector<Square>> squares; // двумерный массив клеток
+vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
+
 int boardArr[boardSize][boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
   -6,-6,-6,-6,-6,-6,-6,-6,
@@ -23,7 +27,7 @@ int boardArr[boardSize][boardSize] =
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
-void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, RenderWindow& window);
+void Delete(Square& square);
 
 int main()
 {
@@ -70,21 +74,16 @@ int main()
 	boardTexture.loadFromFile("images/board1.png");
 	Sprite board(boardTexture);
 
-	vector<vector<Square>> squares;
-
-	vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
-
 	Image icon;
 	icon.loadFromFile("icon.png");
 
-	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", Style::Close);
 	turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
 	for (int i = 0; i < boardSize; ++i) {
 		vector<Square> temp;
 		for (int j = 0; j < boardSize; ++j) {
-			Square tempSquare(i, j, boardArr[j][i], squareSide);
+			Square tempSquare(i, j, boardArr[j][i]);
 			temp.push_back(tempSquare);
 		}
 		squares.push_back(temp);
@@ -185,7 +184,7 @@ int main()
 
 		if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 			isMove = false;
-			int squareX = 0, squareY = 0;
+			int nearestX = 0, nearestY = 0;
 			double maxDistance = 10000.;
 
 			for (int i = 0; i < boardSize; ++i) {
@@ -193,24 +192,19 @@ int main()
 					double dist = sqrt(pow(figures[n]->getPos().x - squares[i][j].xInPixel, 2) + pow(figures[n]->getPos().y - squares[i][j].yInPixel, 2)); // Расстояние до клетки
 					if (dist < maxDistance) {
 						maxDistance = dist;
-						squareX = i;
-						squareY = j;
+						nearestX = i;
+						nearestY = j;
 					}
 				}
 			}
 
 			if (!gameIsStopped && figures[n]->getPos().x <= window.getSize().x && figures[n]->getPos().x >= 0 // проверка границ
 				&& figures[n]->getPos().y <= window.getSize().y && figures[n]->getPos().y >= 0) {
-				if (figures[n]->Capture(squareX, squareY, turn, window, squares)) {
-					Delete(squares, squares[squareX][squareY], figures, window);
-					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[squareX][squareY], turn, window);
-					if (figures[n]->name == "Pawn" && figures[n]->firstMove) figures[n]->firstMove = false;
-					if (gameIsStopped) {
-						turn ? window.setTitle("Chess: WHITE WIN") : window.setTitle("Chess: BLACK WIN");
-						continue;
-					}
+				if (figures[n]->ConditionOfCapture(squares[nearestX][nearestY])) {
+					Delete(squares[nearestX][nearestY]);
+					figures[n]->Move_(squares[figures[n]->x][figures[n]->y], squares[nearestX][nearestY]);
 				}
-				else figures[n]->Move(squareX, squareY, turn, window, squares);
+				else figures[n]->Move(squares[nearestX][nearestY]);
 			}
 			else figures[n]->setPos(squares[figures[n]->x][figures[n]->y].xInPixel, squares[figures[n]->x][figures[n]->y].yInPixel); // возврат обратно
 		}
@@ -223,13 +217,13 @@ int main()
 		if (!gameIsStopped) {
 			for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
 				for (int j = 0; j < boardSize; ++j) {
-					if (figures[n]->ConditionOfMove(i, j, turn, squares)) { // зеленый квадрат, если в эту клетку можно пойти
+					if (figures[n]->ConditionOfMove(squares[i][j])) { // зеленый квадрат, если в эту клетку можно пойти
 						squares[i][j].drawableRect.setFillColor(Color(0, 255, 0, 70));
-						window.draw(squares[i][j].drawableRect);
+						squares[i][j].draw(window);
 					}
-					else if (figures[n]->Capture(i, j, turn, window, squares)) { // красный квадрат, если можно срубить
+					else if (figures[n]->ConditionOfCapture(squares[i][j])) { // красный квадрат, если можно срубить
 						squares[i][j].drawableRect.setFillColor(Color(255, 0, 0, 70));
-						window.draw(squares[i][j].drawableRect);
+						squares[i][j].draw(window);
 					}
 				}
 			}
@@ -237,20 +231,19 @@ int main()
 
 		for (auto& figure : figures)
 		{
-			if (!figure->isDeleted) figure->draw(window, RenderStates::Default);
+			if (!figure->isDeleted) figure->draw(window);
 		}
 
-		figures[n]->draw(window, RenderStates::Default); // перемещаемая фигура рисуется в последнюю очередь, чтобы она была поверх всех остальных
+		figures[n]->draw(window); // перемещаемая фигура рисуется в последнюю очередь (еще раз), для того чтобы она была поверх всех остальных
 		window.display();
 	}
 
 	return 0;
 }
 
-void Castling() {
-};
+void Castling() {};
 
-void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<AbstractFigure>>& figures, RenderWindow& window) {
+void Delete(Square& square) {
 	for (auto& figure : figures) {
 		if (figure->x == square.x && figure->y == square.y) {
 			figure->isDeleted = true;
@@ -260,6 +253,7 @@ void Delete(vector<vector<Square>>& squares, Square& square, vector<unique_ptr<A
 			figure->setPos(-windowSizeX, -windowSizeY);
 			figure->sprite.setColor(Color(0, 0, 0, 0));
 			if (figure->name == "King") gameIsStopped = true;
+			return;
 		}
 	}
 };

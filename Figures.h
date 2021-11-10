@@ -2,32 +2,28 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-class Pawn : public AbstractFigure
-{
-public:
+extern vector<vector<Square>> squares;
+extern bool turn;
 
+class Pawn : public AbstractFigure {
+public:
 	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
 		sprite.setOrigin(18, 38);
 		name = "Pawn";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && x == newX && color == turn
-			&& ((pow(-1, color) * (y - newY) == 2 && squares[x][y - (pow(-1, color) * 1)].isEmpty && firstMove) || pow(-1, color) * (y - newY) == 1));
+	bool ConditionOfMove(const Square& square) override {
+		return (square.isEmpty && x == square.x && color == turn
+			&& ((pow(-1, color) * (y - square.y) == 2 && squares[x][y - (pow(-1, color) * 1)].isEmpty && firstMove) || pow(-1, color) * (y - square.y) == 1));
 	};
 
-	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
-	{
-		if (ConditionOfMove(newX, newY, turn, squares)) {
-			Move_(squares[x][y], squares[newX][newY], turn, window);
-			if (firstMove) firstMove = false;
-		}
+	void Move(Square& square) override {
+		if (ConditionOfMove(square)) Move_(squares[x][y], square);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
-	{
-		return (!squares[newX][newY].isEmpty && pow(-1, color) * (y - newY) == 1 && abs(x - newX) == 1 && squares[newX][newY].color != turn && color == turn);
+	bool ConditionOfCapture(const Square& square) override {
+		return (!square.isEmpty && pow(-1, color) * (y - square.y) == 1 && abs(x - square.x) == 1 && square.color != turn && color == turn);
 	}
 };
 
@@ -38,18 +34,18 @@ public:
 		name = "Castle";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty && color == turn) {
+	bool ConditionOfMove(const Square& square) override {
+		if (square.isEmpty && color == turn) {
 			int dir1Y = y,
 				dir2X = x,
 				dir3Y = y,
 				dir4X = x;
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (newX == x && newY < y) dir1 = true;
-			else if (newX < x && newY == y) dir2 = true;
-			else if (newX == x && newY > y) dir3 = true;
-			else if (newX > x && newY == y) dir4 = true;
+			if (square.x == x && square.y < y) dir1 = true;
+			else if (square.x < x && square.y == y) dir2 = true;
+			else if (square.x == x && square.y > y) dir3 = true;
+			else if (square.x > x && square.y == y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
@@ -66,32 +62,31 @@ public:
 					if (squares[x + i][y].isEmpty) dir4X = x + i; else break;
 				}
 			}
-			return ((dir1 && newY >= dir1Y) ||
-				(dir2 && newX >= dir2X) ||
-				(dir3 && newY <= dir3Y) ||
-				(dir4 && newX <= dir4X));
+			return ((dir1 && square.y >= dir1Y) ||
+				(dir2 && square.x >= dir2X) ||
+				(dir3 && square.y <= dir3Y) ||
+				(dir4 && square.x <= dir4X));
 		}
 		return false;
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
-	{
-		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+	void Move(Square& square) override {
+		if (ConditionOfMove(square)) Move_(squares[x][y], square);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && squares[newX][newY].color != turn && color == turn) {
+	bool ConditionOfCapture(const Square& square) override {
+		if (!square.isEmpty && square.color != turn && color == turn) {
 			int dir1Y = y,
 				dir2X = x,
 				dir3Y = y,
 				dir4X = x;
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (newX == x && newY < y) dir1 = true;
-			else if (newX < x && newY == y) dir2 = true;
-			else if (newX == x && newY > y) dir3 = true;
-			else if (newX > x && newY == y) dir4 = true;
+			if (square.x == x && square.y < y) dir1 = true;
+			else if (square.x < x && square.y == y) dir2 = true;
+			else if (square.x == x && square.y > y) dir3 = true;
+			else if (square.x > x && square.y == y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
@@ -112,10 +107,10 @@ public:
 					if (squares[dir4X][y].isEmpty) continue; else break;
 				}
 			}
-			return ((dir1 && newY == dir1Y) ||
-				(dir2 && newX == dir2X) ||
-				(dir3 && newY == dir3Y) ||
-				(dir4 && newX == dir4X));
+			return ((dir1 && square.y == dir1Y) ||
+				(dir2 && square.x == dir2X) ||
+				(dir3 && square.y == dir3Y) ||
+				(dir4 && square.x == dir4X));
 		}
 		return false;
 	}
@@ -128,18 +123,17 @@ public:
 		name = "Knight";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2 && color == turn);
+	bool ConditionOfMove(const Square& square) override {
+		return (square.isEmpty && abs((x - square.x) * (y - square.y)) == 2 && color == turn);
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
-	{
-		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+	void Move(Square& square) override {
+		if (ConditionOfMove(square)) Move_(squares[x][y], square);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		return (!squares[newX][newY].isEmpty && abs((x - newX) * (y - newY)) == 2 && squares[newX][newY].color != turn && color == turn);
+	bool ConditionOfCapture(const Square& square) override {
+		return (!square.isEmpty && abs((x - square.x) * (y - square.y)) == 2 && square.color != turn && color == turn);
 	}
 };
 
@@ -150,18 +144,18 @@ public:
 		name = "Bishop";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y) && color == turn) {
+	bool ConditionOfMove(const Square& square) override {
+		if (square.isEmpty && abs(square.x - x) == abs(square.y - y) && color == turn) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
 				dir3X = x, dir3Y = y,
 				dir4X = x, dir4Y = y;
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (newX > x && newY < y) dir1 = true;
-			else if (newX < x && newY < y) dir2 = true;
-			else if (newX < x && newY > y) dir3 = true;
-			else if (newX > x && newY > y) dir4 = true;
+			if (square.x > x && square.y < y) dir1 = true;
+			else if (square.x < x && square.y < y) dir2 = true;
+			else if (square.x < x && square.y > y) dir3 = true;
+			else if (square.x > x && square.y > y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
@@ -195,31 +189,31 @@ public:
 				}
 			}
 
-			return ((dir1 && newX <= dir1X && newY >= dir1Y) ||
-				(dir2 && newX >= dir2X && newY >= dir2Y) ||
-				(dir3 && newX >= dir3X && newY <= dir3Y) ||
-				(dir4 && newX <= dir4X && newY <= dir4Y));
+			return ((dir1 && square.x <= dir1X && square.y >= dir1Y) ||
+				(dir2 && square.x >= dir2X && square.y >= dir2Y) ||
+				(dir3 && square.x >= dir3X && square.y <= dir3Y) ||
+				(dir4 && square.x <= dir4X && square.y <= dir4Y));
 		}
 		return false;
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+	void Move(Square& square) override {
+		if (ConditionOfMove(square)) Move_(squares[x][y], square);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && abs(newX - x) == abs(newY - y) && squares[newX][newY].color != turn && color == turn) {
+	bool ConditionOfCapture(const Square& square) override {
+		if (!square.isEmpty && abs(square.x - x) == abs(square.y - y) && square.color != turn && color == turn) {
 			int dir1X = x, dir1Y = y,
 				dir2X = x, dir2Y = y,
 				dir3X = x, dir3Y = y,
 				dir4X = x, dir4Y = y;
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false;
 
-			if (newX > x && newY < y) dir1 = true;
-			else if (newX < x && newY < y) dir2 = true;
-			else if (newX < x && newY > y) dir3 = true;
-			else if (newX > x && newY > y) dir4 = true;
+			if (square.x > x && square.y < y) dir1 = true;
+			else if (square.x < x && square.y < y) dir2 = true;
+			else if (square.x < x && square.y > y) dir3 = true;
+			else if (square.x > x && square.y > y) dir4 = true;
 
 			for (int i = 1; i < 8; ++i)
 			{
@@ -248,10 +242,10 @@ public:
 					else break;
 				}
 			}
-			if ((dir1 && newX == dir1X && newY == dir1Y) ||
-				(dir2 && newX == dir2X && newY == dir2Y) ||
-				(dir3 && newX == dir3X && newY == dir3Y) ||
-				(dir4 && newX == dir4X && newY == dir4Y)) return true;
+			return ((dir1 && square.x == dir1X && square.y == dir1Y) ||
+				(dir2 && square.x == dir2X && square.y == dir2Y) ||
+				(dir3 && square.x == dir3X && square.y == dir3Y) ||
+				(dir4 && square.x == dir4X && square.y == dir4Y));
 		}
 		return false;
 	}
@@ -264,8 +258,8 @@ public:
 		name = "Queen";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
-		if (squares[newX][newY].isEmpty && color == turn) {
+	bool ConditionOfMove(const Square& square) override {
+		if (square.isEmpty && color == turn) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
 				dir3Y = y,						   // 3 - вверх
@@ -277,17 +271,17 @@ public:
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false,
 				dir5 = false, dir6 = false, dir7 = false, dir8 = false;
 
-			if (abs(newX - x) == abs(newY - y)) { // диагонали
-				if (newX > x && newY < y)  dir2 = true;
-				else if (newX < x && newY < y)  dir4 = true;
-				else if (newX < x && newY > y)  dir6 = true;
-				else if (newX > x && newY > y)  dir8 = true;
+			if (abs(square.x - x) == abs(square.y - y)) { // диагонали
+				if (square.x > x && square.y < y)  dir2 = true;
+				else if (square.x < x && square.y < y)  dir4 = true;
+				else if (square.x < x && square.y > y)  dir6 = true;
+				else if (square.x > x && square.y > y)  dir8 = true;
 			}
 			else { // горизонтали и вертикали
-				if (newX > x && newY == y) dir1 = true;
-				else if (newX == x && newY < y) dir3 = true;
-				else if (newX < x && newY == y) dir5 = true;
-				else if (newX == x && newY > y) dir7 = true;
+				if (square.x > x && square.y == y) dir1 = true;
+				else if (square.x == x && square.y < y) dir3 = true;
+				else if (square.x < x && square.y == y) dir5 = true;
+				else if (square.x == x && square.y > y) dir7 = true;
 			}
 
 			for (int i = 1; i < 8; ++i)
@@ -354,25 +348,25 @@ public:
 				}
 			}
 
-			return ((dir1 && newX <= dir1X) ||
-				(dir2 && newX <= dir2X && newY >= dir2Y) ||
-				(dir3 && newY >= dir3Y) ||
-				(dir4 && newX >= dir4X && newY >= dir4Y) ||
-				(dir5 && newX >= dir5X) ||
-				(dir6 && newX >= dir6X && newY <= dir6Y) ||
-				(dir7 && newY <= dir7Y) ||
-				(dir8 && newX <= dir8X && newY <= dir8Y));
+			return ((dir1 && square.x <= dir1X) ||
+				(dir2 && square.x <= dir2X && square.y >= dir2Y) ||
+				(dir3 && square.y >= dir3Y) ||
+				(dir4 && square.x >= dir4X && square.y >= dir4Y) ||
+				(dir5 && square.x >= dir5X) ||
+				(dir6 && square.x >= dir6X && square.y <= dir6Y) ||
+				(dir7 && square.y <= dir7Y) ||
+				(dir8 && square.x <= dir8X && square.y <= dir8Y));
 		}
 		return false;
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+	void Move(Square& square) override {
+		if (ConditionOfMove(square)) Move_(squares[x][y], square);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		if (!squares[newX][newY].isEmpty && squares[newX][newY].color != turn && color == turn) {
+	bool ConditionOfCapture(const Square& square) override {
+		if (!square.isEmpty && square.color != turn && color == turn) {
 			int dir1X = x, 						   // 1 - вправо
 				dir2X = x, dir2Y = y,			   // 2 - по диагонали вправо-вверх
 				dir3Y = y,						   // 3 - вверх
@@ -384,17 +378,17 @@ public:
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false,
 				dir5 = false, dir6 = false, dir7 = false, dir8 = false;
 
-			if (abs(newX - x) == abs(newY - y)) { // диагонали
-				if (newX > x && newY < y)  dir2 = true;
-				else if (newX < x && newY < y)  dir4 = true;
-				else if (newX < x && newY > y)  dir6 = true;
-				else if (newX > x && newY > y)  dir8 = true;
+			if (abs(square.x - x) == abs(square.y - y)) { // диагонали
+				if (square.x > x && square.y < y)  dir2 = true;
+				else if (square.x < x && square.y < y)  dir4 = true;
+				else if (square.x < x && square.y > y)  dir6 = true;
+				else if (square.x > x && square.y > y)  dir8 = true;
 			}
 			else { // горизонтали и вертикали
-				if (newX > x && newY == y) dir1 = true;
-				else if (newX == x && newY < y) dir3 = true;
-				else if (newX < x && newY == y) dir5 = true;
-				else if (newX == x && newY > y) dir7 = true;
+				if (square.x > x && square.y == y) dir1 = true;
+				else if (square.x == x && square.y < y) dir3 = true;
+				else if (square.x < x && square.y == y) dir5 = true;
+				else if (square.x == x && square.y > y) dir7 = true;
 			}
 
 			for (int i = 1; i < 8; ++i)
@@ -438,14 +432,14 @@ public:
 				else break;
 			}
 
-			return ((dir1 && newX == dir1X) ||
-				(dir2 && newX == dir2X && newY == dir2Y) ||
-				(dir3 && newY == dir3Y) ||
-				(dir4 && newX == dir4X && newY == dir4Y) ||
-				(dir5 && newX == dir5X) ||
-				(dir6 && newX == dir6X && newY == dir6Y) ||
-				(dir7 && newY == dir7Y) ||
-				(dir8 && newX == dir8X && newY == dir8Y));
+			return ((dir1 && square.x == dir1X) ||
+				(dir2 && square.x == dir2X && square.y == dir2Y) ||
+				(dir3 && square.y == dir3Y) ||
+				(dir4 && square.x == dir4X && square.y == dir4Y) ||
+				(dir5 && square.x == dir5X) ||
+				(dir6 && square.x == dir6X && square.y == dir6Y) ||
+				(dir7 && square.y == dir7Y) ||
+				(dir8 && square.x == dir8X && square.y == dir8Y));
 		}
 		return false;
 	}
@@ -458,17 +452,16 @@ public:
 		name = "King";
 	}
 
-	bool ConditionOfMove(const int& newX, const int& newY, bool& turn, vector<vector<Square>>& squares) override {
-		return (squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && color == turn);
+	bool ConditionOfMove(const Square& square) override {
+		return (square.isEmpty && abs(square.x - x) <= 1 && abs(square.y - y) <= 1 && color == turn);
 	}
 
-	void Move(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override
-	{
-		if (ConditionOfMove(newX, newY, turn, squares)) Move_(squares[x][y], squares[newX][newY], turn, window);
+	void Move(Square& square) override {
+		if (ConditionOfMove(square)) Move_(squares[x][y], square);
 		else setPos(squares[x][y].xInPixel, squares[x][y].yInPixel);
 	}
 
-	bool Capture(const int& newX, const int& newY, bool& turn, RenderWindow& window, vector<vector<Square>>& squares) override {
-		return (!squares[newX][newY].isEmpty && abs(newX - x) <= 1 && abs(newY - y) <= 1 && (newX != x || newY != y) && squares[newX][newY].color != turn && color == turn);
+	bool ConditionOfCapture(const Square& square) override {
+		return (!square.isEmpty && abs(square.x - x) <= 1 && abs(square.y - y) <= 1 && (square.x != x || square.y != y) && square.color != turn && color == turn);
 	}
 };
