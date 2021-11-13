@@ -7,16 +7,16 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-const int boardSize = 8, windowSizeX = 910, windowSizeY = 910;
-const int squareSide = 112; // длина в пикселях
-bool turn = false; // 0 / false - ход белых, 1 / true - ход черных
-bool gameIsStopped = false;
+extern const int g_boardSize = 8, g_windowSizeX = 910, g_windowSizeY = 910;
+extern const int g_squareSide = 112; // длина в пикселях
+extern bool g_turn = false; // 0 / false - ход белых, 1 / true - ход черных
+extern bool g_gameIsStopped = false;
 
-RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Chess", Style::Close);
+extern RenderWindow window(VideoMode(g_windowSizeX, g_windowSizeY), "Chess", Style::Close);
 vector<vector<Square>> squares; // двумерный массив клеток
 vector<unique_ptr<AbstractFigure>> figures; // Массив всех фигур на доске
 
-int boardArr[boardSize][boardSize] =
+int boardArr[g_boardSize][g_boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
   -6,-6,-6,-6,-6,-6,-6,-6,
    0, 0, 0, 0, 0, 0, 0, 0,
@@ -77,12 +77,12 @@ int main()
 	Image icon;
 	icon.loadFromFile("icon.png");
 
-	turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
+	g_turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	window.setIcon(32, 32, icon.getPixelsPtr());
 
-	for (int i = 0; i < boardSize; ++i) {
+	for (int i = 0; i < g_boardSize; ++i) {
 		vector<Square> temp;
-		for (int j = 0; j < boardSize; ++j) {
+		for (int j = 0; j < g_boardSize; ++j) {
 			Square tempSquare(i, j, boardArr[j][i]);
 			temp.push_back(tempSquare);
 		}
@@ -90,8 +90,8 @@ int main()
 	}
 
 	// Расстановка фигур
-	for (int i = 0; i < boardSize; ++i) {
-		for (int j = 0; j < boardSize; ++j) {
+	for (int i = 0; i < g_boardSize; ++i) {
+		for (int j = 0; j < g_boardSize; ++j) {
 			switch (boardArr[i][j])
 			{
 			case -1:
@@ -187,8 +187,8 @@ int main()
 			int nearestX = 0, nearestY = 0;
 			double maxDistance = 10000.;
 
-			for (int i = 0; i < boardSize; ++i) {
-				for (int j = 0; j < boardSize; ++j) {
+			for (int i = 0; i < g_boardSize; ++i) {
+				for (int j = 0; j < g_boardSize; ++j) {
 					double dist = sqrt(pow(figures[n]->sprite.getPosition().x - squares[i][j].getXInPixel(), 2) + pow(figures[n]->sprite.getPosition().y - squares[i][j].getYInPixel(), 2)); // Расстояние до клетки
 					if (dist < maxDistance) {
 						maxDistance = dist;
@@ -198,13 +198,14 @@ int main()
 				}
 			}
 
-			if (!gameIsStopped && figures[n]->sprite.getPosition().x <= window.getSize().x && figures[n]->sprite.getPosition().x >= 0 // проверка границ
+			if (!g_gameIsStopped && figures[n]->sprite.getPosition().x <= window.getSize().x && figures[n]->sprite.getPosition().x >= 0 // проверка границ
 				&& figures[n]->sprite.getPosition().y <= window.getSize().y && figures[n]->sprite.getPosition().y >= 0)
 			{
 				figures[n]->Capture(squares[nearestX][nearestY]);
 				figures[n]->Move(squares[nearestX][nearestY]);
 			}
-			else figures[n]->sprite.setPosition(squares[figures[n]->getX()][figures[n]->getY()].getXInPixel(), squares[figures[n]->getX()][figures[n]->getY()].getYInPixel()); // возврат обратно
+			else figures[n]->sprite.setPosition(squares[figures[n]->getX()][figures[n]->getY()].getXInPixel(),
+				squares[figures[n]->getX()][figures[n]->getY()].getYInPixel()); // возврат обратно
 		}
 
 		if (isMove) figures[n]->sprite.setPosition(mousePos.x - dx, mousePos.y - dy); // меняем позицию только спрайта, т.к. перемещение еще не подтверждено
@@ -212,9 +213,9 @@ int main()
 		window.clear();
 		window.draw(board);
 
-		if (!gameIsStopped) {
-			for (int i = 0; i < boardSize; ++i) { // отображение клеток, в которые может сходить фигура
-				for (int j = 0; j < boardSize; ++j) {
+		if (!g_gameIsStopped) {
+			for (int i = 0; i < g_boardSize; ++i) { // отображение клеток, в которые может сходить фигура
+				for (int j = 0; j < g_boardSize; ++j) {
 					if (figures[n]->ConditionOfMove(squares[i][j])) { // зеленый квадрат, если в эту клетку можно пойти
 						squares[i][j].drawableRect.setFillColor(Color(0, 255, 0, 70));
 						squares[i][j].draw(window);
@@ -246,11 +247,11 @@ void Delete(Square& square) {
 		if (figure->getX() == square.getX() && figure->getY() == square.getY()) {
 			figure->setIsDeleted(true);
 			squares[figure->getX()][figure->getY()].setIsEmpty(true);
-			figure->setX(-boardSize);
-			figure->setY(-boardSize);
-			figure->sprite.setPosition(-windowSizeX, -windowSizeY);
+			figure->setX(-g_boardSize);
+			figure->setY(-g_boardSize);
+			figure->sprite.setPosition(-g_windowSizeX, -g_windowSizeY);
 			figure->sprite.setColor(Color(0, 0, 0, 0));
-			if (figure->getName() == "King") gameIsStopped = true;
+			if (figure->getName() == "King") g_gameIsStopped = true;
 			return;
 		}
 	}

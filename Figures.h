@@ -2,8 +2,9 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
+extern bool g_turn;
+
 extern vector<vector<Square>> squares;
-extern bool turn;
 
 void Delete(Square& square);
 
@@ -15,7 +16,8 @@ public:
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.getIsEmpty() && getX() == square.getX() && getColor() == turn
+		return (square.getIsEmpty() && getX() == square.getX()
+			&& getColor() == g_turn
 			&& ((pow(-1, getColor()) * (getY() - square.getY()) == 2 && squares[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() && getFirstMove())
 				|| pow(-1, getColor()) * (getY() - square.getY()) == 1));
 	};
@@ -26,7 +28,7 @@ public:
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != turn && getColor() == turn);
+		return (!square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != g_turn && getColor() == g_turn);
 	}
 
 	void Capture(Square& square) override {
@@ -46,7 +48,7 @@ public:
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.getIsEmpty() && getColor() == turn) {
+		if (square.getIsEmpty() && getColor() == g_turn) {
 			int dir1Y = getY(),
 				dir2X = getX(),
 				dir3Y = getY(),
@@ -87,7 +89,7 @@ public:
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.getIsEmpty() && square.getColor() != turn && getColor() == turn) {
+		if (!square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1Y = getY(),
 				dir2X = getX(),
 				dir3Y = getY(),
@@ -143,7 +145,7 @@ public:
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == turn);
+		return (square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == g_turn);
 	}
 
 	void Move(Square& square) override {
@@ -152,7 +154,7 @@ public:
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != turn && getColor() == turn);
+		return (!square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != g_turn && getColor() == g_turn);
 	}
 
 	void Capture(Square& square) override {
@@ -172,7 +174,7 @@ public:
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == turn) {
+		if (square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
 				dir2X = getX(), dir2Y = getY(),
 				dir3X = getX(), dir3Y = getY(),
@@ -230,7 +232,7 @@ public:
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != turn && getColor() == turn) {
+		if (!square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
 				dir2X = getX(), dir2Y = getY(),
 				dir3X = getX(), dir3Y = getY(),
@@ -294,7 +296,7 @@ public:
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.getIsEmpty() && getColor() == turn) {
+		if (square.getIsEmpty() && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
 				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
@@ -401,7 +403,7 @@ public:
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.getIsEmpty() && square.getColor() != turn && getColor() == turn) {
+		if (!square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
 				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
@@ -496,7 +498,7 @@ public:
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == turn);
+		return (square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == g_turn);
 	}
 
 	void Move(Square& square) override {
@@ -506,7 +508,7 @@ public:
 
 	bool ConditionOfCapture(const Square& square) override {
 		return (!square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
-			&& (square.getX() != getX() || square.getY() != getY()) && square.getColor() != turn && getColor() == turn);
+			&& (square.getX() != getX() || square.getY() != getY()) && square.getColor() != g_turn && getColor() == g_turn);
 	}
 
 	void Capture(Square& square)override {

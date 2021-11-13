@@ -2,10 +2,11 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
+extern bool g_turn;
+extern const int g_squareSide;
+extern bool g_gameIsStopped;
+
 extern RenderWindow window;
-extern bool turn;
-extern const int squareSide;
-extern bool gameIsStopped;
 
 class Square : private Drawable {
 	bool color, isEmpty = true;
@@ -17,12 +18,12 @@ public:
 	Square(const int& x, const int& y, const int& value) {
 		this->x = x;
 		this->y = y;
-		this->xInPixel = 7 + squareSide / 2 + squareSide * this->x;
-		this->yInPixel = 7 + squareSide / 2 + squareSide * this->y;
+		this->xInPixel = 7 + g_squareSide / 2 + g_squareSide * this->x;
+		this->yInPixel = 7 + g_squareSide / 2 + g_squareSide * this->y;
 		this->color = false;
 		this->drawableRect.setPosition(xInPixel, yInPixel);
-		this->drawableRect.setSize(Vector2f(squareSide - 2, squareSide - 2));
-		this->drawableRect.setOrigin(squareSide / 2 - 1, squareSide / 2 - 1);
+		this->drawableRect.setSize(Vector2f(g_squareSide - 2, g_squareSide - 2));
+		this->drawableRect.setOrigin(g_squareSide / 2 - 1, g_squareSide / 2 - 1);
 		this->drawableRect.setOutlineColor(Color::White);
 		this->drawableRect.setOutlineThickness(2);
 		value ? this->isEmpty = false : this->isEmpty = true;
@@ -50,7 +51,7 @@ public:
 };
 
 class AbstractFigure : private Drawable {
-	bool color; // 0 - white, 1 - black
+	bool color = false; // 0 - white, 1 - black
 	bool firstMove = true; // учитывается только у пешек
 	bool isDeleted = false;
 	int x = 0, y = 0;
@@ -65,9 +66,9 @@ protected:
 		this->x = newSquare.getX();
 		this->y = newSquare.getY();
 		this->sprite.setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
-		turn = !turn;
-		if (gameIsStopped) turn ? window.setTitle("Chess: WHITE WIN") : window.setTitle("Chess: BLACK WIN");
-		else turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
+		g_turn = !g_turn;
+		if (g_gameIsStopped) g_turn ? window.setTitle("Chess: WHITE WINS") : window.setTitle("Chess: BLACK WINS");
+		else g_turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	};
 
 public:
