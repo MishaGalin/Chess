@@ -2,19 +2,16 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-extern bool g_turn;
+extern bool g_turn, g_gameIsStopped;
 extern const int g_squareSide;
-extern bool g_gameIsStopped;
-
 extern RenderWindow window;
 
-class Square : private Drawable {
+class Square : public Drawable {
 	bool color, isEmpty = true;
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
-
-public:
 	RectangleShape drawableRect;
 
+public:
 	Square(const int& x, const int& y, const int& value) {
 		this->x = x;
 		this->y = y;
@@ -30,6 +27,11 @@ public:
 	}
 
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
+
+	void drawWithColor(Color color) {
+		drawableRect.setFillColor(color);
+		draw(window);
+	}
 
 	bool getIsEmpty() const { return isEmpty; }
 	void setIsEmpty(const bool& isEmpty) { this->isEmpty = isEmpty; }
@@ -50,13 +52,16 @@ public:
 	void setYInPixel(const int& yInPixel) { this->yInPixel = yInPixel; }
 };
 
-class AbstractFigure : private Drawable {
+extern vector<vector<Square>> board;
+extern void Delete(Square& square);
+
+class AbstractChessPiece : public Drawable {
 	bool color = false; // 0 - white, 1 - black
-	bool firstMove = true; // учитывается только у пешек
+	bool firstMove = true; // Only relevant for pawns
 	bool isDeleted = false;
 	int x = 0, y = 0;
+	string name = "";
 
-protected:
 	void Move_(Square& oldSquare, Square& newSquare) {
 		oldSquare.setIsEmpty(true);
 		newSquare.setIsEmpty(false);
@@ -73,15 +78,8 @@ protected:
 
 public:
 	Sprite sprite;
-	string name;
-	Texture texture;
 
-	virtual void Move(Square& square) = 0;
-	virtual bool ConditionOfMove(const Square& square) = 0;
-	virtual void Capture(Square& square) = 0;
-	virtual bool ConditionOfCapture(const Square& square) = 0;
-
-	AbstractFigure(const Square& square, const bool& color, const Texture& texture) {
+	AbstractChessPiece(const Square& square, const bool& color, const Texture& texture) {
 		this->sprite.setTexture(texture);
 		this->sprite.setPosition(square.getXInPixel(), square.getYInPixel());
 		this->color = color;
@@ -89,7 +87,28 @@ public:
 		this->y = square.getY();
 	}
 
+	virtual bool ConditionOfMove(const Square& square) = 0;
+	virtual bool ConditionOfCapture(const Square& square) = 0;
+
+	void ReturnToPrevPos() {
+		sprite.setPosition(board[x][y].getXInPixel(), board[x][y].getYInPixel());
+	};
+
+	void Move(Square& square) {
+		if (ConditionOfMove(square)) Move_(board[getX()][getY()], square);
+		else ReturnToPrevPos();
+	}
+
+	void Capture(Square& square) {
+		if (ConditionOfCapture(square)) {
+			Delete(square);
+			Move_(board[getX()][getY()], square);
+		}
+		else ReturnToPrevPos();
+	}
+
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
+
 	bool getColor() const { return color; }
 	void setColor(const bool& color) { this->color = color; }
 

@@ -2,53 +2,36 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-extern bool g_turn;
+extern bool g_turn, g_gameIsStopped;
+extern vector<vector<Square>> board;
 
-extern vector<vector<Square>> squares;
-
-void Delete(Square& square);
-
-class Pawn : public AbstractFigure {
+class Pawn : public AbstractChessPiece {
 public:
-	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
+	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
 		sprite.setOrigin(25, 42);
-		name = "Pawn";
+		setName("Pawn");
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.getIsEmpty() && getX() == square.getX()
-			&& getColor() == g_turn
-			&& ((pow(-1, getColor()) * (getY() - square.getY()) == 2 && squares[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() && getFirstMove())
+		return (!g_gameIsStopped && square.getIsEmpty() && getX() == square.getX() && getColor() == g_turn
+			&& ((pow(-1, getColor()) * (getY() - square.getY()) == 2 && board[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() && getFirstMove())
 				|| pow(-1, getColor()) * (getY() - square.getY()) == 1));
 	};
 
-	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
-
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != g_turn && getColor() == g_turn);
-	}
-
-	void Capture(Square& square) override {
-		if (ConditionOfCapture(square)) {
-			Delete(square);
-			Move_(squares[getX()][getY()], square);
-		}
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
+		return (!g_gameIsStopped && !square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != g_turn && getColor() == g_turn);
 	}
 };
 
-class Castle : public AbstractFigure {
+class Castle : public AbstractChessPiece {
 public:
-	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
+	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
 		sprite.setOrigin(33, 43);
-		name = "Castle";
+		setName("Castle");
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.getIsEmpty() && getColor() == g_turn) {
+		if (!g_gameIsStopped && square.getIsEmpty() && getColor() == g_turn) {
 			int dir1Y = getY(),
 				dir2X = getX(),
 				dir3Y = getY(),
@@ -63,16 +46,16 @@ public:
 			for (int i = 1; i < 8; ++i)
 			{
 				if (dir1 && getY() - i >= 0 && getY() - i <= 7) {
-					if (squares[getX()][getY() - i].getIsEmpty()) dir1Y = getY() - i; else break;
+					if (board[getX()][getY() - i].getIsEmpty()) dir1Y = getY() - i; else break;
 				}
 				else if (dir2 && getX() - i >= 0 && getX() - i <= 7) {
-					if (squares[getX() - i][getY()].getIsEmpty()) dir2X = getX() - i; else break;
+					if (board[getX() - i][getY()].getIsEmpty()) dir2X = getX() - i; else break;
 				}
 				else if (dir3 && getY() + i >= 0 && getY() + i <= 7) {
-					if (squares[getX()][getY() + i].getIsEmpty()) dir3Y = getY() + i; else break;
+					if (board[getX()][getY() + i].getIsEmpty()) dir3Y = getY() + i; else break;
 				}
 				else if (dir4 && getX() + i >= 0 && getX() + i <= 7) {
-					if (squares[getX() + i][getY()].getIsEmpty()) dir4X = getX() + i; else break;
+					if (board[getX() + i][getY()].getIsEmpty()) dir4X = getX() + i; else break;
 				}
 			}
 			return ((dir1 && square.getY() >= dir1Y) ||
@@ -83,13 +66,8 @@ public:
 		return false;
 	}
 
-	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
-
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
+		if (!g_gameIsStopped && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1Y = getY(),
 				dir2X = getX(),
 				dir3Y = getY(),
@@ -105,19 +83,19 @@ public:
 			{
 				if (dir1 && getY() - i >= 0 && getY() - i <= 7) {
 					dir1Y = getY() - i;
-					if (squares[getX()][dir1Y].getIsEmpty()) continue; else break;
+					if (board[getX()][dir1Y].getIsEmpty()) continue; else break;
 				}
 				else if (dir2 && getX() - i >= 0 && getX() - i <= 7) {
 					dir2X = getX() - i;
-					if (squares[dir2X][getY()].getIsEmpty()) continue; else break;
+					if (board[dir2X][getY()].getIsEmpty()) continue; else break;
 				}
 				else if (dir3 && getY() + i >= 0 && getY() + i <= 7) {
 					dir3Y = getY() + i;
-					if (squares[getX()][dir3Y].getIsEmpty()) continue; else break;
+					if (board[getX()][dir3Y].getIsEmpty()) continue; else break;
 				}
 				else if (dir4 && getX() + i >= 0 && getX() + i <= 7) {
 					dir4X = getX() + i;
-					if (squares[dir4X][getY()].getIsEmpty()) continue; else break;
+					if (board[dir4X][getY()].getIsEmpty()) continue; else break;
 				}
 			}
 			return ((dir1 && square.getY() == dir1Y) ||
@@ -127,54 +105,33 @@ public:
 		}
 		return false;
 	}
-
-	void Capture(Square& square) override {
-		if (ConditionOfCapture(square)) {
-			Delete(square);
-			Move_(squares[getX()][getY()], square);
-		}
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
 };
 
-class Knight : public AbstractFigure {
+class Knight : public AbstractChessPiece {
 public:
-	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
+	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
 		sprite.setOrigin(37, 45);
-		name = "Knight";
+		setName("Knight");
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == g_turn);
-	}
-
-	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
+		return (!g_gameIsStopped && square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == g_turn);
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != g_turn && getColor() == g_turn);
-	}
-
-	void Capture(Square& square) override {
-		if (ConditionOfCapture(square)) {
-			Delete(square);
-			Move_(squares[getX()][getY()], square);
-		}
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
+		return (!g_gameIsStopped && !square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != g_turn && getColor() == g_turn);
 	}
 };
 
-class Bishop : public AbstractFigure {
+class Bishop : public AbstractChessPiece {
 public:
-	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
+	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
 		sprite.setOrigin(42, 44);
-		name = "Bishop";
+		setName("Bishop");
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == g_turn) {
+		if (!g_gameIsStopped && square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
 				dir2X = getX(), dir2Y = getY(),
 				dir3X = getX(), dir3Y = getY(),
@@ -189,28 +146,28 @@ public:
 			for (int i = 1; i < 8; ++i)
 			{
 				if (dir1 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
-					if (squares[getX() + i][getY() - i].getIsEmpty()) {
+					if (board[getX() + i][getY() - i].getIsEmpty()) {
 						dir1X = getX() + i;
 						dir1Y = getY() - i;
 					}
 					else break;
 				}
 				else if (dir2 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
-					if (squares[getX() - i][getY() - i].getIsEmpty()) {
+					if (board[getX() - i][getY() - i].getIsEmpty()) {
 						dir2X = getX() - i;
 						dir2Y = getY() - i;
 					}
 					else break;
 				}
 				else if (dir3 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
-					if (squares[getX() - i][getY() + i].getIsEmpty()) {
+					if (board[getX() - i][getY() + i].getIsEmpty()) {
 						dir3X = getX() - i;
 						dir3Y = getY() + i;
 					}
 					else break;
 				}
 				else if (dir4 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
-					if (squares[getX() + i][getY() + i].getIsEmpty()) {
+					if (board[getX() + i][getY() + i].getIsEmpty()) {
 						dir4X = getX() + i;
 						dir4Y = getY() + i;
 					}
@@ -226,13 +183,8 @@ public:
 		return false;
 	}
 
-	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
-
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != g_turn && getColor() == g_turn) {
+		if (!g_gameIsStopped && !square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
 				dir2X = getX(), dir2Y = getY(),
 				dir3X = getX(), dir3Y = getY(),
@@ -249,25 +201,25 @@ public:
 				if (dir1 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
 					dir1X = getX() + i;
 					dir1Y = getY() - i;
-					if (squares[getX() + i][getY() - i].getIsEmpty()) continue;
+					if (board[getX() + i][getY() - i].getIsEmpty()) continue;
 					else break;
 				}
 				else if (dir2 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
 					dir2X = getX() - i;
 					dir2Y = getY() - i;
-					if (squares[getX() - i][getY() - i].getIsEmpty()) continue;
+					if (board[getX() - i][getY() - i].getIsEmpty()) continue;
 					else break;
 				}
 				else if (dir3 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
 					dir3X = getX() - i;
 					dir3Y = getY() + i;
-					if (squares[getX() - i][getY() + i].getIsEmpty()) continue;
+					if (board[getX() - i][getY() + i].getIsEmpty()) continue;
 					else break;
 				}
 				else if (dir4 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
 					dir4X = getX() + i;
 					dir4Y = getY() + i;
-					if (squares[getX() + i][getY() + i].getIsEmpty()) continue;
+					if (board[getX() + i][getY() + i].getIsEmpty()) continue;
 					else break;
 				}
 			}
@@ -278,25 +230,17 @@ public:
 		}
 		return false;
 	}
-
-	void Capture(Square& square)override {
-		if (ConditionOfCapture(square)) {
-			Delete(square);
-			Move_(squares[getX()][getY()], square);
-		}
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
 };
 
-class Queen : public AbstractFigure {
+class Queen : public AbstractChessPiece {
 public:
-	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
+	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
 		sprite.setOrigin(42, 45);
-		name = "Queen";
+		setName("Queen");
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		if (square.getIsEmpty() && getColor() == g_turn) {
+		if (!g_gameIsStopped && square.getIsEmpty() && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
 				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
@@ -324,14 +268,14 @@ public:
 			for (int i = 1; i < 8; ++i)
 			{
 				if (dir1 && getX() + i >= 0 && getX() + i <= 7) {
-					if (squares[getX() + i][getY()].getIsEmpty()) {
+					if (board[getX() + i][getY()].getIsEmpty()) {
 						dir1X = getX() + i;
 						continue;
 					}
 					else break;
 				}
 				else if (dir2 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
-					if (squares[getX() + i][getY() - i].getIsEmpty()) {
+					if (board[getX() + i][getY() - i].getIsEmpty()) {
 						dir2X = getX() + i;
 						dir2Y = getY() - i;
 						continue;
@@ -339,14 +283,14 @@ public:
 					else break;
 				}
 				else if (dir3 && getY() - i >= 0 && getY() - i <= 7) {
-					if (squares[getX()][getY() - i].getIsEmpty()) {
+					if (board[getX()][getY() - i].getIsEmpty()) {
 						dir3Y = getY() - i;
 						continue;
 					}
 					else break;
 				}
 				else if (dir4 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
-					if (squares[getX() - i][getY() - i].getIsEmpty()) {
+					if (board[getX() - i][getY() - i].getIsEmpty()) {
 						dir4X = getX() - i;
 						dir4Y = getY() - i;
 						continue;
@@ -354,14 +298,14 @@ public:
 					else break;
 				}
 				else if (dir5 && getX() - i >= 0 && getX() - i <= 7) {
-					if (squares[getX() - i][getY()].getIsEmpty()) {
+					if (board[getX() - i][getY()].getIsEmpty()) {
 						dir5X = getX() - i;
 						continue;
 					}
 					else break;
 				}
 				else if (dir6 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
-					if (squares[getX() - i][getY() + i].getIsEmpty()) {
+					if (board[getX() - i][getY() + i].getIsEmpty()) {
 						dir6X = getX() - i;
 						dir6Y = getY() + i;
 						continue;
@@ -369,14 +313,14 @@ public:
 					else break;
 				}
 				else if (dir7 && getY() + i >= 0 && getY() + i <= 7) {
-					if (squares[getX()][getY() + i].getIsEmpty()) {
+					if (board[getX()][getY() + i].getIsEmpty()) {
 						dir7Y = getY() + i;
 						continue;
 					}
 					else break;
 				}
 				else if (dir8 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
-					if (squares[getX() + i][getY() + i].getIsEmpty()) {
+					if (board[getX() + i][getY() + i].getIsEmpty()) {
 						dir8X = getX() + i;
 						dir8Y = getY() + i;
 						continue;
@@ -397,13 +341,8 @@ public:
 		return false;
 	}
 
-	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
-
 	bool ConditionOfCapture(const Square& square) override {
-		if (!square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
+		if (!g_gameIsStopped && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
 				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
@@ -432,39 +371,39 @@ public:
 			{
 				if (dir1 && getX() + i >= 0 && getX() + i <= 7) {
 					dir1X = getX() + i;
-					if (squares[getX() + i][getY()].getIsEmpty()) continue; else break;
+					if (board[getX() + i][getY()].getIsEmpty()) continue; else break;
 				}
 				else if (dir2 && getX() + i >= 0 && getX() + i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
 					dir2X = getX() + i;
 					dir2Y = getY() - i;
-					if (squares[getX() + i][getY() - i].getIsEmpty()) continue; else break;
+					if (board[getX() + i][getY() - i].getIsEmpty()) continue; else break;
 				}
 				else if (dir3 && getY() - i >= 0 && getY() - i <= 7) {
 					dir3Y = getY() - i;
-					if (squares[getX()][getY() - i].getIsEmpty()) continue; else break;
+					if (board[getX()][getY() - i].getIsEmpty()) continue; else break;
 				}
 				else if (dir4 && getX() - i >= 0 && getX() - i <= 7 && getY() - i >= 0 && getY() - i <= 7) {
 					dir4X = getX() - i;
 					dir4Y = getY() - i;
-					if (squares[getX() - i][getY() - i].getIsEmpty()) continue; else break;
+					if (board[getX() - i][getY() - i].getIsEmpty()) continue; else break;
 				}
 				else if (dir5 && getX() - i >= 0 && getX() - i <= 7) {
 					dir5X = getX() - i;
-					if (squares[getX() - i][getY()].getIsEmpty()) continue; else break;
+					if (board[getX() - i][getY()].getIsEmpty()) continue; else break;
 				}
 				else if (dir6 && getX() - i >= 0 && getX() - i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
 					dir6X = getX() - i;
 					dir6Y = getY() + i;
-					if (squares[getX() - i][getY() + i].getIsEmpty()) continue; else break;
+					if (board[getX() - i][getY() + i].getIsEmpty()) continue; else break;
 				}
 				else if (dir7 && getY() + i >= 0 && getY() + i <= 7) {
 					dir7Y = getY() + i;
-					if (squares[getX()][getY() + i].getIsEmpty()) continue; else break;
+					if (board[getX()][getY() + i].getIsEmpty()) continue; else break;
 				}
 				else if (dir8 && getX() + i >= 0 && getX() + i <= 7 && getY() + i >= 0 && getY() + i <= 7) {
 					dir8X = getX() + i;
 					dir8Y = getY() + i;
-					if (squares[getX() + i][getY() + i].getIsEmpty()) continue; else break;
+					if (board[getX() + i][getY() + i].getIsEmpty()) continue; else break;
 				}
 				else break;
 			}
@@ -480,42 +419,21 @@ public:
 		}
 		return false;
 	}
-
-	void Capture(Square& square)override {
-		if (ConditionOfCapture(square)) {
-			Delete(square);
-			Move_(squares[getX()][getY()], square);
-		}
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
-	}
 };
 
-class King : public AbstractFigure {
+class King : public AbstractChessPiece {
 public:
-	King(const Square& square, const bool& color, const Texture& texture) : AbstractFigure(square, color, texture) {
+	King(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
 		sprite.setOrigin(42, 44);
-		name = "King";
+		setName("King");
 	}
 
 	bool ConditionOfMove(const Square& square) override {
-		return (square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == g_turn);
-	}
-
-	void Move(Square& square) override {
-		if (ConditionOfMove(square)) Move_(squares[getX()][getY()], square);
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
+		return (!g_gameIsStopped && square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == g_turn);
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
+		return (!g_gameIsStopped && !square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
 			&& (square.getX() != getX() || square.getY() != getY()) && square.getColor() != g_turn && getColor() == g_turn);
-	}
-
-	void Capture(Square& square)override {
-		if (ConditionOfCapture(square)) {
-			Delete(square);
-			Move_(squares[getX()][getY()], square);
-		}
-		else sprite.setPosition(squares[getX()][getY()].getXInPixel(), squares[getX()][getY()].getYInPixel());
 	}
 };

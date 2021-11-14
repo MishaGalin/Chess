@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AbstractFigure.h">
+    <ClInclude Include="AbstractChessPiece.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Figures.h">
+    <ClInclude Include="ChessPieces.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
