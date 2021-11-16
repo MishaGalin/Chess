@@ -6,12 +6,6 @@ extern bool g_turn, g_gameIsStopped;
 extern vector<vector<Square>> board;
 
 class Pawn : public AbstractChessPiece {
-public:
-	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
-		sprite.setOrigin(25, 42);
-		setName("Pawn");
-	}
-
 	bool ConditionOfMove(const Square& square) override {
 		return (!g_gameIsStopped && square.getIsEmpty() && getX() == square.getX() && getColor() == g_turn
 			&& ((pow(-1, getColor()) * (getY() - square.getY()) == 2 && board[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() && getFirstMove())
@@ -21,15 +15,15 @@ public:
 	bool ConditionOfCapture(const Square& square) override {
 		return (!g_gameIsStopped && !square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != g_turn && getColor() == g_turn);
 	}
+
+public:
+	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+		sprite.setOrigin(25, 42);
+		setName("Pawn");
+	}
 };
 
 class Castle : public AbstractChessPiece {
-public:
-	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
-		sprite.setOrigin(33, 43);
-		setName("Castle");
-	}
-
 	bool ConditionOfMove(const Square& square) override {
 		if (!g_gameIsStopped && square.getIsEmpty() && getColor() == g_turn) {
 			int dir1Y = getY(),
@@ -105,15 +99,15 @@ public:
 		}
 		return false;
 	}
+
+public:
+	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+		sprite.setOrigin(33, 43);
+		setName("Castle");
+	}
 };
 
 class Knight : public AbstractChessPiece {
-public:
-	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
-		sprite.setOrigin(37, 45);
-		setName("Knight");
-	}
-
 	bool ConditionOfMove(const Square& square) override {
 		return (!g_gameIsStopped && square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == g_turn);
 	}
@@ -121,15 +115,15 @@ public:
 	bool ConditionOfCapture(const Square& square) override {
 		return (!g_gameIsStopped && !square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != g_turn && getColor() == g_turn);
 	}
+
+public:
+	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+		sprite.setOrigin(37, 45);
+		setName("Knight");
+	}
 };
 
 class Bishop : public AbstractChessPiece {
-public:
-	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
-		sprite.setOrigin(42, 44);
-		setName("Bishop");
-	}
-
 	bool ConditionOfMove(const Square& square) override {
 		if (!g_gameIsStopped && square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
@@ -230,15 +224,15 @@ public:
 		}
 		return false;
 	}
+
+public:
+	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+		sprite.setOrigin(42, 44);
+		setName("Bishop");
+	}
 };
 
 class Queen : public AbstractChessPiece {
-public:
-	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
-		sprite.setOrigin(42, 45);
-		setName("Queen");
-	}
-
 	bool ConditionOfMove(const Square& square) override {
 		if (!g_gameIsStopped && square.getIsEmpty() && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
@@ -419,15 +413,15 @@ public:
 		}
 		return false;
 	}
+
+public:
+	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+		sprite.setOrigin(42, 45);
+		setName("Queen");
+	}
 };
 
 class King : public AbstractChessPiece {
-public:
-	King(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
-		sprite.setOrigin(42, 44);
-		setName("King");
-	}
-
 	bool ConditionOfMove(const Square& square) override {
 		return (!g_gameIsStopped && square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == g_turn);
 	}
@@ -435,5 +429,11 @@ public:
 	bool ConditionOfCapture(const Square& square) override {
 		return (!g_gameIsStopped && !square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
 			&& (square.getX() != getX() || square.getY() != getY()) && square.getColor() != g_turn && getColor() == g_turn);
+	}
+
+public:
+	King(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+		sprite.setOrigin(42, 44);
+		setName("King");
 	}
 };

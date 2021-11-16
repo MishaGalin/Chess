@@ -3,27 +3,28 @@ using namespace sf; // SFML namespace
 using namespace std;
 
 extern bool g_turn, g_gameIsStopped;
-extern const int g_squareSide;
+extern const int g_squareSide, g_boardSize;
 extern RenderWindow window;
 
 class Square : public Drawable {
-	bool color, isEmpty = true;
+	bool color = false, isEmpty = true;
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	RectangleShape drawableRect;
 
 public:
 	Square(const int& x, const int& y, const int& value) {
-		this->x = x;
-		this->y = y;
-		this->xInPixel = 7 + g_squareSide / 2 + g_squareSide * this->x;
-		this->yInPixel = 7 + g_squareSide / 2 + g_squareSide * this->y;
-		this->color = false;
-		this->drawableRect.setPosition(xInPixel, yInPixel);
-		this->drawableRect.setSize(Vector2f(g_squareSide - 2, g_squareSide - 2));
-		this->drawableRect.setOrigin(g_squareSide / 2 - 1, g_squareSide / 2 - 1);
-		this->drawableRect.setOutlineColor(Color::White);
-		this->drawableRect.setOutlineThickness(2);
-		value ? this->isEmpty = false : this->isEmpty = true;
+		setX(x);
+		setY(y);
+		setXInPixel(7 + g_squareSide / 2 + g_squareSide * getX());
+		setYInPixel(7 + g_squareSide / 2 + g_squareSide * getY());
+		setColor(false);
+		value ? setIsEmpty(false) : setIsEmpty(true);
+
+		drawableRect.setPosition(xInPixel, yInPixel);
+		drawableRect.setSize(Vector2f(g_squareSide - 2, g_squareSide - 2));
+		drawableRect.setOrigin(g_squareSide / 2 - 1, g_squareSide / 2 - 1);
+		drawableRect.setOutlineColor(Color::White);
+		drawableRect.setOutlineThickness(2);
 	}
 
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
@@ -62,52 +63,70 @@ class AbstractChessPiece : public Drawable {
 	int x = 0, y = 0;
 	string name = "";
 
+	// Directly moving from one square to another
 	void Move_(Square& oldSquare, Square& newSquare) {
 		oldSquare.setIsEmpty(true);
 		newSquare.setIsEmpty(false);
-		newSquare.setColor(this->color);
-		oldSquare.setColor(!this->color);
-		if (this->firstMove) this->firstMove = false;
-		this->x = newSquare.getX();
-		this->y = newSquare.getY();
-		this->sprite.setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
+		oldSquare.setColor(!getColor());
+		newSquare.setColor(getColor());
+
+		if (getFirstMove()) setFirstMove(false);
+		setX(newSquare.getX());
+		setY(newSquare.getY());
+		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
+
 		g_turn = !g_turn;
 		if (g_gameIsStopped) g_turn ? window.setTitle("Chess: WHITE WINS") : window.setTitle("Chess: BLACK WINS");
 		else g_turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
 	};
 
-public:
-	Sprite sprite;
-
-	AbstractChessPiece(const Square& square, const bool& color, const Texture& texture) {
-		this->sprite.setTexture(texture);
-		this->sprite.setPosition(square.getXInPixel(), square.getYInPixel());
-		this->color = color;
-		this->x = square.getX();
-		this->y = square.getY();
-	}
-
 	virtual bool ConditionOfMove(const Square& square) = 0;
 	virtual bool ConditionOfCapture(const Square& square) = 0;
+
+protected:
+	Sprite sprite;
+	AbstractChessPiece(const Square& square, const bool& color, const Texture& texture) {
+		sprite.setTexture(texture);
+		setPosition(square.getXInPixel(), square.getYInPixel());
+		setColor(color);
+		setX(square.getX());
+		setY(square.getY());
+	}
+
+public:
+	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
 
 	void ReturnToPrevPos() {
 		sprite.setPosition(board[x][y].getXInPixel(), board[x][y].getYInPixel());
 	};
 
 	void Move(Square& square) {
-		if (ConditionOfMove(square)) Move_(board[getX()][getY()], square);
+		if (ConditionOfMove(square)) Move_(board[x][y], square);
 		else ReturnToPrevPos();
 	}
 
 	void Capture(Square& square) {
 		if (ConditionOfCapture(square)) {
 			Delete(square);
-			Move_(board[getX()][getY()], square);
+			Move_(board[x][y], square);
 		}
 		else ReturnToPrevPos();
 	}
 
-	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
+	// Displaying the squares into which the piece can go
+	void DrawPossibleSquares() {
+		for (int i = 0; i < g_boardSize; ++i) {
+			for (int j = 0; j < g_boardSize; ++j) {
+				if (ConditionOfMove(board[i][j])) board[i][j].drawWithColor(Color(0, 255, 0, 70)); // Green square if you can go to this square
+				else if (ConditionOfCapture(board[i][j])) board[i][j].drawWithColor(Color(255, 0, 0, 70)); // Red square if you can capture
+			}
+		}
+	}
+
+	FloatRect getGlobalBounds() const { return sprite.getGlobalBounds(); }
+
+	Vector2f getPosition() const { return sprite.getPosition(); }
+	void setPosition(const int& x, const int& y) { sprite.setPosition(float(x), float(y)); }
 
 	bool getColor() const { return color; }
 	void setColor(const bool& color) { this->color = color; }
