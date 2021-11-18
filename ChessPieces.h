@@ -4,6 +4,7 @@ using namespace std;
 
 extern bool g_turn, g_gameIsStopped;
 extern vector<vector<Square>> board;
+extern map <string, Texture*> textureOfPieces;
 
 class Pawn : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
@@ -17,9 +18,10 @@ class Pawn : public AbstractChessPiece {
 	}
 
 public:
-	Pawn(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+	Pawn(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(25, 42);
-		setName("Pawn");
+		setName(color ? "PawnB" : "PawnW");
+		sprite.setTexture(*textureOfPieces[getName()]);
 	}
 };
 
@@ -101,9 +103,10 @@ class Castle : public AbstractChessPiece {
 	}
 
 public:
-	Castle(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+	Castle(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(33, 43);
-		setName("Castle");
+		setName(color ? "CastleB" : "CastleW");
+		sprite.setTexture(*textureOfPieces[getName()]);
 	}
 };
 
@@ -117,9 +120,10 @@ class Knight : public AbstractChessPiece {
 	}
 
 public:
-	Knight(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+	Knight(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(37, 45);
-		setName("Knight");
+		setName(color ? "KnightB" : "KnightW");
+		sprite.setTexture(*textureOfPieces[getName()]);
 	}
 };
 
@@ -226,9 +230,10 @@ class Bishop : public AbstractChessPiece {
 	}
 
 public:
-	Bishop(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+	Bishop(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
-		setName("Bishop");
+		setName(color ? "BishopB" : "BishopW");
+		sprite.setTexture(*textureOfPieces[getName()]);
 	}
 };
 
@@ -415,9 +420,10 @@ class Queen : public AbstractChessPiece {
 	}
 
 public:
-	Queen(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+	Queen(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 45);
-		setName("Queen");
+		setName(color ? "QueenB" : "QueenW");
+		sprite.setTexture(*textureOfPieces[getName()]);
 	}
 };
 
@@ -432,8 +438,9 @@ class King : public AbstractChessPiece {
 	}
 
 public:
-	King(const Square& square, const bool& color, const Texture& texture) : AbstractChessPiece(square, color, texture) {
+	King(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
-		setName("King");
+		setName(color ? "KingB" : "KingW");
+		sprite.setTexture(*textureOfPieces[getName()]);
 	}
 };

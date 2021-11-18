@@ -10,9 +10,37 @@ const int g_squareSide = 112; // Side length of a square in pixels
 bool g_turn = false; // 0 - white move, 1 - black move
 bool g_gameIsStopped = false;
 
+Texture
+texturePawnW,
+texturePawnB,
+textureCastleW,
+textureCastleB,
+textureKnightW,
+textureKnightB,
+textureBishopW,
+textureBishopB,
+textureQueenW,
+textureQueenB,
+textureKingW,
+textureKingB;
+
 RenderWindow window(VideoMode(g_windowSizeX, g_windowSizeY), "Chess", Style::Close);
 vector<vector<Square>> board;
 vector<unique_ptr<AbstractChessPiece>> pieces; // An array of all pieces on the board
+map <string, Texture*> textureOfPieces = {
+	{"PawnW", &texturePawnW },
+	{"PawnB", &texturePawnB },
+	{"CastleW", &textureCastleW },
+	{"CastleB", &textureCastleB },
+	{"KnightW", &textureKnightW },
+	{"KnightB", &textureKnightB },
+	{"BishopW", &textureBishopW },
+	{"BishopB", &textureBishopB },
+	{"QueenW", &textureQueenW },
+	{"QueenB", &textureQueenB },
+	{"KingW", &textureKingW },
+	{"KingB", &textureKingB }
+};
 
 int boardArr[g_boardSize][g_boardSize] =
 { -1,-2,-3,-4,-5,-3,-2,-1,
@@ -25,53 +53,29 @@ int boardArr[g_boardSize][g_boardSize] =
    1, 2, 3, 4, 5, 3, 2, 1
 };
 
-// Deleting a piece by known coordinates on the board
 void Castling();
 
+// Deleting a piece by known coordinates on the board
 void Delete(Square& square);
 
 int main()
 {
 	bool isMove = false;
-	int dx = 0, dy = 0, n = 0, nearestX = 0, nearestY = 0;
-	double maxDistance = 10000., distance = 0.;
+	int dx = 0, dy = 0, n = 0;
 	Event event;
-	Vector2i mousePos;
+	Vector2i mousePos, nearestSquare;
 
-	Texture texturePawnW;
 	texturePawnW.loadFromFile("images/pawn_w.png");
-
-	Texture texturePawnB;
 	texturePawnB.loadFromFile("images/pawn_b.png");
-
-	Texture textureCastleW;
 	textureCastleW.loadFromFile("images/castle_w.png");
-
-	Texture textureCastleB;
 	textureCastleB.loadFromFile("images/castle_b.png");
-
-	Texture textureKnightW;
 	textureKnightW.loadFromFile("images/knight_w.png");
-
-	Texture textureKnightB;
 	textureKnightB.loadFromFile("images/knight_b.png");
-
-	Texture textureBishopW;
 	textureBishopW.loadFromFile("images/bishop_w.png");
-
-	Texture textureBishopB;
 	textureBishopB.loadFromFile("images/bishop_b.png");
-
-	Texture textureQueenW;
 	textureQueenW.loadFromFile("images/queen_w.png");
-
-	Texture textureQueenB;
 	textureQueenB.loadFromFile("images/queen_b.png");
-
-	Texture textureKingW;
 	textureKingW.loadFromFile("images/king_w.png");
-
-	Texture textureKingB;
 	textureKingB.loadFromFile("images/king_b.png");
 
 	Texture boardTexture;
@@ -100,62 +104,62 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Castle(board[j][i], true, textureCastleB)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Castle(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 1:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Castle(board[j][i], false, textureCastleW)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Castle(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -2:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Knight(board[j][i], true, textureKnightB)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Knight(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 2:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Knight(board[j][i], false, textureKnightW)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Knight(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -3:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Bishop(board[j][i], true, textureBishopB)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Bishop(board[j][i], true)));
 			board[j][i].setColor(true);  }
 			break;
 
 			case 3:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Bishop(board[j][i], false, textureBishopW)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Bishop(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -4:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Queen(board[j][i], true, textureQueenB)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Queen(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 4:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Queen(board[j][i], false, textureQueenW)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Queen(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -5:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new King(board[j][i], true, textureKingB)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new King(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 5:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new King(board[j][i], false, textureKingW)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new King(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -6:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Pawn(board[j][i], true, texturePawnB)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Pawn(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 6:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Pawn(board[j][i], false, texturePawnW)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Pawn(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
@@ -180,29 +184,20 @@ int main()
 						n = i; // pieces[n] - a piece that we move with the mouse
 						dx = mousePos.x - pieces[n]->getPosition().x;
 						dy = mousePos.y - pieces[n]->getPosition().y;
+						pieces[n]->setIsSelected(true);
+						break;
 					}
+					else pieces[i]->setIsSelected(false);
 				}
 			}
 
 			if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 				isMove = false;
-				maxDistance = 10000.;
-				distance = 0.;
-
-				for (int i = 0; i < g_boardSize; ++i) {
-					for (int j = 0; j < g_boardSize; ++j) {
-						distance = sqrt(pow(pieces[n]->getPosition().x - board[i][j].getXInPixel(), 2) + pow(pieces[n]->getPosition().y - board[i][j].getYInPixel(), 2)); // Distance to the square
-						if (distance < maxDistance) {
-							maxDistance = distance;
-							nearestX = i;
-							nearestY = j;
-						}
-					}
-				}
+				nearestSquare = pieces[n]->SearchNearestSquare();
 
 				if (boardImage.getGlobalBounds().contains(pieces[n]->getPosition())) { // Check the piece exit outside the window
-					pieces[n]->Capture(board[nearestX][nearestY]);
-					pieces[n]->Move(board[nearestX][nearestY]);
+					pieces[n]->Capture(board[nearestSquare.x][nearestSquare.y]);
+					pieces[n]->Move(board[nearestSquare.x][nearestSquare.y]);
 				}
 				else pieces[n]->ReturnToPrevPos();
 			}
@@ -236,7 +231,7 @@ void Delete(Square& square) {
 			piece->setX(-g_boardSize);
 			piece->setY(-g_boardSize);
 			piece->setPosition(-g_windowSizeX, -g_windowSizeY);
-			if (piece->getName() == "King") g_gameIsStopped = true;
+			if (piece->getName() == "KingW" || piece->getName() == "KingB") g_gameIsStopped = true;
 			return;
 		}
 	}

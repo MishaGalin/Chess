@@ -59,7 +59,7 @@ extern void Delete(Square& square);
 class AbstractChessPiece : public Drawable {
 	bool color = false; // 0 - white, 1 - black
 	bool firstMove = true; // Only relevant for pawns
-	bool isDeleted = false;
+	bool isDeleted = false, isSelected = false;
 	int x = 0, y = 0;
 	string name = "";
 
@@ -85,8 +85,7 @@ class AbstractChessPiece : public Drawable {
 
 protected:
 	Sprite sprite;
-	AbstractChessPiece(const Square& square, const bool& color, const Texture& texture) {
-		sprite.setTexture(texture);
+	AbstractChessPiece(const Square& square, const bool& color) {
 		setPosition(square.getXInPixel(), square.getYInPixel());
 		setColor(color);
 		setX(square.getX());
@@ -113,12 +112,29 @@ public:
 		else ReturnToPrevPos();
 	}
 
+	Vector2i SearchNearestSquare() {
+		double maxDistance = 10000., distance = 0.;
+		int nearestX = 0, nearestY = 0;
+
+		for (int i = 0; i < g_boardSize; ++i) {
+			for (int j = 0; j < g_boardSize; ++j) {
+				distance = sqrt(pow(getPosition().x - board[i][j].getXInPixel(), 2) + pow(getPosition().y - board[i][j].getYInPixel(), 2)); // Distance to the square
+				if (distance < maxDistance) {
+					maxDistance = distance;
+					nearestX = i;
+					nearestY = j;
+				}
+			}
+		}
+		return Vector2i(nearestX, nearestY);
+	}
+
 	// Displaying the squares into which the piece can go
 	void DrawPossibleSquares() {
 		for (int i = 0; i < g_boardSize; ++i) {
 			for (int j = 0; j < g_boardSize; ++j) {
-				if (ConditionOfMove(board[i][j])) board[i][j].drawWithColor(Color(0, 255, 0, 70)); // Green square if you can go to this square
-				else if (ConditionOfCapture(board[i][j])) board[i][j].drawWithColor(Color(255, 0, 0, 70)); // Red square if you can capture
+				if (ConditionOfMove(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(0, 255, 0, 70)); // Green square if you can go to this square
+				else if (ConditionOfCapture(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(255, 0, 0, 70)); // Red square if you can capture
 			}
 		}
 	}
@@ -130,6 +146,9 @@ public:
 
 	bool getColor() const { return color; }
 	void setColor(const bool& color) { this->color = color; }
+
+	bool getIsSelected() const { return isSelected; }
+	void setIsSelected(const bool& isSelected) { this->isSelected = isSelected; }
 
 	bool getFirstMove() const { return firstMove; }
 	void setFirstMove(const bool& firstMove) { this->firstMove = firstMove; }
