@@ -74,6 +74,7 @@ class AbstractChessPiece : public Drawable {
 		setX(newSquare.getX());
 		setY(newSquare.getY());
 		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
+		setIsDeleted(false);
 
 		g_turn = !g_turn;
 		if (g_gameIsStopped) g_turn ? window.setTitle("Chess: WHITE WINS") : window.setTitle("Chess: BLACK WINS");

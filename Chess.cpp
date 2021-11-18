@@ -104,62 +104,62 @@ int main()
 			switch (boardArr[i][j])
 			{
 			case -1:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Castle(board[j][i], true)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Castle>(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 1:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Castle(board[j][i], false)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Castle>(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -2:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Knight(board[j][i], true)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Knight>(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 2:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Knight(board[j][i], false)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Knight>(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -3:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Bishop(board[j][i], true)));
-			board[j][i].setColor(true);  }
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Bishop>(board[j][i], true)));
+			board[j][i].setColor(true); }
 			break;
 
 			case 3:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Bishop(board[j][i], false)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Bishop>(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -4:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Queen(board[j][i], true)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Queen>(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 4:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Queen(board[j][i], false)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Queen>(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -5:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new King(board[j][i], true)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<King>(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 5:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new King(board[j][i], false)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<King>(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
 			case -6:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Pawn(board[j][i], true)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Pawn>(board[j][i], true)));
 			board[j][i].setColor(true); }
 			break;
 
 			case 6:
-			{pieces.push_back(unique_ptr<AbstractChessPiece>(new Pawn(board[j][i], false)));
+			{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Pawn>(board[j][i], false)));
 			board[j][i].setColor(false); }
 			break;
 
@@ -178,6 +178,7 @@ int main()
 			if (event.type == Event::Closed) window.close();
 
 			if (event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left) {
+				nearestSquare = pieces[n]->SearchNearestSquare(mousePos);
 				for (int i = 0; i < pieces.size(); ++i) {
 					if (pieces[i]->getGlobalBounds().contains(mousePos.x, mousePos.y) && pieces[i]->getColor() == g_turn) {
 						isMove = true;
@@ -187,11 +188,15 @@ int main()
 						pieces[n]->setIsSelected(true);
 						break;
 					}
-					else pieces[i]->setIsSelected(false);
+					else {
+						pieces[n]->Capture(board[nearestSquare.x][nearestSquare.y]);
+						pieces[n]->Move(board[nearestSquare.x][nearestSquare.y]);
+						pieces[i]->setIsSelected(false);
+					}
 				}
 			}
 
-			if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
+			else if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 				isMove = false;
 				nearestSquare = pieces[n]->SearchNearestSquare(mousePos);
 

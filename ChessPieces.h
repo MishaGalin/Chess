@@ -8,13 +8,13 @@ extern map <string, Texture*> textureOfPieces;
 
 class Pawn : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
-		return (!g_gameIsStopped && square.getIsEmpty() && getX() == square.getX() && getColor() == g_turn
+		return (!g_gameIsStopped && getIsSelected() && square.getIsEmpty() && getX() == square.getX() && getColor() == g_turn
 			&& ((pow(-1, getColor()) * (getY() - square.getY()) == 2 && board[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() && getFirstMove())
 				|| pow(-1, getColor()) * (getY() - square.getY()) == 1));
 	};
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!g_gameIsStopped && !square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != g_turn && getColor() == g_turn);
+		return (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && pow(-1, getColor()) * (getY() - square.getY()) == 1 && abs(getX() - square.getX()) == 1 && square.getColor() != g_turn && getColor() == g_turn);
 	}
 
 public:
@@ -27,7 +27,7 @@ public:
 
 class Castle : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
-		if (!g_gameIsStopped && square.getIsEmpty() && getColor() == g_turn) {
+		if (!g_gameIsStopped && getIsSelected() && square.getIsEmpty() && getColor() == g_turn) {
 			int dir1Y = getY(),
 				dir2X = getX(),
 				dir3Y = getY(),
@@ -63,7 +63,7 @@ class Castle : public AbstractChessPiece {
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!g_gameIsStopped && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
+		if (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1Y = getY(),
 				dir2X = getX(),
 				dir3Y = getY(),
@@ -112,11 +112,11 @@ public:
 
 class Knight : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
-		return (!g_gameIsStopped && square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == g_turn);
+		return (!g_gameIsStopped && getIsSelected() && square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && getColor() == g_turn);
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!g_gameIsStopped && !square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != g_turn && getColor() == g_turn);
+		return (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && abs((getX() - square.getX()) * (getY() - square.getY())) == 2 && square.getColor() != g_turn && getColor() == g_turn);
 	}
 
 public:
@@ -129,7 +129,7 @@ public:
 
 class Bishop : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
-		if (!g_gameIsStopped && square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == g_turn) {
+		if (!g_gameIsStopped && getIsSelected() && square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
 				dir2X = getX(), dir2Y = getY(),
 				dir3X = getX(), dir3Y = getY(),
@@ -182,7 +182,7 @@ class Bishop : public AbstractChessPiece {
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!g_gameIsStopped && !square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != g_turn && getColor() == g_turn) {
+		if (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && abs(square.getX() - getX()) == abs(square.getY() - getY()) && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1X = getX(), dir1Y = getY(),
 				dir2X = getX(), dir2Y = getY(),
 				dir3X = getX(), dir3Y = getY(),
@@ -239,7 +239,7 @@ public:
 
 class Queen : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
-		if (!g_gameIsStopped && square.getIsEmpty() && getColor() == g_turn) {
+		if (!g_gameIsStopped && getIsSelected() && square.getIsEmpty() && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
 				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
@@ -341,7 +341,7 @@ class Queen : public AbstractChessPiece {
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		if (!g_gameIsStopped && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
+		if (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
 			int dir1X = getX(), 						   // 1 - вправо
 				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
@@ -429,11 +429,11 @@ public:
 
 class King : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
-		return (!g_gameIsStopped && square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == g_turn);
+		return (!g_gameIsStopped && getIsSelected() && square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1 && getColor() == g_turn);
 	}
 
 	bool ConditionOfCapture(const Square& square) override {
-		return (!g_gameIsStopped && !square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
+		return (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && abs(square.getX() - getX()) <= 1 && abs(square.getY() - getY()) <= 1
 			&& (square.getX() != getX() || square.getY() != getY()) && square.getColor() != g_turn && getColor() == g_turn);
 	}
 
