@@ -112,13 +112,13 @@ public:
 		else ReturnToPrevPos();
 	}
 
-	Vector2i SearchNearestSquare() {
+	Vector2i SearchNearestSquare(Vector2i& mousePos) {
 		double maxDistance = 10000., distance = 0.;
 		int nearestX = 0, nearestY = 0;
 
 		for (int i = 0; i < g_boardSize; ++i) {
 			for (int j = 0; j < g_boardSize; ++j) {
-				distance = sqrt(pow(getPosition().x - board[i][j].getXInPixel(), 2) + pow(getPosition().y - board[i][j].getYInPixel(), 2)); // Distance to the square
+				distance = sqrt(pow(mousePos.x - board[i][j].getXInPixel(), 2) + pow(mousePos.y - board[i][j].getYInPixel(), 2)); // Distance to the square
 				if (distance < maxDistance) {
 					maxDistance = distance;
 					nearestX = i;

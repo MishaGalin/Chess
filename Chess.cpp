@@ -179,7 +179,7 @@ int main()
 
 			if (event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left) {
 				for (int i = 0; i < pieces.size(); ++i) {
-					if (pieces[i]->getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+					if (pieces[i]->getGlobalBounds().contains(mousePos.x, mousePos.y) && pieces[i]->getColor() == g_turn) {
 						isMove = true;
 						n = i; // pieces[n] - a piece that we move with the mouse
 						dx = mousePos.x - pieces[n]->getPosition().x;
@@ -193,7 +193,7 @@ int main()
 
 			if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 				isMove = false;
-				nearestSquare = pieces[n]->SearchNearestSquare();
+				nearestSquare = pieces[n]->SearchNearestSquare(mousePos);
 
 				if (boardImage.getGlobalBounds().contains(pieces[n]->getPosition())) { // Check the piece exit outside the window
 					pieces[n]->Capture(board[nearestSquare.x][nearestSquare.y]);
