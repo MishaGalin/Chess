@@ -1,6 +1,7 @@
 ﻿#include <SFML/Graphics.hpp>
 #include "AbstractChessPiece.h"
 #include "ChessPieces.h"
+#include <vector>
 
 using namespace sf; // SFML namespace
 using namespace std;
@@ -174,11 +175,11 @@ int main()
 		while (window.pollEvent(event))
 		{
 			mousePos = Mouse::getPosition(window);
+			nearestSquare = pieces[n]->SearchNearestSquare(mousePos);
 
 			if (event.type == Event::Closed) window.close();
 
 			if (event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left) {
-				nearestSquare = pieces[n]->SearchNearestSquare(mousePos);
 				for (int i = 0; i < pieces.size(); ++i) {
 					if (pieces[i]->getGlobalBounds().contains(mousePos.x, mousePos.y) && pieces[i]->getColor() == g_turn) {
 						isMove = true;
@@ -191,14 +192,13 @@ int main()
 					else {
 						pieces[n]->Capture(board[nearestSquare.x][nearestSquare.y]);
 						pieces[n]->Move(board[nearestSquare.x][nearestSquare.y]);
-						pieces[i]->setIsSelected(false);
+						pieces[n]->setIsSelected(false);
 					}
 				}
 			}
 
 			else if (event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left) {
 				isMove = false;
-				nearestSquare = pieces[n]->SearchNearestSquare(mousePos);
 
 				if (boardImage.getGlobalBounds().contains(pieces[n]->getPosition())) { // Check the piece exit outside the window
 					pieces[n]->Capture(board[nearestSquare.x][nearestSquare.y]);
@@ -212,13 +212,8 @@ int main()
 
 		window.clear();
 		window.draw(boardImage);
-
 		pieces[n]->DrawPossibleSquares();
-
-		for (auto& piece : pieces) {
-			if (!piece->getIsDeleted()) piece->draw(window);
-		}
-
+		for (auto& piece : pieces) { piece->draw(window); }
 		pieces[n]->draw(window); // The shape that is being moved is drawn a second time so that it is on top of all the others
 		window.display();
 	}
@@ -229,14 +224,12 @@ int main()
 void Castling() {}
 
 void Delete(Square& square) {
-	for (auto& piece : pieces) {
-		if (piece->getX() == square.getX() && piece->getY() == square.getY()) {
-			piece->setIsDeleted(true);
-			board[piece->getX()][piece->getY()].setIsEmpty(true);
-			piece->setX(-g_boardSize);
-			piece->setY(-g_boardSize);
-			piece->setPosition(-g_windowSizeX, -g_windowSizeY);
-			if (piece->getName() == "KingW" || piece->getName() == "KingB") g_gameIsStopped = true;
+	for (auto piece = pieces.begin(); piece != pieces.end(); piece++) {
+		if ((*piece)->getX() == square.getX() && (*piece)->getY() == square.getY())
+		{
+			board[(*piece)->getX()][(*piece)->getY()].setIsEmpty(true);
+			if ((*piece)->getName() == "KingW" || (*piece)->getName() == "KingB") g_gameIsStopped = true;
+			pieces.erase(piece);
 			return;
 		}
 	}

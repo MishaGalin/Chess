@@ -59,7 +59,7 @@ extern void Delete(Square& square);
 class AbstractChessPiece : public Drawable {
 	bool color = false; // 0 - white, 1 - black
 	bool firstMove = true; // Only relevant for pawns
-	bool isDeleted = false, isSelected = false;
+	bool isSelected = false;
 	int x = 0, y = 0;
 	string name = "";
 
@@ -74,7 +74,6 @@ class AbstractChessPiece : public Drawable {
 		setX(newSquare.getX());
 		setY(newSquare.getY());
 		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
-		setIsDeleted(false);
 
 		g_turn = !g_turn;
 		if (g_gameIsStopped) g_turn ? window.setTitle("Chess: WHITE WINS") : window.setTitle("Chess: BLACK WINS");
@@ -153,9 +152,6 @@ public:
 
 	bool getFirstMove() const { return firstMove; }
 	void setFirstMove(const bool& firstMove) { this->firstMove = firstMove; }
-
-	bool getIsDeleted() const { return isDeleted; }
-	void setIsDeleted(const bool& isDeleted) { this->isDeleted = isDeleted; }
 
 	int getX() const { return x; }
 	void setX(const int& x) { this->x = x; }
