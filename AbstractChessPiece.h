@@ -5,6 +5,7 @@ using namespace std;
 extern bool g_turn, g_gameIsStopped;
 extern const int g_squareSide, g_boardSize;
 extern RenderWindow window;
+extern vector<unique_ptr<AbstractChessPiece>> pieces;
 
 class Square : public Drawable {
 	bool color = false, isEmpty = true;
@@ -70,18 +71,36 @@ class AbstractChessPiece : public Drawable {
 		oldSquare.setColor(!getColor());
 		newSquare.setColor(getColor());
 
-		if (getFirstMove()) setFirstMove(false);
+		setFirstMove(false);
 		setX(newSquare.getX());
 		setY(newSquare.getY());
 		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
 
 		g_turn = !g_turn;
-		if (g_gameIsStopped) g_turn ? window.setTitle("Chess: WHITE WINS") : window.setTitle("Chess: BLACK WINS");
-		else g_turn ? window.setTitle("Chess: turn of black") : window.setTitle("Chess: turn of white");
+		if (g_gameIsStopped) window.setTitle(g_turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
+		else window.setTitle(g_turn ? "Chess: turn of black" : "Chess: turn of white");
 	};
+
+	void Castling_(Square& oldSquare, Square& newSquare) {
+		setFirstMove(false);
+		setX(newSquare.getX());
+		setY(newSquare.getY());
+		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
+		g_turn = !g_turn;
+
+		for (auto& piece : pieces) {
+			if (piece->getX() == newSquare.getX() && piece->getY() == newSquare.getY()) {
+				piece->setX(oldSquare.getX());
+				piece->setY(oldSquare.getY());
+				piece->setPosition(oldSquare.getXInPixel(), oldSquare.getYInPixel());
+				piece->setFirstMove(false);
+			}
+		}
+	}
 
 	virtual bool ConditionOfMove(const Square& square) = 0;
 	virtual bool ConditionOfCapture(const Square& square) = 0;
+	virtual bool ConditionOfCastling(const Square& square) = 0;
 
 protected:
 	Sprite sprite;
@@ -112,6 +131,11 @@ public:
 		else ReturnToPrevPos();
 	}
 
+	void Castling(Square& square) {
+		if (ConditionOfCastling(square)) Castling_(board[x][y], square);
+		else ReturnToPrevPos();
+	}
+
 	Vector2i SearchNearestSquare(Vector2i& mousePos) {
 		double maxDistance = 10000., distance = 0.;
 		int nearestX = 0, nearestY = 0;
@@ -133,8 +157,9 @@ public:
 	void DrawPossibleSquares() {
 		for (int i = 0; i < g_boardSize; ++i) {
 			for (int j = 0; j < g_boardSize; ++j) {
-				if (ConditionOfMove(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(0, 255, 0, 70)); // Green square if you can go to this square
-				else if (ConditionOfCapture(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(255, 0, 0, 70)); // Red square if you can capture
+				if (ConditionOfMove(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(0, 255, 0, 60)); // Green square if you can go to this square
+				else if (ConditionOfCapture(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(255, 0, 0, 60)); // Red square if you can capture
+				else if (ConditionOfCastling(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(255, 255, 0, 60));
 			}
 		}
 	}

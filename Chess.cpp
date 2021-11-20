@@ -43,18 +43,29 @@ map <string, Texture*> textureOfPieces = {
 	{"KingB", &textureKingB }
 };
 
+//int boardArr[g_boardSize][g_boardSize] =
+//{ -1,-2,-3,-4,-5,-3,-2,-1,
+//  -6,-6,-6,-6,-6,-6,-6,-6,
+//   0, 0, 0, 0, 0, 0, 0, 0,
+//   0, 0, 0, 0, 0, 0, 0, 0,
+//   0, 0, 0, 0, 0, 0, 0, 0,
+//   0, 0, 0, 0, 0, 0, 0, 0,
+//   6, 6, 6, 6, 6, 6, 6, 6,
+//   1, 2, 3, 4, 5, 3, 2, 1
+//};
+
+// Test board
 int boardArr[g_boardSize][g_boardSize] =
-{ -1,-2,-3,-4,-5,-3,-2,-1,
-  -6,-6,-6,-6,-6,-6,-6,-6,
+{ -1,0,0,0,-5,0,0,-1,
+  0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0,
-   6, 6, 6, 6, 6, 6, 6, 6,
-   1, 2, 3, 4, 5, 3, 2, 1
+   0, 0, 0, 0, 0, 0, 0, 1,
+   1, 0, 3, 0, 5, 0, 0, 1
 };
 
-void Castling();
 
 // Deleting a piece by known coordinates on the board
 void Delete(Square& square);
@@ -184,12 +195,14 @@ int main()
 					if (pieces[i]->getGlobalBounds().contains(mousePos.x, mousePos.y) && pieces[i]->getColor() == g_turn) {
 						isMove = true;
 						n = i; // pieces[n] - a piece that we move with the mouse
+						pieces[n]->Castling(board[nearestSquare.x][nearestSquare.y]);
 						dx = mousePos.x - pieces[n]->getPosition().x;
 						dy = mousePos.y - pieces[n]->getPosition().y;
 						pieces[n]->setIsSelected(true);
 						break;
 					}
 					else {
+						pieces[n]->Castling(board[nearestSquare.x][nearestSquare.y]);
 						pieces[n]->Capture(board[nearestSquare.x][nearestSquare.y]);
 						pieces[n]->Move(board[nearestSquare.x][nearestSquare.y]);
 						pieces[n]->setIsSelected(false);
@@ -213,6 +226,11 @@ int main()
 		window.clear();
 		window.draw(boardImage);
 		pieces[n]->DrawPossibleSquares();
+
+		for (auto& piece : pieces) {
+			piece->draw(window);
+		}
+
 		for (auto& piece : pieces) { piece->draw(window); }
 		pieces[n]->draw(window); // The shape that is being moved is drawn a second time so that it is on top of all the others
 		window.display();
@@ -221,12 +239,12 @@ int main()
 	return 0;
 }
 
-void Castling() {}
+
+
 
 void Delete(Square& square) {
-	for (auto piece = pieces.begin(); piece != pieces.end(); piece++) {
-		if ((*piece)->getX() == square.getX() && (*piece)->getY() == square.getY())
-		{
+	for (auto piece = pieces.begin(); piece < pieces.end(); piece++) {
+		if ((*piece)->getX() == square.getX() && (*piece)->getY() == square.getY()) {
 			board[(*piece)->getX()][(*piece)->getY()].setIsEmpty(true);
 			if ((*piece)->getName() == "KingW" || (*piece)->getName() == "KingB") g_gameIsStopped = true;
 			pieces.erase(piece);
