@@ -5,57 +5,8 @@ using namespace std;
 extern bool g_turn, g_gameIsStopped;
 extern const int g_squareSide, g_boardSize;
 extern RenderWindow window;
-extern vector<unique_ptr<AbstractChessPiece>> pieces;
-
-class Square : public Drawable {
-	bool color = false, isEmpty = true;
-	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
-	RectangleShape drawableRect;
-
-public:
-	Square(const int& x, const int& y, const int& value) {
-		setX(x);
-		setY(y);
-		setXInPixel(7 + g_squareSide / 2 + g_squareSide * getX());
-		setYInPixel(7 + g_squareSide / 2 + g_squareSide * getY());
-		setColor(false);
-		value ? setIsEmpty(false) : setIsEmpty(true);
-
-		drawableRect.setPosition(xInPixel, yInPixel);
-		drawableRect.setSize(Vector2f(g_squareSide - 2, g_squareSide - 2));
-		drawableRect.setOrigin(g_squareSide / 2 - 1, g_squareSide / 2 - 1);
-		drawableRect.setOutlineColor(Color::White);
-		drawableRect.setOutlineThickness(2);
-	}
-
-	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
-
-	void drawWithColor(Color color) {
-		drawableRect.setFillColor(color);
-		draw(window);
-	}
-
-	bool getIsEmpty() const { return isEmpty; }
-	void setIsEmpty(const bool& isEmpty) { this->isEmpty = isEmpty; }
-
-	bool getColor() const { return color; }
-	void setColor(const bool& color) { this->color = color; }
-
-	int getX() const { return x; }
-	void setX(const int& x) { this->x = x; }
-
-	int getY() const { return y; }
-	void setY(const int& y) { this->y = y; }
-
-	int getXInPixel() const { return xInPixel; }
-	void setXInPixel(const int& xInPixel) { this->xInPixel = xInPixel; }
-
-	int getYInPixel() const { return yInPixel; }
-	void setYInPixel(const int& yInPixel) { this->yInPixel = yInPixel; }
-};
-
 extern vector<vector<Square>> board;
-extern void Delete(Square& square);
+extern void DeletePiece(const Square& square);
 
 class AbstractChessPiece : public Drawable {
 	bool color = false; // 0 - white, 1 - black
@@ -81,26 +32,10 @@ class AbstractChessPiece : public Drawable {
 		else window.setTitle(g_turn ? "Chess: turn of black" : "Chess: turn of white");
 	};
 
-	void Castling_(Square& oldSquare, Square& newSquare) {
-		setFirstMove(false);
-		setX(newSquare.getX());
-		setY(newSquare.getY());
-		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
-		g_turn = !g_turn;
-
-		for (auto& piece : pieces) {
-			if (piece->getX() == newSquare.getX() && piece->getY() == newSquare.getY()) {
-				piece->setX(oldSquare.getX());
-				piece->setY(oldSquare.getY());
-				piece->setPosition(oldSquare.getXInPixel(), oldSquare.getYInPixel());
-				piece->setFirstMove(false);
-			}
-		}
-	}
-
 	virtual bool ConditionOfMove(const Square& square) = 0;
 	virtual bool ConditionOfCapture(const Square& square) = 0;
 	virtual bool ConditionOfCastling(const Square& square) = 0;
+	virtual void Castling_(const Square& square) = 0;
 
 protected:
 	Sprite sprite;
@@ -115,7 +50,7 @@ public:
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
 
 	void ReturnToPrevPos() {
-		sprite.setPosition(board[x][y].getXInPixel(), board[x][y].getYInPixel());
+		sprite.setPosition((float)board[x][y].getXInPixel(), (float)board[x][y].getYInPixel());
 	};
 
 	void Move(Square& square) {
@@ -125,14 +60,14 @@ public:
 
 	void Capture(Square& square) {
 		if (ConditionOfCapture(square)) {
-			Delete(square);
+			DeletePiece(square);
 			Move_(board[x][y], square);
 		}
 		else ReturnToPrevPos();
 	}
 
 	void Castling(Square& square) {
-		if (ConditionOfCastling(square)) Castling_(board[x][y], square);
+		if (ConditionOfCastling(square)) Castling_(square);
 		else ReturnToPrevPos();
 	}
 

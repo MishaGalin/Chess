@@ -6,6 +6,7 @@ extern bool g_turn, g_gameIsStopped;
 extern vector<vector<Square>> board;
 extern map <string, Texture*> textureOfPieces;
 extern vector<unique_ptr<AbstractChessPiece>> pieces;
+extern AbstractChessPiece* FindPiece(const Square& square);
 
 class Pawn : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& square) override {
@@ -20,6 +21,7 @@ class Pawn : public AbstractChessPiece {
 
 	bool ConditionOfCastling(const Square& square) override { return false; }
 
+	void Castling_(const Square& square) { return; }
 public:
 	Pawn(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(25, 42);
@@ -131,7 +133,31 @@ class Castle : public AbstractChessPiece {
 		}
 		return false;
 	}
-	
+
+	void Castling_(const Square& square) {
+		int newX = getX() + (square.getX() > getX() ? 3 : -2);
+		board[getX()][getY()].setIsEmpty(true);
+		board[newX][getY()].setIsEmpty(false);
+		board[getX()][getY()].setColor(!getColor());
+		board[newX][getY()].setColor(getColor());
+
+		setFirstMove(false);
+		setX(newX);
+		setPosition(board[getX()][getY()].getXInPixel(), board[getX()][getY()].getYInPixel());
+
+		AbstractChessPiece* piece = FindPiece(square);
+		if (piece->getX() == square.getX() && piece->getY() == square.getY()) {
+			int newThisPieceX = getX() + (square.getX() > getX() ? -1 : 1);
+			board[square.getX()][getY()].setIsEmpty(true);
+			board[newThisPieceX][getY()].setIsEmpty(false);
+			piece->setX(newThisPieceX);
+			piece->setPosition(board[piece->getX()][getY()].getXInPixel(), board[piece->getX()][getY()].getYInPixel());
+			piece->setFirstMove(false);
+		}
+
+		g_turn = !g_turn;
+		window.setTitle(g_turn ? "Chess: turn of black" : "Chess: turn of white");
+	}
 public:
 	Castle(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(33, 43);
@@ -151,6 +177,7 @@ class Knight : public AbstractChessPiece {
 
 	bool ConditionOfCastling(const Square& square) override { return false; }
 
+	void Castling_(const Square& square) { return; }
 public:
 	Knight(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(37, 45);
@@ -263,6 +290,7 @@ class Bishop : public AbstractChessPiece {
 
 	bool ConditionOfCastling(const Square& square) override { return false; }
 
+	void Castling_(const Square& square) { return; }
 public:
 	Bishop(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
@@ -376,14 +404,14 @@ class Queen : public AbstractChessPiece {
 
 	bool ConditionOfCapture(const Square& square) override {
 		if (!g_gameIsStopped && getIsSelected() && !square.getIsEmpty() && square.getColor() != g_turn && getColor() == g_turn) {
-			int dir1X = getX(), 						   // 1 - вправо
-				dir2X = getX(), dir2Y = getY(),			   // 2 - по диагонали вправо-вверх
+			int dir1X = getX(), 					   // 1 - вправо
+				dir2X = getX(), dir2Y = getY(),		   // 2 - по диагонали вправо-вверх
 				dir3Y = getY(),						   // 3 - вверх
-				dir4X = getX(), dir4Y = getY(),			   // и т.д. против часовой стрелки
+				dir4X = getX(), dir4Y = getY(),		   // и т.д. против часовой стрелки
 				dir5X = getX(),						   //
-				dir6X = getX(), dir6Y = getY(),			   //
+				dir6X = getX(), dir6Y = getY(),		   //
 				dir7Y = getY(),						   //
-				dir8X = getX(), dir8Y = getY();			   //
+				dir8X = getX(), dir8Y = getY();		   //
 			bool dir1 = false, dir2 = false, dir3 = false, dir4 = false,
 				dir5 = false, dir6 = false, dir7 = false, dir8 = false;
 
@@ -454,6 +482,8 @@ class Queen : public AbstractChessPiece {
 	}
 
 	bool ConditionOfCastling(const Square& square) override { return false; }
+
+	void Castling_(const Square& square) { return; }
 public:
 	Queen(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 45);
@@ -483,10 +513,10 @@ class King : public AbstractChessPiece {
 
 					for (int i = 1; i < 8; ++i)
 					{
-					if (shortСastling && getX() + i >= 0 && getX() + i <= 7) {
-						shortСastlingX = getX() + i;
-						if (board[shortСastlingX][getY()].getIsEmpty()) continue; else break;
-					}
+						if (shortСastling && getX() + i >= 0 && getX() + i <= 7) {
+							shortСastlingX = getX() + i;
+							if (board[shortСastlingX][getY()].getIsEmpty()) continue; else break;
+						}
 						if (distantCastling && getX() - i >= 0 && getX() - i <= 7) {
 							distantCastlingX = getX() - i;
 							if (board[distantCastlingX][getY()].getIsEmpty()) continue; else break;
@@ -498,6 +528,32 @@ class King : public AbstractChessPiece {
 		}
 		return false;
 	}
+
+	void Castling_(const Square& square) {
+		int newX = getX() + (square.getX() > getX() ? 2 : -2);
+		board[getX()][getY()].setIsEmpty(true);
+		board[newX][getY()].setIsEmpty(false);
+		board[getX()][getY()].setColor(!getColor());
+		board[newX][getY()].setColor(getColor());
+
+		setFirstMove(false);
+		setX(newX);
+		setPosition(board[getX()][getY()].getXInPixel(), board[getX()][getY()].getYInPixel());
+
+		AbstractChessPiece* piece = FindPiece(square);
+		if (piece->getX() == square.getX() && piece->getY() == square.getY()) {
+			int newThisPieceX = getX() + (getX() < piece->getX() ? -1 : 1);
+			board[square.getX()][getY()].setIsEmpty(true);
+			board[newThisPieceX][getY()].setIsEmpty(false);
+			piece->setX(newThisPieceX);
+			piece->setPosition(board[piece->getX()][getY()].getXInPixel(), board[piece->getX()][getY()].getYInPixel());
+			piece->setFirstMove(false);
+		}
+
+		g_turn = !g_turn;
+		window.setTitle(g_turn ? "Chess: turn of black" : "Chess: turn of white");
+	}
+
 public:
 	King(const Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
