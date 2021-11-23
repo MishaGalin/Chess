@@ -15,20 +15,15 @@ class AbstractChessPiece : public Drawable {
 	string name = "";
 
 	// Directly moving from one square to another
-	void Move_(Square& oldSquare, Square& newSquare) {
-		oldSquare.setIsEmpty(true);
-		newSquare.setIsEmpty(false);
-		oldSquare.setColor(!getColor());
-		newSquare.setColor(getColor());
+	void Move_(Square& newSquare) {
+		Changeover(board.Squares[x][y], newSquare);
 
 		setFirstMove(false);
 		setX(newSquare.getX());
 		setY(newSquare.getY());
-		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
+		setPosition(newSquare.getInPixel());
 
-		game.turn = !game.turn;
-		if (game.isStopped) window.setTitle(game.turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
-		else window.setTitle(game.turn ? "Chess: turn of black" : "Chess: turn of white");
+		game.ChangeOfTurn();
 	};
 
 	virtual bool ConditionOfMove(const Square& square) = 0;
@@ -39,34 +34,41 @@ class AbstractChessPiece : public Drawable {
 protected:
 	Sprite sprite;
 	AbstractChessPiece(const Square& square, const bool& color) {
-		setPosition(square.getXInPixel(), square.getYInPixel());
+		setPosition(square.getInPixel());
 		setColor(color);
 		setX(square.getX());
 		setY(square.getY());
+	}
+
+	void Changeover(Square& oldSquare, Square& newSquare) {
+		oldSquare.setIsEmpty(true);
+		newSquare.setIsEmpty(false);
+		oldSquare.setColor(!getColor());
+		newSquare.setColor(getColor());
 	}
 
 public:
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
 
 	void ReturnToPrevPos() {
-		sprite.setPosition((float)board.Squares[x][y].getXInPixel(), (float)board.Squares[x][y].getYInPixel());
+		setPosition(board.Squares[x][y].getInPixel());
 	};
 
-	void Move(Square& square) {
-		if (ConditionOfMove(square)) Move_(board.Squares[x][y], square);
+	void Move(Square& newSquare) {
+		if (ConditionOfMove(newSquare)) Move_(newSquare);
 		else ReturnToPrevPos();
 	}
 
-	void Capture(Square& square) {
-		if (ConditionOfCapture(square)) {
-			DeletePiece(square);
-			Move_(board.Squares[x][y], square);
+	void Capture(Square& newSquare) {
+		if (ConditionOfCapture(newSquare)) {
+			DeletePiece(newSquare);
+			Move_(newSquare);
 		}
 		else ReturnToPrevPos();
 	}
 
-	void Castling(Square& square) {
-		if (ConditionOfCastling(square)) Castling_(square);
+	void Castling(Square& newSquare) {
+		if (ConditionOfCastling(newSquare)) Castling_(newSquare);
 		else ReturnToPrevPos();
 	}
 
@@ -91,9 +93,9 @@ public:
 	void DrawPossibleSquares() {
 		for (int i = 0; i < Board::Size; ++i) {
 			for (int j = 0; j < Board::Size; ++j) {
-				if (ConditionOfMove(board.Squares[i][j]) && getIsSelected()) board.Squares[i][j].drawWithColor(Color(0, 255, 0, 60)); // Green square if you can go to this square
-				else if (ConditionOfCapture(board.Squares[i][j]) && getIsSelected()) board.Squares[i][j].drawWithColor(Color(255, 0, 0, 60)); // Red square if you can capture
-				else if (ConditionOfCastling(board.Squares[i][j]) && getIsSelected()) board.Squares[i][j].drawWithColor(Color(255, 255, 0, 60));
+				if (ConditionOfMove(board.Squares[i][j])) board.Squares[i][j].drawWithColor(Color(0, 255, 0, 60)); // Green square if you can go to this square
+				else if (ConditionOfCapture(board.Squares[i][j])) board.Squares[i][j].drawWithColor(Color(255, 0, 0, 60)); // Red square if you can capture
+				else if (ConditionOfCastling(board.Squares[i][j])) board.Squares[i][j].drawWithColor(Color(255, 255, 0, 60));
 			}
 		}
 	}
@@ -102,6 +104,7 @@ public:
 
 	Vector2f getPosition() const { return sprite.getPosition(); }
 	void setPosition(const int& x, const int& y) { sprite.setPosition(float(x), float(y)); }
+	void setPosition(Vector2i newPos) { sprite.setPosition(float(newPos.x), float(newPos.y)); }
 
 	bool getColor() const { return color; }
 	void setColor(const bool& color) { this->color = color; }

@@ -3,6 +3,8 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
+extern RenderWindow window;
+
 class Game {
 	Texture texturePawnW,
 		texturePawnB,
@@ -16,6 +18,7 @@ class Game {
 		textureQueenB,
 		textureKingW,
 		textureKingB;
+
 public:
 	Vector2i mousePos = Vector2i(0, 0);
 	bool turn = false; // 0 - white move, 1 - black move
@@ -35,11 +38,20 @@ public:
 	{"QueenW", &textureQueenW },
 	{"QueenB", &textureQueenB },
 	{"KingW", &textureKingW },
-	{"KingB", &textureKingB }
-	};
+	{"KingB", &textureKingB } };
+
+	void ChangeOfTurn() {
+		turn = !turn;
+		if (isStopped) window.setTitle(turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
+		else window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
+	}
 
 	Game() {
 		icon.loadFromFile("images/icon.png");
+
+		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
+		window.setIcon(32, 32, icon.getPixelsPtr());
+		window.setFramerateLimit(300);
 
 		textureOfPieces["PawnW"]->loadFromFile("images/pawn_w.png");
 		textureOfPieces["PawnB"]->loadFromFile("images/pawn_b.png");

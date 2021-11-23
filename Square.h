@@ -51,4 +51,6 @@ public:
 
 	int getYInPixel() const { return yInPixel; }
 	void setYInPixel(const int& yInPixel) { this->yInPixel = yInPixel; }
+
+	Vector2i getInPixel() const { return Vector2i(xInPixel, yInPixel); }
 };

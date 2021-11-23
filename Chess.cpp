@@ -4,14 +4,13 @@
 #include "Board.h"
 #include "AbstractChessPiece.h"
 #include "ChessPieces.h"
-#include <vector>
 
 using namespace sf; // SFML namespace
 using namespace std;
 
+RenderWindow window(VideoMode(Game::windowSizeX, Game::windowSizeY), "Chess", Style::Close);
 Board board;
 Game game;
-RenderWindow window(VideoMode(Game::windowSizeX, Game::windowSizeY), "Chess", Style::Close);
 vector<unique_ptr<AbstractChessPiece>> pieces; // An array of all pieces on the board
 
 // Deleting a piece by known coordinates on the board
@@ -26,10 +25,6 @@ int main()
 	int dx = 0, dy = 0, n = 0;
 	Event event;
 	Square* nearestSquare;
-
-	window.setTitle(game.turn ? "Chess: turn of black" : "Chess: turn of white");
-	window.setIcon(32, 32, game.icon.getPixelsPtr());
-	window.setFramerateLimit(300);
 
 	// Arrangement of pieces
 	for (int i = 0; i < Board::Size; ++i) {
