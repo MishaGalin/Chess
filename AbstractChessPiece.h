@@ -2,11 +2,10 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-extern bool g_turn, g_gameIsStopped;
-extern const int g_squareSide, g_boardSize;
+extern Game game;
 extern RenderWindow window;
-extern vector<vector<Square>> board;
-extern void DeletePiece(const Square& square);
+extern Board board;
+void DeletePiece(const Square& square);
 
 class AbstractChessPiece : public Drawable {
 	bool color = false; // 0 - white, 1 - black
@@ -27,9 +26,9 @@ class AbstractChessPiece : public Drawable {
 		setY(newSquare.getY());
 		setPosition(newSquare.getXInPixel(), newSquare.getYInPixel());
 
-		g_turn = !g_turn;
-		if (g_gameIsStopped) window.setTitle(g_turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
-		else window.setTitle(g_turn ? "Chess: turn of black" : "Chess: turn of white");
+		game.turn = !game.turn;
+		if (game.isStopped) window.setTitle(game.turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
+		else window.setTitle(game.turn ? "Chess: turn of black" : "Chess: turn of white");
 	};
 
 	virtual bool ConditionOfMove(const Square& square) = 0;
@@ -50,18 +49,18 @@ public:
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
 
 	void ReturnToPrevPos() {
-		sprite.setPosition((float)board[x][y].getXInPixel(), (float)board[x][y].getYInPixel());
+		sprite.setPosition((float)board.Squares[x][y].getXInPixel(), (float)board.Squares[x][y].getYInPixel());
 	};
 
 	void Move(Square& square) {
-		if (ConditionOfMove(square)) Move_(board[x][y], square);
+		if (ConditionOfMove(square)) Move_(board.Squares[x][y], square);
 		else ReturnToPrevPos();
 	}
 
 	void Capture(Square& square) {
 		if (ConditionOfCapture(square)) {
 			DeletePiece(square);
-			Move_(board[x][y], square);
+			Move_(board.Squares[x][y], square);
 		}
 		else ReturnToPrevPos();
 	}
@@ -71,13 +70,13 @@ public:
 		else ReturnToPrevPos();
 	}
 
-	Vector2i SearchNearestSquare(Vector2i& mousePos) {
+	Square* SearchNearestSquare(Vector2i& mousePos) {
 		double maxDistance = 10000., distance = 0.;
 		int nearestX = 0, nearestY = 0;
 
-		for (int i = 0; i < g_boardSize; ++i) {
-			for (int j = 0; j < g_boardSize; ++j) {
-				distance = sqrt(pow(mousePos.x - board[i][j].getXInPixel(), 2) + pow(mousePos.y - board[i][j].getYInPixel(), 2)); // Distance to the square
+		for (int i = 0; i < Board::Size; ++i) {
+			for (int j = 0; j < Board::Size; ++j) {
+				distance = sqrt(pow(mousePos.x - board.Squares[i][j].getXInPixel(), 2) + pow(mousePos.y - board.Squares[i][j].getYInPixel(), 2)); // Distance to the square
 				if (distance < maxDistance) {
 					maxDistance = distance;
 					nearestX = i;
@@ -85,16 +84,16 @@ public:
 				}
 			}
 		}
-		return Vector2i(nearestX, nearestY);
+		return &board.Squares[nearestX][nearestY];
 	}
 
 	// Displaying the squares into which the piece can go
 	void DrawPossibleSquares() {
-		for (int i = 0; i < g_boardSize; ++i) {
-			for (int j = 0; j < g_boardSize; ++j) {
-				if (ConditionOfMove(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(0, 255, 0, 60)); // Green square if you can go to this square
-				else if (ConditionOfCapture(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(255, 0, 0, 60)); // Red square if you can capture
-				else if (ConditionOfCastling(board[i][j]) && getIsSelected()) board[i][j].drawWithColor(Color(255, 255, 0, 60));
+		for (int i = 0; i < Board::Size; ++i) {
+			for (int j = 0; j < Board::Size; ++j) {
+				if (ConditionOfMove(board.Squares[i][j]) && getIsSelected()) board.Squares[i][j].drawWithColor(Color(0, 255, 0, 60)); // Green square if you can go to this square
+				else if (ConditionOfCapture(board.Squares[i][j]) && getIsSelected()) board.Squares[i][j].drawWithColor(Color(255, 0, 0, 60)); // Red square if you can capture
+				else if (ConditionOfCastling(board.Squares[i][j]) && getIsSelected()) board.Squares[i][j].drawWithColor(Color(255, 255, 0, 60));
 			}
 		}
 	}

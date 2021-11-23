@@ -2,11 +2,11 @@
 using namespace sf; // SFML namespace
 using namespace std;
 
-extern bool g_turn, g_gameIsStopped;
-extern const int g_squareSide, g_boardSize;
+extern Game game;
 extern RenderWindow window;
 
 class Square : public Drawable {
+	static const int squareSide = 112; // Side length of a square in pixels
 	bool color = false, isEmpty = true;
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	RectangleShape drawableRect;
@@ -15,14 +15,14 @@ public:
 	Square(const int& x, const int& y, const int& value) {
 		setX(x);
 		setY(y);
-		setXInPixel(7 + g_squareSide / 2 + g_squareSide * getX());
-		setYInPixel(7 + g_squareSide / 2 + g_squareSide * getY());
+		setXInPixel(7 + squareSide / 2 + squareSide * getX());
+		setYInPixel(7 + squareSide / 2 + squareSide * getY());
 		setColor(false);
-		value ? setIsEmpty(false) : setIsEmpty(true);
+		setIsEmpty(value == 0 ? true : false);
 
 		drawableRect.setPosition((float)xInPixel, (float)yInPixel);
-		drawableRect.setSize(Vector2f(g_squareSide - 2, g_squareSide - 2));
-		drawableRect.setOrigin((float)(g_squareSide / 2 - 1), (float)(g_squareSide / 2 - 1));
+		drawableRect.setSize(Vector2f(squareSide - 2, squareSide - 2));
+		drawableRect.setOrigin((float)(squareSide / 2 - 1), (float)(squareSide / 2 - 1));
 		drawableRect.setOutlineColor(Color::White);
 		drawableRect.setOutlineThickness(2);
 	}

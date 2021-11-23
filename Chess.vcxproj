@@ -149,7 +149,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractChessPiece.h" />
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="Chess.h" />
     <ClInclude Include="ChessPieces.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="Square.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
