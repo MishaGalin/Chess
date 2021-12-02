@@ -1,38 +1,36 @@
-#pragma once
-using namespace sf; // SFML namespace
-using namespace std;
-
 extern Game game;
 extern RenderWindow window;
 
 class Square : public Drawable {
-	static const int squareSide = 112; // Side length of a square in pixels
 	bool color = false, isEmpty = true;
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	RectangleShape drawableRect;
 
 public:
+	static const int sideLength = 112; // Side length of a square in pixels
 	Square(const int& x, const int& y, const int& value) {
 		setX(x);
 		setY(y);
-		setXInPixel(7 + squareSide / 2 + squareSide * getX());
-		setYInPixel(7 + squareSide / 2 + squareSide * getY());
+		setXInPixel(7 + sideLength / 2 + sideLength * getX());
+		setYInPixel(7 + sideLength / 2 + sideLength * getY());
 		setColor(false);
 		setIsEmpty(value == 0 ? true : false);
 
 		drawableRect.setPosition((float)xInPixel, (float)yInPixel);
-		drawableRect.setSize(Vector2f(squareSide - 2, squareSide - 2));
-		drawableRect.setOrigin((float)(squareSide / 2 - 1), (float)(squareSide / 2 - 1));
+		drawableRect.setSize(Vector2f(sideLength - 2, sideLength - 2));
+		drawableRect.setOrigin((float)(sideLength / 2 - 1), (float)(sideLength / 2 - 1));
 		drawableRect.setOutlineColor(Color::White);
 		drawableRect.setOutlineThickness(2);
 	}
 
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
 
-	void drawWithColor(Color color) {
+	void drawWithColor(const Color& color) {
 		drawableRect.setFillColor(color);
 		draw(window);
 	}
+
+	FloatRect getGlobalBounds() { return drawableRect.getGlobalBounds(); }
 
 	bool getIsEmpty() const { return isEmpty; }
 	void setIsEmpty(const bool& isEmpty) { this->isEmpty = isEmpty; }

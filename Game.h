@@ -1,30 +1,33 @@
 #pragma once
-
 using namespace sf; // SFML namespace
 using namespace std;
 
 extern RenderWindow window;
 
 class Game {
-	Texture texturePawnW,
-		texturePawnB,
-		textureCastleW,
-		textureCastleB,
-		textureKnightW,
-		textureKnightB,
-		textureBishopW,
-		textureBishopB,
-		textureQueenW,
-		textureQueenB,
-		textureKingW,
-		textureKingB;
+	Image icon;
+
+	Texture texturePawnW;
+	Texture	texturePawnB;
+	Texture	textureCastleW;
+	Texture	textureCastleB;
+	Texture	textureKnightW;
+	Texture	textureKnightB;
+	Texture	textureBishopW;
+	Texture textureBishopB;
+	Texture	textureQueenW;
+	Texture	textureQueenB;
+	Texture	textureKingW;
+	Texture	textureKingB;
+
+	Texture choicePieceW;
+	Texture choicePieceB;
 
 public:
 	Vector2i mousePos = Vector2i(0, 0);
 	bool turn = false; // 0 - white move, 1 - black move
-	bool isStopped = false;
+	bool isFinished = false, pawnIsPromotion = false;
 	static const int windowSizeX = 910, windowSizeY = 910;
-	Image icon;
 
 	map <string, Texture*> textureOfPieces = {
 	{"PawnW", &texturePawnW },
@@ -38,16 +41,18 @@ public:
 	{"QueenW", &textureQueenW },
 	{"QueenB", &textureQueenB },
 	{"KingW", &textureKingW },
-	{"KingB", &textureKingB } };
+	{"KingB", &textureKingB },
+	{"choiceW", &choicePieceW},
+	{"choiceB", &choicePieceB} };
 
 	void ChangeOfTurn() {
 		turn = !turn;
-		if (isStopped) window.setTitle(turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
+		if (isFinished) window.setTitle(turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
 		else window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
 	}
 
 	Game() {
-		icon.loadFromFile("images/icon.png");
+		icon.loadFromFile("images/icon32.png");
 
 		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
 		window.setIcon(32, 32, icon.getPixelsPtr());
@@ -65,5 +70,8 @@ public:
 		textureOfPieces["QueenB"]->loadFromFile("images/queen_b.png");
 		textureOfPieces["KingW"]->loadFromFile("images/king_w.png");
 		textureOfPieces["KingB"]->loadFromFile("images/king_b.png");
+
+		textureOfPieces["choiceW"]->loadFromFile("images/choicePieceW.png");
+		textureOfPieces["choiceB"]->loadFromFile("images/choicePieceB.png");
 	}
 };
