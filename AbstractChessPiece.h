@@ -123,9 +123,9 @@ public:
 	void DrawPossibleSquares() {
 		for (int i = 0; i < Board::Size; ++i) {
 			for (int j = 0; j < Board::Size; ++j) {
-				if (ConditionOfMove(board.Squares[i][j]))          board.Squares[i][j].drawWithColor(Color(0, 255, 0, 60)); // Green square if you can go to this square
-				else if (ConditionOfCapture(board.Squares[i][j]))  board.Squares[i][j].drawWithColor(Color(255, 0, 0, 60)); // Red square if you can capture
-				else if (ConditionOfCastling(board.Squares[i][j])) board.Squares[i][j].drawWithColor(Color(255, 255, 0, 60));
+				if (ConditionOfMove(board.Squares[i][j]))          board.Squares[i][j].drawWithColor(Color(0, 255, 0, 60));   // Green square if you can go to this square
+				else if (ConditionOfCapture(board.Squares[i][j]))  board.Squares[i][j].drawWithColor(Color(255, 0, 0, 60));   // Red square if you can capture
+				else if (ConditionOfCastling(board.Squares[i][j])) board.Squares[i][j].drawWithColor(Color(255, 255, 0, 60)); // Yellow square if castling can be done
 			}
 		}
 	}
@@ -134,7 +134,7 @@ public:
 
 	Vector2f getPosition() const { return sprite.getPosition(); }
 	void setPosition(const int& x, const int& y) { sprite.setPosition(float(x), float(y)); }
-	void setPosition(Vector2i newPos) { sprite.setPosition(float(newPos.x), float(newPos.y)); }
+	void setPosition(const Vector2i& newPos) { sprite.setPosition(float(newPos.x), float(newPos.y)); }
 
 	// 0 - white, 1 - black
 	bool getColor() const { return color; }

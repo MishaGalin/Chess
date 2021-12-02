@@ -3,6 +3,29 @@ extern Board board;
 extern vector<unique_ptr<AbstractChessPiece>> pieces;
 extern AbstractChessPiece* FindPiece(const Square& square);
 
+class Pawn : public AbstractChessPiece {
+	bool ConditionOfMove(const Square& newSquare) override {
+		return (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and newSquare.getIsEmpty() and getX() == newSquare.getX() and getColor() == game.turn
+			and ((pow(-1, getColor()) * (getY() - newSquare.getY()) == 2 and board.Squares[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() and getFirstMove())
+				or pow(-1, getColor()) * (getY() - newSquare.getY()) == 1));
+	};
+
+	bool ConditionOfCapture(const Square& newSquare) override {
+		return (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and !newSquare.getIsEmpty() and getColor() == game.turn and newSquare.getColor() != game.turn and
+			pow(-1, getColor()) * (getY() - newSquare.getY()) == 1 and abs(getX() - newSquare.getX()) == 1);
+	}
+
+	bool ConditionOfCastling(const Square& newSquare) override { return false; }
+
+	void Castling_(const Square& square) {}
+public:
+	Pawn(Square& square, const bool& color) : AbstractChessPiece(square, color) {
+		sprite.setOrigin(25, 42);
+		setName(color ? "PawnB" : "PawnW");
+		sprite.setTexture(*game.textureOfPieces[getName()]);
+	}
+};
+
 class Castle : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& newSquare) override {
 		if (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and newSquare.getIsEmpty() and getColor() == game.turn) {
@@ -131,7 +154,7 @@ class Knight : public AbstractChessPiece {
 	}
 
 	bool ConditionOfCapture(const Square& newSquare) override {
-		return (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and !newSquare.getIsEmpty() and newSquare.getColor() != game.turn and getColor() == game.turn
+		return (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and !newSquare.getIsEmpty() and newSquare.getColor() != getColor() and getColor() == game.turn
 			and abs((getX() - newSquare.getX()) * (getY() - newSquare.getY())) == 2);
 	}
 
@@ -510,29 +533,6 @@ public:
 	King(Square& square, const bool& color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
 		setName(color ? "KingB" : "KingW");
-		sprite.setTexture(*game.textureOfPieces[getName()]);
-	}
-};
-
-class Pawn : public AbstractChessPiece {
-	bool ConditionOfMove(const Square& newSquare) override {
-		return (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and newSquare.getIsEmpty() and getX() == newSquare.getX() and getColor() == game.turn
-			and ((pow(-1, getColor()) * (getY() - newSquare.getY()) == 2 and board.Squares[getX()][getY() - (pow(-1, getColor()) * 1)].getIsEmpty() and getFirstMove())
-				or pow(-1, getColor()) * (getY() - newSquare.getY()) == 1));
-	};
-
-	bool ConditionOfCapture(const Square& newSquare) override {
-		return (!game.isFinished and !game.pawnIsPromotion and getIsSelected() and !newSquare.getIsEmpty() and getColor() == game.turn and newSquare.getColor() != game.turn and
-			pow(-1, getColor()) * (getY() - newSquare.getY()) == 1 and abs(getX() - newSquare.getX()) == 1);
-	}
-
-	bool ConditionOfCastling(const Square& newSquare) override { return false; }
-
-	void Castling_(const Square& square) {}
-public:
-	Pawn(Square& square, const bool& color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(25, 42);
-		setName(color ? "PawnB" : "PawnW");
 		sprite.setTexture(*game.textureOfPieces[getName()]);
 	}
 };
