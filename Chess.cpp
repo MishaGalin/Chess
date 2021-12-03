@@ -8,6 +8,7 @@ RenderWindow window(VideoMode(Game::windowSizeX, Game::windowSizeY), "Chess", St
 Board board;
 Game game;
 vector<unique_ptr<AbstractChessPiece>> pieces; // An array of all pieces on the board
+int n = 0;
 
 // Deleting a piece by known coordinates on the board
 void DeletePiece(Square& square);
@@ -19,7 +20,7 @@ void AddPiece(Square& square, const int& value);
 
 int main()
 {
-	int dx = 0, dy = 0, n = 0;
+	int dx = 0, dy = 0;
 	Square* nearestSquare;
 
 	// Arrangement of pieces
@@ -48,14 +49,12 @@ int main()
 
 						dx = game.mousePos.x - (int)pieces[n]->getPosition().x;
 						dy = game.mousePos.y - (int)pieces[n]->getPosition().y;
-						break;
 					}
 					else pieces[i]->setIsSelected(false);
 				}
 			}
 
 			if (game.event.type == Event::MouseButtonReleased and game.event.key.code == Mouse::Left) {
-				nearestSquare = pieces[n]->SearchNearestSquare();
 				pieces[n]->IsMove(false);
 
 				if (board.getGlobalBounds().contains(pieces[n]->getPosition())) { // Check the piece exit outside the window
@@ -74,10 +73,11 @@ int main()
 						game.ChangeOfTurn();
 						continue;
 					}
+					nearestSquare = pieces[n]->SearchNearestSquare();
 
-					pieces[n]->Castling(*nearestSquare);
-					pieces[n]->Move(*nearestSquare);
-					pieces[n]->Capture(*nearestSquare);
+					pieces[n]->Castling(*nearestSquare); //
+					pieces[n]->Capture(*nearestSquare);	 // Only one of the options is possible
+					pieces[n]->Move(*nearestSquare);	 //
 				}
 				else pieces[n]->ReturnToPrevPos();
 			}
@@ -108,6 +108,7 @@ void DeletePiece(Square& square) {
 			square.setIsEmpty(true);
 			if ((*piece)->getName() == "KingW" or (*piece)->getName() == "KingB") game.isFinished = true;
 			pieces.erase(piece);
+			n = pieces.size() - 1;
 			return;
 		}
 	}
