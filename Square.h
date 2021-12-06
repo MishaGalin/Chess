@@ -6,15 +6,14 @@ class Square : public Drawable {
 	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
 	RectangleShape drawableRect;
 
+	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
 public:
 	static const int sideLength = 112; // Side length of a square in pixels
-	Square(const int& x, const int& y, const int& value) {
-		setX(x);
-		setY(y);
-		setXInPixel(7 + sideLength / 2 + sideLength * getX());
-		setYInPixel(7 + sideLength / 2 + sideLength * getY());
-		setColor(false);
-		setIsEmpty(value == 0 ? true : false);
+	Square(const int& x, const int& y) {
+		this->x = x;
+		this->y = y;
+		xInPixel = 7 + sideLength / 2 + sideLength * x;
+		yInPixel = 7 + sideLength / 2 + sideLength * y;
 
 		drawableRect.setPosition((float)xInPixel, (float)yInPixel);
 		drawableRect.setSize(Vector2f(sideLength - 2, sideLength - 2));
@@ -23,9 +22,8 @@ public:
 		drawableRect.setOutlineThickness(2);
 	}
 
-	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
-
-	void drawWithColor(const Color& color) {
+	auto operator<=>(const Square&) const = default;
+	void DrawWithColor(const Color& color) {
 		drawableRect.setFillColor(color);
 		draw(window);
 	}
@@ -51,4 +49,8 @@ public:
 	void setYInPixel(const int& yInPixel) { this->yInPixel = yInPixel; }
 
 	Vector2i getInPixel() const { return Vector2i(xInPixel, yInPixel); }
+
+	bool operator==(const Square& square) {
+		return (x == square.x and y == square.y);
+	}
 };

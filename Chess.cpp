@@ -18,20 +18,21 @@ AbstractChessPiece* FindPiece(const Square& square);
 
 void AddPiece(Square& square, const int& value);
 
+void Promotion();
+
 int main()
 {
 	int dx = 0, dy = 0;
 	Square* nearestSquare;
 
 	// Arrangement of pieces
-	for (int i = 0; i < Board::Size; ++i) {
-		for (int j = 0; j < Board::Size; ++j) {
-			AddPiece(board.Squares[i][j], board.InitArr[j][i]);
+	for (int i = 0; i < Board::size; ++i) {
+		for (int j = 0; j < Board::size; ++j) {
+			AddPiece(board.squares[i][j], board.InitArr[j][i]);
 		}
 	}
 
-	while (window.isOpen())
-	{
+	while (window.isOpen()) {
 		while (window.pollEvent(game.event))
 		{
 			game.mousePos = Mouse::getPosition(window);
@@ -39,12 +40,11 @@ int main()
 			if (game.event.type == Event::Closed) window.close();
 
 			if (game.event.type == Event::MouseButtonPressed and game.event.key.code == Mouse::Left) {
-				nearestSquare = pieces[n]->SearchNearestSquare();
 				for (int i = 0; i < pieces.size(); ++i) {
 					if (pieces[i]->getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) {
 						n = i; // pieces[n] - a piece that we move with the mouse
 
-						pieces[n]->IsMove(true);
+						pieces[n]->setIsMove(true);
 						pieces[n]->setIsSelected(true);
 
 						dx = game.mousePos.x - (int)pieces[n]->getPosition().x;
@@ -55,28 +55,14 @@ int main()
 			}
 
 			if (game.event.type == Event::MouseButtonReleased and game.event.key.code == Mouse::Left) {
-				pieces[n]->IsMove(false);
+				pieces[n]->setIsMove(false);
 
 				if (board.getGlobalBounds().contains(pieces[n]->getPosition())) { // Check the piece exit outside the window
-					if (pieces[n]->getIsPromotion() and board.Squares[pieces[n]->getX()][pieces[n]->getY()].getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) {
-						int tempMousePosX = game.mousePos.x - pieces[n]->getX() * Square::sideLength,
-							tempMousePosY = game.mousePos.y - pieces[n]->getY() * Square::sideLength;
-
-						if (tempMousePosX > Square::sideLength / 2 and tempMousePosY < Square::sideLength / 2)	    pieces[n] = make_unique<Knight>(board.Squares[pieces[n]->getX()][pieces[n]->getY()], pieces[n]->getColor() ? true : false);
-						else if (tempMousePosX < Square::sideLength / 2 and tempMousePosY < Square::sideLength / 2) pieces[n] = make_unique<Queen>(board.Squares[pieces[n]->getX()][pieces[n]->getY()], pieces[n]->getColor() ? true : false);
-						else if (tempMousePosX < Square::sideLength / 2 and tempMousePosY > Square::sideLength / 2) pieces[n] = make_unique<Bishop>(board.Squares[pieces[n]->getX()][pieces[n]->getY()], pieces[n]->getColor() ? true : false);
-						else if (tempMousePosX > Square::sideLength / 2 and tempMousePosY > Square::sideLength / 2) pieces[n] = make_unique<Castle>(board.Squares[pieces[n]->getX()][pieces[n]->getY()], pieces[n]->getColor() ? true : false);
-
-						pieces[n]->setIsPromotion(false);
-						pieces[n]->setIsMovable(true);
-						game.pawnIsPromotion = false;
-						game.ChangeOfTurn();
-						continue;
-					}
 					nearestSquare = pieces[n]->SearchNearestSquare();
 
-					pieces[n]->Castling(*nearestSquare); //
-					pieces[n]->Capture(*nearestSquare);	 // Only one of the options is possible
+					Promotion();						 //
+					pieces[n]->Castling(*nearestSquare); // Only one of the options is possible
+					pieces[n]->Capture(*nearestSquare);	 //
 					pieces[n]->Move(*nearestSquare);	 //
 				}
 				else pieces[n]->ReturnToPrevPos();
@@ -104,7 +90,7 @@ AbstractChessPiece* FindPiece(const Square& square) {
 
 void DeletePiece(Square& square) {
 	for (auto piece = pieces.begin(); piece < pieces.end(); ++piece) {
-		if ((*piece)->getX() == square.getX() and (*piece)->getY() == square.getY()) {
+		if ((*(*piece)->getSquare()) == square) {
 			square.setIsEmpty(true);
 			if ((*piece)->getName() == "KingW" or (*piece)->getName() == "KingB") game.isFinished = true;
 			pieces.erase(piece);
@@ -168,3 +154,27 @@ void AddPiece(Square& square, const int& value) {
 		break;
 	}
 }
+
+void Promotion() {
+	if (pieces[n]->getIsPromotion() and board.squares[pieces[n]->getX()][pieces[n]->getY()].getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) {
+		int tempMousePosX = game.mousePos.x - pieces[n]->getX() * Square::sideLength,
+			tempMousePosY = game.mousePos.y - pieces[n]->getY() * Square::sideLength;
+
+		if (tempMousePosX > Square::sideLength / 2 and tempMousePosY < Square::sideLength / 2)
+			pieces[n] = make_unique<Knight>(*pieces[n]->getSquare(), pieces[n]->getColor());
+
+		else if (tempMousePosX < Square::sideLength / 2 and tempMousePosY < Square::sideLength / 2)
+			pieces[n] = make_unique<Queen>(*pieces[n]->getSquare(), pieces[n]->getColor());
+
+		else if (tempMousePosX < Square::sideLength / 2 and tempMousePosY > Square::sideLength / 2)
+			pieces[n] = make_unique<Bishop>(*pieces[n]->getSquare(), pieces[n]->getColor());
+
+		else if (tempMousePosX > Square::sideLength / 2 and tempMousePosY > Square::sideLength / 2)
+			pieces[n] = make_unique<Castle>(*pieces[n]->getSquare(), pieces[n]->getColor());
+
+		pieces[n]->setIsPromotion(false);
+		pieces[n]->setIsMovable(true);
+		game.pawnIsPromotion = false;
+		game.ChangeOfTurn();
+	}
+};

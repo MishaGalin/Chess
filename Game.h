@@ -33,20 +33,21 @@ public:
 	static const int windowSizeX = 910, windowSizeY = 910;
 
 	map <string, Texture*> textureOfPieces = {
-	{"PawnW", &texturePawnW },
-	{"PawnB", &texturePawnB },
-	{"CastleW", &textureCastleW },
-	{"CastleB", &textureCastleB },
-	{"KnightW", &textureKnightW },
-	{"KnightB", &textureKnightB },
-	{"BishopW", &textureBishopW },
-	{"BishopB", &textureBishopB },
-	{"QueenW", &textureQueenW },
-	{"QueenB", &textureQueenB },
-	{"KingW", &textureKingW },
-	{"KingB", &textureKingB },
-	{"choiceW", &choicePieceW},
-	{"choiceB", &choicePieceB} };
+		{"PawnW", &texturePawnW },
+		{"PawnB", &texturePawnB },
+		{"CastleW", &textureCastleW },
+		{"CastleB", &textureCastleB },
+		{"KnightW", &textureKnightW },
+		{"KnightB", &textureKnightB },
+		{"BishopW", &textureBishopW },
+		{"BishopB", &textureBishopB },
+		{"QueenW", &textureQueenW },
+		{"QueenB", &textureQueenB },
+		{"KingW", &textureKingW },
+		{"KingB", &textureKingB },
+		{"choiceW", &choicePieceW},
+		{"choiceB", &choicePieceB}
+	};
 
 	void ChangeOfTurn() {
 		turn = !turn;
@@ -55,10 +56,11 @@ public:
 	}
 
 	Game() {
+		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
+
 		icon.loadFromFile("images/icon32.png");
 		window.setIcon(32, 32, icon.getPixelsPtr());
 
-		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
 		window.setFramerateLimit(300);
 
 		textureOfPieces["PawnW"]->loadFromFile("images/pawn_w.png");
