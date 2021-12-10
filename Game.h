@@ -26,7 +26,6 @@ class Game {
 	Texture choicePieceB;
 
 public:
-	Event event;
 	Vector2i mousePos = Vector2i(0, 0);
 	bool turn = false; // 0 - white move, 1 - black move
 	bool isFinished = false, pawnIsPromotion = false;
@@ -57,11 +56,10 @@ public:
 
 	Game() {
 		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
+		window.setFramerateLimit(300);
 
 		icon.loadFromFile("images/icon32.png");
 		window.setIcon(32, 32, icon.getPixelsPtr());
-
-		window.setFramerateLimit(300);
 
 		textureOfPieces["PawnW"]->loadFromFile("images/pawn_w.png");
 		textureOfPieces["PawnB"]->loadFromFile("images/pawn_b.png");

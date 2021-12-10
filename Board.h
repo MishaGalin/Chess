@@ -1,3 +1,5 @@
+extern void AddPiece(Square& square, const int& value);
+
 class Board : Drawable {
 	Texture texture;
 	Sprite sprite;
@@ -29,6 +31,8 @@ public:
 			vector<Square> temp;
 			for (int j = 0; j < size; ++j) {
 				Square tempSquare(i, j);
+				tempSquare.setColor(InitArr[j][i] < 0);
+				AddPiece(tempSquare, InitArr[j][i]); // Arrangement of pieces
 				temp.push_back(tempSquare);
 			}
 			squares.push_back(temp);

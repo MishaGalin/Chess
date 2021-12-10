@@ -4,11 +4,11 @@
 #include "AbstractChessPiece.h"
 #include "ChessPieces.h"
 
-RenderWindow window(VideoMode(Game::windowSizeX, Game::windowSizeY), "Chess", Style::Close);
-Board board;
+RenderWindow window(VideoMode(Game::windowSizeX, Game::windowSizeY), "", Style::Close);
 Game game;
+Board board;
 vector<unique_ptr<AbstractChessPiece>> pieces; // An array of all pieces on the board
-int n = 0;
+int selected = 0, dx = 0, dy = 0;
 
 // Deleting a piece by known coordinates on the board
 void DeletePiece(Square& square);
@@ -17,73 +17,47 @@ void DeletePiece(Square& square);
 AbstractChessPiece* FindPiece(const Square& square);
 
 void AddPiece(Square& square, const int& value);
-
+void UpdateWindow();
 void Promotion();
 
-int main()
-{
-	int dx = 0, dy = 0;
-	Square* nearestSquare;
-
-	// Arrangement of pieces
-	for (int i = 0; i < Board::size; ++i) {
-		for (int j = 0; j < Board::size; ++j) {
-			AddPiece(board.squares[i][j], board.InitArr[j][i]);
-		}
-	}
-
+int main() {
+	Event event;
 	while (window.isOpen()) {
-		while (window.pollEvent(game.event))
+		while (window.pollEvent(event))
 		{
 			game.mousePos = Mouse::getPosition(window);
 
-			if (game.event.type == Event::Closed) window.close();
+			if (event.type == Event::Closed) window.close();
 
-			if (game.event.type == Event::MouseButtonPressed and game.event.key.code == Mouse::Left) {
+			if (event.type == Event::MouseButtonPressed and event.key.code == Mouse::Left) {
 				for (int i = 0; i < pieces.size(); ++i) {
-					if (pieces[i]->getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) {
-						n = i; // pieces[n] - a piece that we move with the mouse
-
-						pieces[n]->setIsMove(true);
-						pieces[n]->setIsSelected(true);
-
-						dx = game.mousePos.x - (int)pieces[n]->getPosition().x;
-						dy = game.mousePos.y - (int)pieces[n]->getPosition().y;
-					}
-					else pieces[i]->setIsSelected(false);
+					if (pieces[i]->getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) pieces[i]->Select(i);
+					else pieces[i]->Unselect();
 				}
 			}
 
-			if (game.event.type == Event::MouseButtonReleased and game.event.key.code == Mouse::Left) {
-				pieces[n]->setIsMove(false);
+			if (event.type == Event::MouseButtonReleased and event.key.code == Mouse::Left) {
+				if (board.getGlobalBounds().contains(pieces[selected]->getPosition())) { // Check the piece exit outside the window
+					Square* nearestSquare = pieces[selected]->SearchNearestSquare();
 
-				if (board.getGlobalBounds().contains(pieces[n]->getPosition())) { // Check the piece exit outside the window
-					nearestSquare = pieces[n]->SearchNearestSquare();
-
-					Promotion();						 //
-					pieces[n]->Castling(*nearestSquare); // Only one of the options is possible
-					pieces[n]->Capture(*nearestSquare);	 //
-					pieces[n]->Move(*nearestSquare);	 //
+					Promotion();						        //
+					pieces[selected]->Castling(*nearestSquare); // Only one of the options is possible
+					pieces[selected]->Capture(*nearestSquare);	//
+					pieces[selected]->Move(*nearestSquare);	    //
 				}
-				else pieces[n]->ReturnToPrevPos();
+				else pieces[selected]->ReturnToPrevPos();
+				pieces[selected]->Unselect();
 			}
-
-			if (pieces[n]->getIsMovable() and pieces[n]->getIsMove()) pieces[n]->setPosition(game.mousePos.x - dx, game.mousePos.y - dy);
+			pieces[selected]->MoveWithMouse();
 		}
-
-		window.clear();
-		board.draw(window);
-		pieces[n]->DrawPossibleSquares();
-		for (auto& piece : pieces) { piece->draw(window); }
-		pieces[n]->draw(window); // The piece that is being moved is drawn a second time so that it is on top of all the others
-		window.display();
+		UpdateWindow();
 	}
 	return 0;
 }
 
 AbstractChessPiece* FindPiece(const Square& square) {
 	for (auto& piece : pieces) {
-		if (piece->getX() == square.getX() and piece->getY() == square.getY()) return piece.get();
+		if ((*piece->getSquare()) == square) return piece.get();
 	}
 	return 0;
 }
@@ -94,7 +68,7 @@ void DeletePiece(Square& square) {
 			square.setIsEmpty(true);
 			if ((*piece)->getName() == "KingW" or (*piece)->getName() == "KingB") game.isFinished = true;
 			pieces.erase(piece);
-			n = pieces.size() - 1;
+			selected = pieces.size() - 1;
 			return;
 		}
 	}
@@ -103,51 +77,51 @@ void DeletePiece(Square& square) {
 void AddPiece(Square& square, const int& value) {
 	switch (value) {
 	case -1:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Castle>(square, true))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Castle>(square))); }
 	break;
 
 	case 1:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Castle>(square, false))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Castle>(square))); }
 	break;
 
 	case -2:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Knight>(square, true))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Knight>(square))); }
 	break;
 
 	case 2:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Knight>(square, false))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Knight>(square))); }
 	break;
 
 	case -3:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Bishop>(square, true))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Bishop>(square))); }
 	break;
 
 	case 3:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Bishop>(square, false))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Bishop>(square))); }
 	break;
 
 	case -4:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Queen>(square, true))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Queen>(square))); }
 	break;
 
 	case 4:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Queen>(square, false))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Queen>(square))); }
 	break;
 
 	case -5:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<King>(square, true))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<King>(square))); }
 	break;
 
 	case 5:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<King>(square, false))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<King>(square))); }
 	break;
 
 	case -6:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Pawn>(square, true))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Pawn>(square))); }
 	break;
 
 	case 6:
-	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Pawn>(square, false))); }
+	{pieces.push_back(unique_ptr<AbstractChessPiece>(make_unique<Pawn>(square))); }
 	break;
 
 	default:
@@ -156,25 +130,34 @@ void AddPiece(Square& square, const int& value) {
 }
 
 void Promotion() {
-	if (pieces[n]->getIsPromotion() and board.squares[pieces[n]->getX()][pieces[n]->getY()].getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) {
-		int tempMousePosX = game.mousePos.x - pieces[n]->getX() * Square::sideLength,
-			tempMousePosY = game.mousePos.y - pieces[n]->getY() * Square::sideLength;
+	if (pieces[selected]->getIsPromotion() and (*pieces[selected]->getSquare()).getGlobalBounds().contains(game.mousePos.x, game.mousePos.y)) {
+		int tempMousePosX = game.mousePos.x - pieces[selected]->getX() * Square::sideLength,
+			tempMousePosY = game.mousePos.y - pieces[selected]->getY() * Square::sideLength;
 
 		if (tempMousePosX > Square::sideLength / 2 and tempMousePosY < Square::sideLength / 2)
-			pieces[n] = make_unique<Knight>(*pieces[n]->getSquare(), pieces[n]->getColor());
+			pieces[selected] = make_unique<Knight>(*pieces[selected]->getSquare());
 
 		else if (tempMousePosX < Square::sideLength / 2 and tempMousePosY < Square::sideLength / 2)
-			pieces[n] = make_unique<Queen>(*pieces[n]->getSquare(), pieces[n]->getColor());
+			pieces[selected] = make_unique<Queen>(*pieces[selected]->getSquare());
 
 		else if (tempMousePosX < Square::sideLength / 2 and tempMousePosY > Square::sideLength / 2)
-			pieces[n] = make_unique<Bishop>(*pieces[n]->getSquare(), pieces[n]->getColor());
+			pieces[selected] = make_unique<Bishop>(*pieces[selected]->getSquare());
 
 		else if (tempMousePosX > Square::sideLength / 2 and tempMousePosY > Square::sideLength / 2)
-			pieces[n] = make_unique<Castle>(*pieces[n]->getSquare(), pieces[n]->getColor());
+			pieces[selected] = make_unique<Castle>(*pieces[selected]->getSquare());
 
-		pieces[n]->setIsPromotion(false);
-		pieces[n]->setIsMovable(true);
+		pieces[selected]->setIsPromotion(false);
+		pieces[selected]->setIsMovable(true);
 		game.pawnIsPromotion = false;
 		game.ChangeOfTurn();
 	}
 };
+
+void UpdateWindow() {
+	window.clear();
+	board.draw(window);
+	pieces[selected]->DrawPossibleSquares();
+	for (auto& piece : pieces) { piece->draw(window); }
+	pieces[selected]->draw(window); // The piece that is being moved is drawn a second time so that it is on top of all the others
+	window.display();
+}

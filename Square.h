@@ -22,7 +22,6 @@ public:
 		drawableRect.setOutlineThickness(2);
 	}
 
-	auto operator<=>(const Square&) const = default;
 	void DrawWithColor(const Color& color) {
 		drawableRect.setFillColor(color);
 		draw(window);

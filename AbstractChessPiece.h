@@ -2,6 +2,7 @@ extern Game game;
 extern RenderWindow window;
 extern Board board;
 extern void DeletePiece(Square& square);
+extern int selected, dx, dy;
 
 class AbstractChessPiece : public Drawable {
 	virtual bool ConditionOfMove(const Square& square) = 0;
@@ -16,12 +17,12 @@ protected:
 	int x = 0, y = 0;
 	Sprite sprite;
 
-	AbstractChessPiece(Square& square, const bool& color) {
-		this->color = color;
+	AbstractChessPiece(Square& square) {
+		color = square.getColor();
 		x = square.getX();
 		y = square.getY();
+
 		setPosition(square.getInPixel());
-		square.setColor(color);
 		square.setIsEmpty(false);
 	}
 
@@ -101,6 +102,24 @@ public:
 		else ReturnToPrevPos();
 	}
 
+	void Select(const int& i) {
+		selected = i;
+		isMove = true;
+		isSelected = true;
+
+		dx = game.mousePos.x - (int)getPosition().x;
+		dy = game.mousePos.y - (int)getPosition().y;
+	}
+
+	void Unselect() {
+		isMove = false;
+		isSelected = false;
+	}
+
+	void MoveWithMouse() {
+		if (isMovable and isMove and color == game.turn) setPosition(game.mousePos.x - dx, game.mousePos.y - dy);
+	}
+
 	Square* SearchNearestSquare() {
 		double maxDistance = 10000., distance = 0.;
 		int nearestX = 0, nearestY = 0;
@@ -122,9 +141,9 @@ public:
 	void DrawPossibleSquares() {
 		for (int i = 0; i < Board::size; ++i) {
 			for (int j = 0; j < Board::size; ++j) {
-				if (ConditionOfMove(board.squares[i][j]))          board.squares[i][j].DrawWithColor(Color(0, 255, 0, 60));   // Green square if you can go to this square
-				else if (ConditionOfCapture(board.squares[i][j]))  board.squares[i][j].DrawWithColor(Color(255, 0, 0, 60));   // Red square if you can capture
-				else if (ConditionOfCastling(board.squares[i][j])) board.squares[i][j].DrawWithColor(Color(255, 255, 0, 60)); // Yellow square if castling can be done
+				if (ConditionOfMove(board.squares[i][j]))          board.squares[i][j].DrawWithColor(Color(0, 215, 0, 70));   // Green square if you can go to this square
+				else if (ConditionOfCapture(board.squares[i][j]))  board.squares[i][j].DrawWithColor(Color(215, 0, 0, 70));   // Red square if you can capture
+				else if (ConditionOfCastling(board.squares[i][j])) board.squares[i][j].DrawWithColor(Color(215, 215, 0, 75)); // Yellow square if castling can be done
 			}
 		}
 	}
