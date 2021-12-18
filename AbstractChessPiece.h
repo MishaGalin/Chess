@@ -11,22 +11,23 @@ class AbstractChessPiece : public Drawable {
 	virtual void Castling_(const Square& square) = 0;
 
 protected:
+	Sprite sprite;
 	string name;
 	bool color = false; // 0 - white, 1 - black
 	bool firstMove = true, isSelected = false, isPromotion = false, isMovable = true, isMove = false;
 	int x = 0, y = 0;
-	Sprite sprite;
 
-	AbstractChessPiece(Square& square) {
-		color = square.getColor();
+	AbstractChessPiece(Square& square, bool color) {
+		this->color = color;
 		x = square.getX();
 		y = square.getY();
 
+		square.setColor(color);
 		setPosition(square.getInPixel());
 		square.setIsEmpty(false);
 	}
 
-	void Changeover(Square& newSquare) {
+	void Changeover(Square& newSquare) const {
 		(*getSquare()).setIsEmpty(true);
 		newSquare.setIsEmpty(false);
 
@@ -45,9 +46,13 @@ public:
 		setPosition(newSquare.getInPixel());
 	};
 
-	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(sprite, states); }
+	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const {
+		target.draw(sprite, states);
+	}
 
-	void ReturnToPrevPos() { setPosition((*getSquare()).getInPixel()); };
+	void ReturnToPrevPos() {
+		setPosition((*getSquare()).getInPixel());
+	};
 
 	void Move(Square& newSquare) {
 		if (ConditionOfMove(newSquare)) {
@@ -77,11 +82,11 @@ public:
 			Move_(newSquare);
 
 			if ((name == "PawnW" and y == 0) or (name == "PawnB" and y == 7)) {
-				IntRect tepmRect(Vector2i(0, 0), Vector2i(112, 112));
+				IntRect tepmRect(Vector2i(0, 0), Vector2i(Square::sideLength, Square::sideLength));
 
 				sprite.setTextureRect(tepmRect);
 				sprite.setTexture(*game.textureOfPieces[color ? "choiceB" : "choiceW"]);
-				sprite.setOrigin(56, 56);
+				sprite.setOrigin(Square::sideLength / 2, Square::sideLength / 2);
 
 				isPromotion = true;
 				isMovable = false;
@@ -102,7 +107,7 @@ public:
 		else ReturnToPrevPos();
 	}
 
-	void Select(const int& i) {
+	void Select(int i) {
 		selected = i;
 		isMove = true;
 		isSelected = true;
@@ -117,7 +122,7 @@ public:
 	}
 
 	void MoveWithMouse() {
-		if (isMovable and isMove and color == game.turn) setPosition(game.mousePos.x - dx, game.mousePos.y - dy);
+		if (isMovable and isMove and color == game.turn) setPosition(float(game.mousePos.x - dx), float(game.mousePos.y - dy));
 	}
 
 	Square* SearchNearestSquare() {
@@ -148,39 +153,41 @@ public:
 		}
 	}
 
-	FloatRect getGlobalBounds() const { return sprite.getGlobalBounds(); }
+	FloatRect getGlobalBounds() const {
+		return sprite.getGlobalBounds();
+	}
 
 	Vector2f getPosition() const { return sprite.getPosition(); }
-	void setPosition(const int& x, const int& y) { sprite.setPosition(float(x), float(y)); }
+	void setPosition(float x, float y) { sprite.setPosition(x, y); }
 	void setPosition(const Vector2i& newPos) { sprite.setPosition(float(newPos.x), float(newPos.y)); }
 
 	// 0 - white, 1 - black
 	bool getColor() const { return color; }
-	void setColor(const bool& color) { this->color = color; }
+	void setColor(bool color) { this->color = color; }
 
 	bool getIsPromotion() const { return isPromotion; }
-	void setIsPromotion(const bool& isPromotion) { this->isPromotion = isPromotion; }
+	void setIsPromotion(bool isPromotion) { this->isPromotion = isPromotion; }
 
 	bool getIsSelected() const { return isSelected; }
-	void setIsSelected(const bool& isSelected) { this->isSelected = isSelected; }
+	void setIsSelected(bool isSelected) { this->isSelected = isSelected; }
 
 	bool getIsMovable() const { return isMovable; }
-	void setIsMovable(const bool& IsMovable) { this->isMovable = IsMovable; }
+	void setIsMovable(bool IsMovable) { this->isMovable = IsMovable; }
 
 	bool getIsMove() const { return isMove; }
-	void setIsMove(const bool& IsMove) { this->isMove = IsMove; }
+	void setIsMove(bool IsMove) { this->isMove = IsMove; }
 
 	bool getFirstMove() const { return firstMove; }
-	void setFirstMove(const bool& firstMove) { this->firstMove = firstMove; }
+	void setFirstMove(bool firstMove) { this->firstMove = firstMove; }
 
 	int getX() const { return x; }
-	void setX(const int& x) { this->x = x; }
+	void setX(int x) { this->x = x; }
 
 	int getY() const { return y; }
-	void setY(const int& y) { this->y = y; }
+	void setY(int y) { this->y = y; }
 
 	string getName() const { return name; }
-	void setName(const string& name) { this->name = name; }
+	void setName(string name) { this->name = name; }
 
 	Square* getSquare() const { return &board.squares[x][y]; }
 };

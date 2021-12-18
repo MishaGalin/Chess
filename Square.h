@@ -9,7 +9,7 @@ class Square : public Drawable {
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
 public:
 	static const int sideLength = 112; // Side length of a square in pixels
-	Square(const int& x, const int& y) {
+	Square(int x, int y) {
 		this->x = x;
 		this->y = y;
 		xInPixel = 7 + sideLength / 2 + sideLength * x;
@@ -30,26 +30,26 @@ public:
 	FloatRect getGlobalBounds() { return drawableRect.getGlobalBounds(); }
 
 	bool getIsEmpty() const { return isEmpty; }
-	void setIsEmpty(const bool& isEmpty) { this->isEmpty = isEmpty; }
+	void setIsEmpty(bool isEmpty) { this->isEmpty = isEmpty; }
 
 	bool getColor() const { return color; }
-	void setColor(const bool& color) { this->color = color; }
+	void setColor(bool color) { this->color = color; }
 
 	int getX() const { return x; }
-	void setX(const int& x) { this->x = x; }
+	void setX(int x) { this->x = x; }
 
 	int getY() const { return y; }
-	void setY(const int& y) { this->y = y; }
+	void setY(int y) { this->y = y; }
 
 	int getXInPixel() const { return xInPixel; }
-	void setXInPixel(const int& xInPixel) { this->xInPixel = xInPixel; }
+	void setXInPixel(int xInPixel) { this->xInPixel = xInPixel; }
 
 	int getYInPixel() const { return yInPixel; }
-	void setYInPixel(const int& yInPixel) { this->yInPixel = yInPixel; }
+	void setYInPixel(int yInPixel) { this->yInPixel = yInPixel; }
 
 	Vector2i getInPixel() const { return Vector2i(xInPixel, yInPixel); }
 
-	bool operator==(const Square& square) {
-		return (x == square.x and y == square.y);
+	bool operator==(const Square& anotherSquare) {
+		return x == anotherSquare.x and y == anotherSquare.y;
 	}
 };

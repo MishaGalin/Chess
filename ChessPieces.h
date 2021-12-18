@@ -6,20 +6,20 @@ extern AbstractChessPiece* FindPiece(const Square& square);
 class Pawn : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& newSquare) override {
 		return (!game.isFinished and !game.pawnIsPromotion and isSelected and newSquare.getIsEmpty() and x == newSquare.getX() and color == game.turn
-			and ((pow(-1, color) * (y - newSquare.getY()) == 2 and board.squares[x][y - (pow(-1, color) * 1)].getIsEmpty() and getFirstMove())
+			and ((pow(-1, color) * (y - newSquare.getY()) == 2 and board.squares[x][int(y - pow(-1, color))].getIsEmpty() and getFirstMove())
 				or pow(-1, color) * (y - newSquare.getY()) == 1));
 	};
 
 	bool ConditionOfCapture(const Square& newSquare) override {
-		return (!game.isFinished and !game.pawnIsPromotion and isSelected and !newSquare.getIsEmpty() and color == game.turn and newSquare.getColor() != game.turn and
-			pow(-1, color) * (y - newSquare.getY()) == 1 and abs(x - newSquare.getX()) == 1);
+		return (!game.isFinished and !game.pawnIsPromotion and isSelected and !newSquare.getIsEmpty() and color == game.turn and newSquare.getColor() != game.turn
+			and pow(-1, color) * (y - newSquare.getY()) == 1 and abs(x - newSquare.getX()) == 1);
 	}
 
 	bool ConditionOfCastling(const Square& newSquare) override { return false; }
 	void Castling_(const Square& square) {}
 
 public:
-	Pawn(Square& square) : AbstractChessPiece(square) {
+	Pawn(Square& square, bool color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(25, 42);
 		name = color ? "PawnB" : "PawnW";
 		sprite.setTexture(*game.textureOfPieces[name]);
@@ -105,15 +105,16 @@ class Castle : public AbstractChessPiece {
 			if (piece->getFirstMove() and (piece->getName() == "KingB" or piece->getName() == "KingW")) {
 				piece->getX() > x ? shortÑastling = true : distantCastling = true;
 
-				for (int i = 1; i < 8; ++i)
-				{
+				for (int i = 1; i < 8; ++i) {
 					if (shortÑastling and x + i <= 7) {
 						tempX = x + i;
-						if (board.squares[tempX][y].getIsEmpty()) continue; else break;
+						if (board.squares[tempX][y].getIsEmpty()) continue;
+						else break;
 					}
 					else if (distantCastling and x - i >= 0) {
 						tempX = x - i;
-						if (board.squares[tempX][y].getIsEmpty()) continue; else break;
+						if (board.squares[tempX][y].getIsEmpty()) continue;
+						else break;
 					}
 				}
 				return newSquare.getX() == tempX;
@@ -130,7 +131,7 @@ class Castle : public AbstractChessPiece {
 	}
 
 public:
-	Castle(Square& square) : AbstractChessPiece(square) {
+	Castle(Square& square, bool color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(33, 43);
 		name = color ? "CastleB" : "CastleW";
 		sprite.setTexture(*game.textureOfPieces[name]);
@@ -152,7 +153,7 @@ class Knight : public AbstractChessPiece {
 	void Castling_(const Square& square) {}
 
 public:
-	Knight(Square& square) : AbstractChessPiece(square) {
+	Knight(Square& square, bool color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(37, 45);
 		name = color ? "KnightB" : "KnightW";
 		sprite.setTexture(*game.textureOfPieces[name]);
@@ -259,7 +260,7 @@ class Bishop : public AbstractChessPiece {
 	void Castling_(const Square& square) {}
 
 public:
-	Bishop(Square& square) : AbstractChessPiece(square) {
+	Bishop(Square& square, bool color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
 		name = color ? "BishopB" : "BishopW";
 		sprite.setTexture(*game.textureOfPieces[name]);
@@ -444,7 +445,7 @@ class Queen : public AbstractChessPiece {
 	void Castling_(const Square& square) {}
 
 public:
-	Queen(Square& square) : AbstractChessPiece(square) {
+	Queen(Square& square, bool color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 45);
 		name = color ? "QueenB" : "QueenW";
 		sprite.setTexture(*game.textureOfPieces[name]);
@@ -471,15 +472,16 @@ class King : public AbstractChessPiece {
 			if (piece->getFirstMove() and (piece->getName() == "CastleB" or piece->getName() == "CastleW")) {
 				piece->getX() > x ? shortÑastling = true : distantCastling = true;
 
-				for (int i = 1; i < 8; ++i)
-				{
+				for (int i = 1; i < 8; ++i) {
 					if (shortÑastling and x + i <= 7) {
 						tempX = x + i;
-						if (board.squares[tempX][y].getIsEmpty()) continue; else break;
+						if (board.squares[tempX][y].getIsEmpty()) continue;
+						else break;
 					}
 					else if (distantCastling and x - i >= 0) {
 						tempX = x - i;
-						if (board.squares[tempX][y].getIsEmpty()) continue; else break;
+						if (board.squares[tempX][y].getIsEmpty()) continue;
+						else break;
 					}
 				}
 				return newSquare.getX() == tempX;
@@ -496,7 +498,7 @@ class King : public AbstractChessPiece {
 	}
 
 public:
-	King(Square& square) : AbstractChessPiece(square) {
+	King(Square& square, bool color) : AbstractChessPiece(square, color) {
 		sprite.setOrigin(42, 44);
 		name = color ? "KingB" : "KingW";
 		sprite.setTexture(*game.textureOfPieces[name]);

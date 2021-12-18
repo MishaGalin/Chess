@@ -1,7 +1,6 @@
-extern void AddPiece(Square& square, const int& value);
+extern void AddPiece(Square& square, int value);
 
 class Board : Drawable {
-	Texture texture;
 	Sprite sprite;
 
 public:
@@ -24,14 +23,12 @@ public:
 	FloatRect getGlobalBounds() { return sprite.getGlobalBounds(); }
 
 	Board() {
-		texture.loadFromFile("images/board.png");
-		sprite.setTexture(texture);
+		sprite.setTexture(*game.textureOfPieces["board"]);
 
 		for (int i = 0; i < size; ++i) {
 			vector<Square> temp;
 			for (int j = 0; j < size; ++j) {
 				Square tempSquare(i, j);
-				tempSquare.setColor(InitArr[j][i] < 0);
 				AddPiece(tempSquare, InitArr[j][i]); // Arrangement of pieces
 				temp.push_back(tempSquare);
 			}

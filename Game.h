@@ -25,6 +25,8 @@ class Game {
 	Texture choicePieceW;
 	Texture choicePieceB;
 
+	Texture textureBoard;
+
 public:
 	Vector2i mousePos = Vector2i(0, 0);
 	bool turn = false; // 0 - white move, 1 - black move
@@ -45,7 +47,8 @@ public:
 		{"KingW", &textureKingW },
 		{"KingB", &textureKingB },
 		{"choiceW", &choicePieceW},
-		{"choiceB", &choicePieceB}
+		{"choiceB", &choicePieceB},
+		{"board", &textureBoard}
 	};
 
 	void ChangeOfTurn() {
@@ -76,5 +79,7 @@ public:
 
 		textureOfPieces["choiceW"]->loadFromFile("images/choicePieceW.png");
 		textureOfPieces["choiceB"]->loadFromFile("images/choicePieceB.png");
+
+		textureOfPieces["board"]->loadFromFile("images/board.png");
 	}
 };
