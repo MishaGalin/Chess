@@ -3,12 +3,14 @@ extern RenderWindow window;
 
 class Square : public Drawable {
 	bool color = false, isEmpty = true;
-	int x = 0, y = 0, xInPixel = 0, yInPixel = 0;
+	unsigned char x = 0, y = 0;
+	unsigned short xInPixel = 0, yInPixel = 0;
 	RectangleShape drawableRect;
 
 	void draw(RenderTarget& target, RenderStates states = RenderStates::Default) const { target.draw(drawableRect, states); }
+
 public:
-	static const int sideLength = 112; // Side length of a square in pixels
+	static const unsigned int sideLength = 112; // Side length of a square in pixels
 	Square(int x, int y) {
 		this->x = x;
 		this->y = y;

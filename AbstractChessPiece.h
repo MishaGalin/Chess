@@ -2,7 +2,8 @@ extern Game game;
 extern RenderWindow window;
 extern Board board;
 extern void DeletePiece(Square& square);
-extern int selected, dx, dy;
+extern unsigned char selected;
+extern short dx, dy;
 
 class AbstractChessPiece : public Drawable {
 	virtual bool ConditionOfMove(const Square& square) = 0;
@@ -15,7 +16,7 @@ protected:
 	string name;
 	bool color = false; // 0 - white, 1 - black
 	bool firstMove = true, isSelected = false, isPromotion = false, isMovable = true, isMove = false;
-	int x = 0, y = 0;
+	char x = 0, y = 0;
 
 	AbstractChessPiece(Square& square, bool color) {
 		this->color = color;
@@ -59,11 +60,11 @@ public:
 			Move_(newSquare);
 
 			if ((name == "PawnW" and y == 0) or (name == "PawnB" and y == 7)) {
-				IntRect tepmRect(Vector2i(0, 0), Vector2i(112, 112));
+				IntRect tepmRect(Vector2i(0, 0), Vector2i(Square::sideLength, Square::sideLength));
 
 				sprite.setTextureRect(tepmRect);
 				sprite.setTexture(*game.textureOfPieces[color ? "choiceB" : "choiceW"]);
-				sprite.setOrigin(56, 56);
+				sprite.setOrigin(Square::sideLength / 2, Square::sideLength / 2);
 
 				isPromotion = true;
 				isMovable = false;
@@ -112,20 +113,25 @@ public:
 		isMove = true;
 		isSelected = true;
 
-		dx = game.mousePos.x - (int)getPosition().x;
-		dy = game.mousePos.y - (int)getPosition().y;
+		dx = game.mousePos.x - int(getPosition().x);
+		dy = game.mousePos.y - int(getPosition().y);
 	}
 
-	void Unselect() {
+	inline void Unselect() {
 		isMove = false;
 		isSelected = false;
 	}
 
 	void MoveWithMouse() {
-		if (isMovable and isMove and color == game.turn) setPosition(float(game.mousePos.x - dx), float(game.mousePos.y - dy));
+		game.mousePos = Mouse::getPosition(window);
+		if (isMovable and isMove and isSelected and color == game.turn) setPosition(float(game.mousePos.x - dx), float(game.mousePos.y - dy));
 	}
 
-	Square* SearchNearestSquare() {
+	inline bool ContainsMouse() const {
+		return getGlobalBounds().contains(float(game.mousePos.x), float(game.mousePos.y));
+	}
+
+	Square* SearchNearestSquare() const {
 		double maxDistance = 10000., distance = 0.;
 		int nearestX = 0, nearestY = 0;
 

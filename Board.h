@@ -4,10 +4,10 @@ class Board : Drawable {
 	Sprite sprite;
 
 public:
-	static const int size = 8;
+	static const unsigned char size = 8;
 	vector<vector<Square>> squares;
 
-	int InitArr[size][size] =
+	char InitArr[size][size] =
 	{ -1,-2,-3,-4,-5,-3,-2,-1,
 	  -6,-6,-6,-6,-6,-6,-6,-6,
 	   0, 0, 0, 0, 0, 0, 0, 0,

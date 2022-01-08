@@ -1,5 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 
 using namespace sf; // SFML namespace
 using namespace std;
@@ -31,7 +30,7 @@ public:
 	Vector2i mousePos = Vector2i(0, 0);
 	bool turn = false; // 0 - white move, 1 - black move
 	bool isFinished = false, pawnIsPromotion = false;
-	static const int windowSizeX = 910, windowSizeY = 910;
+	static const unsigned short windowSizeX = 910, windowSizeY = 910;
 
 	map <string, Texture*> textureOfPieces = {
 		{"PawnW", &texturePawnW },
@@ -52,9 +51,14 @@ public:
 	};
 
 	void ChangeOfTurn() {
-		turn = !turn;
-		if (isFinished) window.setTitle(turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
-		else window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
+		if (isFinished) {
+			window.setTitle(turn ? "Chess: BLACK WINS" : "Chess: WHITE WINS");
+			return;
+		}
+		else {
+			turn = !turn;
+			window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
+		}
 	}
 
 	Game() {

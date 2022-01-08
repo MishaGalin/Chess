@@ -1,4 +1,5 @@
-﻿#include "Game.h"
+﻿#include <SFML/Graphics.hpp>
+#include "Game.h"
 #include "Square.h"
 #include "Board.h"
 #include "AbstractChessPiece.h"
@@ -8,7 +9,8 @@ RenderWindow window(VideoMode(Game::windowSizeX, Game::windowSizeY), "", Style::
 Game game;
 Board board;
 vector<unique_ptr<AbstractChessPiece>> pieces; // An array of all pieces on the board
-int selected = 0, dx = 0, dy = 0;
+unsigned char selected = 0;
+short dx = 0, dy = 0;
 
 // Deleting a piece by known coordinates on the board
 void DeletePiece(Square& square);
@@ -26,18 +28,20 @@ int main() {
 	{
 		while (window.pollEvent(event))
 		{
-			game.mousePos = Mouse::getPosition(window);
-
 			if (event.type == Event::Closed) window.close();
 
 			if (event.type == Event::MouseButtonPressed and event.key.code == Mouse::Left)
 			{
 				for (int i = 0; i < pieces.size(); ++i)
 				{
-					if (pieces[i]->getGlobalBounds().contains(float(game.mousePos.x), float(game.mousePos.y))) pieces[i]->Select(i);
-					else pieces[i]->Unselect();
+					if (pieces[i]->ContainsMouse()) {
+						pieces[i]->Select(i);
+						break;
+					}
 				}
 			}
+
+			pieces[selected]->MoveWithMouse();
 
 			if (event.type == Event::MouseButtonReleased and event.key.code == Mouse::Left)
 			{
@@ -54,7 +58,6 @@ int main() {
 
 				pieces[selected]->Unselect();
 			}
-			pieces[selected]->MoveWithMouse();
 		}
 		UpdateWindow();
 	}
@@ -65,7 +68,6 @@ AbstractChessPiece* FindPiece(const Square& square) {
 	for (auto& piece : pieces) {
 		if ((*piece->getSquare()) == square) return piece.get();
 	}
-	return 0;
 }
 
 void DeletePiece(Square& square) {

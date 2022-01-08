@@ -20,9 +20,9 @@ class Pawn : public AbstractChessPiece {
 
 public:
 	Pawn(Square& square, bool color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(25, 42);
 		name = color ? "PawnB" : "PawnW";
 		sprite.setTexture(*game.textureOfPieces[name]);
+		sprite.setOrigin(round(getGlobalBounds().width / 2), round(getGlobalBounds().height / 2));
 	}
 };
 
@@ -132,9 +132,9 @@ class Castle : public AbstractChessPiece {
 
 public:
 	Castle(Square& square, bool color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(33, 43);
 		name = color ? "CastleB" : "CastleW";
 		sprite.setTexture(*game.textureOfPieces[name]);
+		sprite.setOrigin(round(getGlobalBounds().width / 2), round(getGlobalBounds().height / 2));
 	}
 };
 
@@ -154,9 +154,9 @@ class Knight : public AbstractChessPiece {
 
 public:
 	Knight(Square& square, bool color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(37, 45);
 		name = color ? "KnightB" : "KnightW";
 		sprite.setTexture(*game.textureOfPieces[name]);
+		sprite.setOrigin(round(getGlobalBounds().width / 2), round(getGlobalBounds().height / 2));
 	}
 };
 
@@ -261,9 +261,9 @@ class Bishop : public AbstractChessPiece {
 
 public:
 	Bishop(Square& square, bool color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(42, 44);
 		name = color ? "BishopB" : "BishopW";
 		sprite.setTexture(*game.textureOfPieces[name]);
+		sprite.setOrigin(round(getGlobalBounds().width / 2), round(getGlobalBounds().height / 2));
 	}
 };
 
@@ -446,9 +446,9 @@ class Queen : public AbstractChessPiece {
 
 public:
 	Queen(Square& square, bool color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(42, 45);
 		name = color ? "QueenB" : "QueenW";
 		sprite.setTexture(*game.textureOfPieces[name]);
+		sprite.setOrigin(round(getGlobalBounds().width / 2), round(getGlobalBounds().height / 2));
 	}
 };
 
@@ -499,8 +499,8 @@ class King : public AbstractChessPiece {
 
 public:
 	King(Square& square, bool color) : AbstractChessPiece(square, color) {
-		sprite.setOrigin(42, 44);
 		name = color ? "KingB" : "KingW";
 		sprite.setTexture(*game.textureOfPieces[name]);
+		sprite.setOrigin(round(getGlobalBounds().width / 2), round(getGlobalBounds().height / 2));
 	}
 };
