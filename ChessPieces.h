@@ -1,11 +1,11 @@
-extern Game game;
+extern GameData game;
 extern Board board;
 extern vector<unique_ptr<AbstractChessPiece>> pieces;
 extern AbstractChessPiece* FindPiece(const Square& square);
 
 class Pawn : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& newSquare) override {
-		return (!game.isFinished and !game.pawnIsPromotion and isSelected and newSquare.getIsEmpty() and x == newSquare.getX() and color == game.turn
+		return (!game.isFinished and !game.pawnIsPromotion and newSquare.getIsEmpty() and isSelected and x == newSquare.getX() and color == game.turn
 			and ((pow(-1, color) * (y - newSquare.getY()) == 2 and board.squares[x][int(y - pow(-1, color))].getIsEmpty() and getFirstMove())
 				or pow(-1, color) * (y - newSquare.getY()) == 1));
 	};
@@ -28,7 +28,7 @@ public:
 
 class Castle : public AbstractChessPiece {
 	bool ConditionOfMove(const Square& newSquare) override {
-		if (!game.isFinished and !game.pawnIsPromotion and isSelected and newSquare.getIsEmpty() and color == game.turn) {
+		if (!game.isFinished and isSelected and isSelected and color == game.turn and !game.pawnIsPromotion and newSquare.getIsEmpty()) {
 			int tempX = x, tempY = y,
 				dir = 0; // direction
 

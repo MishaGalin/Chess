@@ -5,7 +5,8 @@ using namespace std;
 
 extern RenderWindow window;
 
-class Game {
+class GameData {
+private:
 	Image icon;
 
 	Texture texturePawnW;
@@ -27,10 +28,10 @@ class Game {
 	Texture textureBoard;
 
 public:
-	Vector2i mousePos = Vector2i(0, 0);
-	bool turn = false; // 0 - white move, 1 - black move
+	Vector2f mousePos = Vector2f(0.f, 0.f);
+	bool turn = 0; // 0 - white move, 1 - black move
 	bool isFinished = false, pawnIsPromotion = false;
-	static const unsigned short windowSizeX = 910, windowSizeY = 910;
+	static const unsigned short windowSizeX = 910, windowSizeY = 910, maxFPS = 300;
 
 	map <string, Texture*> textureOfPieces = {
 		{"PawnW", &texturePawnW },
@@ -51,19 +52,18 @@ public:
 	};
 
 	void ChangeOfTurn() {
-		if (isFinished) {
-			window.setTitle(turn ? "Chess: BLACK WINS" : "Chess: WHITE WINS");
-			return;
-		}
-		else {
-			turn = !turn;
-			window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
-		}
+		turn = !turn;
+		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
 	}
 
-	Game() {
+	void FinishGame() {
+		isFinished = true;
+		window.setTitle(turn ? "Chess: BLACK WINS" : "Chess: WHITE WINS");
+	}
+
+	GameData() {
 		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
-		window.setFramerateLimit(300);
+		window.setFramerateLimit(maxFPS);
 
 		icon.loadFromFile("images/icon32.png");
 		window.setIcon(32, 32, icon.getPixelsPtr());

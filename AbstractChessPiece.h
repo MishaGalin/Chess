@@ -1,9 +1,8 @@
-extern Game game;
+extern GameData game;
 extern RenderWindow window;
 extern Board board;
 extern void DeletePiece(Square& square);
-extern unsigned char selected;
-extern short dx, dy;
+extern float dx, dy;
 
 class AbstractChessPiece : public Drawable {
 	virtual bool ConditionOfMove(const Square& square) = 0;
@@ -37,7 +36,7 @@ protected:
 	}
 
 public:
-	// Directly moving from one square to another
+	// Directly moving from one square to another without checking the condition
 	void Move_(Square& newSquare) {
 		Changeover(newSquare);
 
@@ -51,7 +50,7 @@ public:
 		target.draw(sprite, states);
 	}
 
-	void ReturnToPrevPos() {
+	void ReturnToPreviousPos() {
 		setPosition((*getSquare()).getInPixel());
 	};
 
@@ -64,7 +63,7 @@ public:
 
 				sprite.setTextureRect(tepmRect);
 				sprite.setTexture(*game.textureOfPieces[color ? "choiceB" : "choiceW"]);
-				sprite.setOrigin(Square::sideLength / 2, Square::sideLength / 2);
+				sprite.setOrigin(Square::sideLength / 2.f, Square::sideLength / 2.f);
 
 				isPromotion = true;
 				isMovable = false;
@@ -74,7 +73,7 @@ public:
 
 			game.ChangeOfTurn();
 		}
-		else ReturnToPrevPos();
+		else ReturnToPreviousPos();
 	}
 
 	void Capture(Square& newSquare) {
@@ -87,7 +86,7 @@ public:
 
 				sprite.setTextureRect(tepmRect);
 				sprite.setTexture(*game.textureOfPieces[color ? "choiceB" : "choiceW"]);
-				sprite.setOrigin(Square::sideLength / 2, Square::sideLength / 2);
+				sprite.setOrigin(Square::sideLength / 2., Square::sideLength / 2.);
 
 				isPromotion = true;
 				isMovable = false;
@@ -97,7 +96,7 @@ public:
 
 			game.ChangeOfTurn();
 		}
-		else ReturnToPrevPos();
+		else ReturnToPreviousPos();
 	}
 
 	void Castling(Square& newSquare) {
@@ -105,39 +104,40 @@ public:
 			Castling_(newSquare);
 			game.ChangeOfTurn();
 		}
-		else ReturnToPrevPos();
+		else ReturnToPreviousPos();
 	}
 
-	void Select(int i) {
-		selected = i;
+	void Select() {
 		isMove = true;
 		isSelected = true;
 
-		dx = game.mousePos.x - int(getPosition().x);
-		dy = game.mousePos.y - int(getPosition().y);
+		dx = game.mousePos.x - getPosition().x;
+		dy = game.mousePos.y - getPosition().y;
 	}
 
-	inline void Unselect() {
+	inline void ResetSelection() {
 		isMove = false;
 		isSelected = false;
 	}
 
 	void MoveWithMouse() {
-		game.mousePos = Mouse::getPosition(window);
-		if (isMovable and isMove and isSelected and color == game.turn) setPosition(float(game.mousePos.x - dx), float(game.mousePos.y - dy));
+		game.mousePos = Vector2f(float(Mouse::getPosition(window).x), float(Mouse::getPosition(window).y));
+		if (isMovable and isMove and isSelected and color == game.turn) setPosition(game.mousePos.x - dx, game.mousePos.y - dy);
 	}
 
 	inline bool ContainsMouse() const {
-		return getGlobalBounds().contains(float(game.mousePos.x), float(game.mousePos.y));
+		return getGlobalBounds().contains(game.mousePos.x, game.mousePos.y);
 	}
 
+	// Finds the square closest to the mouse position while dragging.
 	Square* SearchNearestSquare() const {
 		double maxDistance = 10000., distance = 0.;
-		int nearestX = 0, nearestY = 0;
+		unsigned char nearestX = 0, nearestY = 0;
 
 		for (int i = 0; i < Board::size; ++i) {
 			for (int j = 0; j < Board::size; ++j) {
-				distance = sqrt(pow(game.mousePos.x - board.squares[i][j].getXInPixel(), 2) + pow(game.mousePos.y - board.squares[i][j].getYInPixel(), 2)); // Distance to the square
+				distance = sqrt(pow(game.mousePos.x - board.squares[i][j].getXInPixel(), 2)
+					+ pow(game.mousePos.y - board.squares[i][j].getYInPixel(), 2)); // Distance to the square
 				if (distance < maxDistance) {
 					maxDistance = distance;
 					nearestX = i;
@@ -152,9 +152,9 @@ public:
 	void DrawPossibleSquares() {
 		for (int i = 0; i < Board::size; ++i) {
 			for (int j = 0; j < Board::size; ++j) {
-				if (ConditionOfMove(board.squares[i][j]))          board.squares[i][j].DrawWithColor(Color(0, 215, 0, 70));   // Green square if you can go to this square
-				else if (ConditionOfCapture(board.squares[i][j]))  board.squares[i][j].DrawWithColor(Color(215, 0, 0, 70));   // Red square if you can capture
-				else if (ConditionOfCastling(board.squares[i][j])) board.squares[i][j].DrawWithColor(Color(215, 215, 0, 75)); // Yellow square if castling can be done
+				if (ConditionOfMove(board.squares[i][j]))			board.squares[i][j].DrawWithColor(Color(0, 215, 0, 70));   // Green square if you can go to this square
+				else if (ConditionOfCapture(board.squares[i][j]))	board.squares[i][j].DrawWithColor(Color(215, 0, 0, 70));   // Red square if you can capture
+				else if (ConditionOfCastling(board.squares[i][j]))	board.squares[i][j].DrawWithColor(Color(215, 215, 0, 75)); // Yellow square if castling can be done
 			}
 		}
 	}
@@ -165,7 +165,7 @@ public:
 
 	Vector2f getPosition() const { return sprite.getPosition(); }
 	void setPosition(float x, float y) { sprite.setPosition(x, y); }
-	void setPosition(const Vector2i& newPos) { sprite.setPosition(float(newPos.x), float(newPos.y)); }
+	void setPosition(const Vector2f& newPos) { sprite.setPosition(newPos.x, newPos.y); }
 
 	// 0 - white, 1 - black
 	bool getColor() const { return color; }
