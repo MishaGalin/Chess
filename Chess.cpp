@@ -42,8 +42,8 @@ int main() {
 				if (board.getGlobalBounds().contains(pieces[selected]->getPosition())) { // Check the piece exit outside the window
 					Square* nearestSquare = pieces[selected]->SearchNearestSquare();
 
-					pieces[selected]->Move(*nearestSquare);	    //
 					pieces[selected]->Capture(*nearestSquare);	// Only one of the options is possible
+					pieces[selected]->Move(*nearestSquare);	    //
 					pieces[selected]->Castling(*nearestSquare); //
 					Promotion();						        //
 				}
@@ -68,7 +68,7 @@ void DeletePiece(Square& square) {
 	for (auto piece = pieces.begin(); piece < pieces.end(); ++piece) {
 		if ((*(*piece)->getSquare()) == square) {
 			square.setIsEmpty(true);
-			if ((*piece)->getName() == "KingW" or (*piece)->getName() == "KingB") game.FinishGame();
+			if ((*piece)->getName() == "KingW" or (*piece)->getName() == "KingB") game.isFinished = true;
 			pieces.erase(piece);
 			selected = static_cast<char>(pieces.size()) - 1;
 			return;

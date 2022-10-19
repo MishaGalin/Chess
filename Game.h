@@ -53,12 +53,10 @@ public:
 
 	void ChangeOfTurn() {
 		turn = !turn;
-		window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
-	}
-
-	void FinishGame() {
-		isFinished = true;
-		window.setTitle(turn ? "Chess: BLACK WINS" : "Chess: WHITE WINS");
+		if (isFinished)
+			window.setTitle(turn ? "Chess: WHITE WINS" : "Chess: BLACK WINS");
+		else
+			window.setTitle(turn ? "Chess: turn of black" : "Chess: turn of white");
 	}
 
 	GameData() {
